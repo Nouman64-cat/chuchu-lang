@@ -34,30 +34,38 @@ Use descriptive frontmatter titles and descriptions. Link to Markdown files with
 
 `npm run build` produces static files in `build/`. Deploy that directory to a static host. No Node server is required in production.
 
-### GitHub Pages (configured default)
+### Production domain
 
-Default canonical origin: `https://chuchu-lang.github.io`
-Default base path: `/chuchu-lang-docs/`
+Default canonical origin: `https://docs.chuchu-lang.org`  
+Default base path: `/`
 
-The included workflow validates pull requests and deploys pushes to `main`. In repository **Settings → Pages → Build and deployment**, select **GitHub Actions**. Push the repository to trigger the workflow. This setup does not publish anything until pushed and Pages is enabled.
+These defaults configure navigation, asset paths, canonical links, social metadata, sitemap entries, and search for the domain root. Local development is available at `http://localhost:3000/`.
 
-### Custom domain / Cloudflare / Netlify / Vercel
+### Vercel
 
-Set both variables at build time:
+Import the `chuchu-lang-docs` repository and use:
 
-```sh
-SITE_URL=https://your-real-domain.example BASE_URL=/ npm run build
-```
-
-Replace the example domain with your actual production origin, without a path. `BASE_URL` must begin and end with `/`. These variables control canonical URLs, sitemap entries, navigation, asset paths, and the local search route. For GitHub Actions, set repository variables `SITE_URL` and `BASE_URL` to override defaults. Configure the corresponding domain in your hosting provider and DNS; no domain is claimed by this repository.
-
+- Framework preset: Docusaurus
 - Build command: `npm run build`
 - Output directory: `build`
+- Install command: `npm ci`
 - Node version: 24
-- For a root custom domain: `BASE_URL=/`
-- For a subdirectory: set that exact path, e.g. `/chuchu-lang-docs/`
 
-Use the host's real 404 handling and directory index support. Do not rewrite all missing paths to the homepage. The build emits a 404 page.
+Add `docs.chuchu-lang.org` in the project's domain settings and apply the DNS record Vercel provides at your DNS provider. Deploying this repository does not configure domain ownership or DNS automatically.
+
+No environment overrides are required for production. If the project already has `SITE_URL` or `BASE_URL` configured, remove stale values or set them to `https://docs.chuchu-lang.org` and `/` respectively.
+
+### Other hosts and URL overrides
+
+The output also works with Cloudflare, Netlify, or another static host. To override the defaults at build time:
+
+```sh
+SITE_URL=https://docs.chuchu-lang.org BASE_URL=/ npm run build
+```
+
+`SITE_URL` is the origin without a path; `BASE_URL` must begin and end with `/`. Use the host's real 404 handling and directory index support; do not rewrite every missing path to the homepage.
+
+The included GitHub Pages workflow validates pull requests and deploys pushes to `main` when Pages is enabled. Its URL defaults also use the custom domain. If using GitHub Pages instead of Vercel, configure that same custom domain in repository Pages settings and follow GitHub's DNS instructions. Repository variables `SITE_URL` and `BASE_URL` override the workflow defaults. Use a single production host for this domain.
 
 ## SEO
 

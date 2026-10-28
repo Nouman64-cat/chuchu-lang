@@ -21,8 +21,8 @@ jobs:
       - run: npm ci
       - run: npm run check
         env:
-          SITE_URL: ${{ vars.SITE_URL || 'https://chuchu-lang.github.io' }}
-          BASE_URL: ${{ vars.BASE_URL || '/chuchu-lang-docs/' }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://docs.chuchu-lang.org' }}
+          BASE_URL: ${{ vars.BASE_URL || '/' }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: build

@@ -2,8 +2,8 @@ import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 import {themes as prismThemes} from 'prism-react-renderer';
 
-const url = process.env.SITE_URL || 'https://chuchu-lang.github.io';
-const baseUrl = process.env.BASE_URL || '/chuchu-lang-docs/';
+const url = process.env.SITE_URL || 'https://docs.chuchu-lang.org';
+const baseUrl = process.env.BASE_URL || '/';
 
 const config: Config = {
   title: 'Chuchu',
