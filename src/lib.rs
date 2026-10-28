@@ -1,6 +1,8 @@
 pub mod ast;
 pub mod codegen;
+pub mod compiler;
 pub mod lexer;
+pub mod native;
 pub mod parser;
 pub mod symbol_table;
 pub mod token;

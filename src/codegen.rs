@@ -1,11 +1,13 @@
+use std::collections::HashMap;
 use std::fmt;
 
+use inkwell::AddressSpace;
 use inkwell::builder::{Builder, BuilderError};
 use inkwell::context::Context;
 use inkwell::module::Module;
 use inkwell::values::IntValue;
 
-use crate::ast::{BinaryOperator, Expr, ExprKind};
+use crate::ast::{BinaryOperator, Expr, ExprKind, Stmt, StmtKind};
 use crate::token::Span;
 
 #[derive(Debug)]
@@ -16,6 +18,11 @@ pub enum CodegenError {
     UnsupportedExpression { span: Span },
     InvalidInsertionPoint { span: Span },
     BuildAddition { source: BuilderError, span: Span },
+    UndefinedVariable { name: String, span: Span },
+    DuplicateDeclaration { name: String, span: Span },
+    UnsupportedStatement { span: Span },
+    BuildOutput { source: BuilderError, span: Span },
+    InvalidRuntimeDeclaration,
 }
 
 impl fmt::Display for CodegenError {
@@ -39,13 +46,37 @@ impl fmt::Display for CodegenError {
             ),
             Self::InvalidInsertionPoint { span } => write!(
                 formatter,
-                "Addition requires a builder positioned in an unterminated function block at {}..{}",
+                "Code generation requires a builder positioned in an unterminated function block at {}..{}",
                 span.start, span.end
             ),
             Self::BuildAddition { source, span } => write!(
                 formatter,
                 "Failed to build addition at {}..{}: {source}",
                 span.start, span.end
+            ),
+            Self::UndefinedVariable { name, span } => write!(
+                formatter,
+                "Undefined variable {name:?} at {}..{}",
+                span.start, span.end
+            ),
+            Self::DuplicateDeclaration { name, span } => write!(
+                formatter,
+                "Duplicate declaration of {name:?} at {}..{}",
+                span.start, span.end
+            ),
+            Self::UnsupportedStatement { span } => write!(
+                formatter,
+                "Unsupported statement for LLVM code generation at {}..{}",
+                span.start, span.end
+            ),
+            Self::BuildOutput { source, span } => write!(
+                formatter,
+                "Failed to build output at {}..{}: {source}",
+                span.start, span.end
+            ),
+            Self::InvalidRuntimeDeclaration => write!(
+                formatter,
+                "Existing printf declaration has an incompatible type"
             ),
         }
     }
@@ -56,21 +87,28 @@ impl std::error::Error for CodegenError {
         match self {
             Self::BuildReturn(error) => Some(error),
             Self::BuildAddition { source, .. } => Some(source),
+            Self::BuildOutput { source, .. } => Some(source),
             Self::Verification(_)
             | Self::InvalidIntegerLiteral { .. }
             | Self::UnsupportedExpression { .. }
-            | Self::InvalidInsertionPoint { .. } => None,
+            | Self::InvalidInsertionPoint { .. }
+            | Self::UndefinedVariable { .. }
+            | Self::DuplicateDeclaration { .. }
+            | Self::UnsupportedStatement { .. }
+            | Self::InvalidRuntimeDeclaration => None,
         }
     }
 }
 
-/// Generates integer literals and additions using a builder from the same context.
+/// Generates integer literals, identifier references, and additions.
+/// Bindings must belong to the same LLVM context and current function as the builder.
 /// Additions require the builder to be positioned in an unterminated function block.
 /// Signed i64 is a provisional backend representation, not a language-level width guarantee.
 /// Signed overflow semantics remain undecided; additions set neither `nsw` nor `nuw`.
 pub fn generate_expression<'ctx>(
     context: &'ctx Context,
     builder: &Builder<'ctx>,
+    bindings: &HashMap<String, IntValue<'ctx>>,
     expr: &Expr,
 ) -> Result<IntValue<'ctx>, CodegenError> {
     match &expr.kind {
@@ -89,14 +127,9 @@ pub fn generate_expression<'ctx>(
             operator: BinaryOperator::Add,
             right,
         } => {
-            let block = builder
-                .get_insert_block()
-                .ok_or(CodegenError::InvalidInsertionPoint { span: expr.span })?;
-            if block.get_parent().is_none() || block.get_terminator().is_some() {
-                return Err(CodegenError::InvalidInsertionPoint { span: expr.span });
-            }
-            let left = generate_expression(context, builder, left)?;
-            let right = generate_expression(context, builder, right)?;
+            validate_insertion_point(builder, expr.span)?;
+            let left = generate_expression(context, builder, bindings, left)?;
+            let right = generate_expression(context, builder, bindings, right)?;
             builder.build_int_add(left, right, "add").map_err(|source| {
                 CodegenError::BuildAddition {
                     source,
@@ -104,8 +137,118 @@ pub fn generate_expression<'ctx>(
                 }
             })
         }
-        ExprKind::Identifier(_) => Err(CodegenError::UnsupportedExpression { span: expr.span }),
+        ExprKind::Identifier(name) => {
+            bindings
+                .get(name)
+                .copied()
+                .ok_or_else(|| CodegenError::UndefinedVariable {
+                    name: name.clone(),
+                    span: expr.span,
+                })
+        }
     }
+}
+
+fn validate_insertion_point(builder: &Builder<'_>, span: Span) -> Result<(), CodegenError> {
+    let block = builder
+        .get_insert_block()
+        .ok_or(CodegenError::InvalidInsertionPoint { span })?;
+    if block.get_parent().is_none() || block.get_terminator().is_some() {
+        return Err(CodegenError::InvalidInsertionPoint { span });
+    }
+    Ok(())
+}
+
+/// Binds an immutable declaration to its initializer's SSA value without stack storage.
+/// The caller owns one binding environment per function; failed initializers add no binding.
+pub fn generate_declaration<'ctx>(
+    context: &'ctx Context,
+    builder: &Builder<'ctx>,
+    bindings: &mut HashMap<String, IntValue<'ctx>>,
+    stmt: &Stmt,
+) -> Result<(), CodegenError> {
+    let StmtKind::Set { name, value } = &stmt.kind else {
+        return Err(CodegenError::UnsupportedStatement { span: stmt.span });
+    };
+
+    if bindings.contains_key(name) {
+        return Err(CodegenError::DuplicateDeclaration {
+            name: name.clone(),
+            span: stmt.span,
+        });
+    }
+
+    let value = generate_expression(context, builder, bindings, value)?;
+    bindings.insert(name.clone(), value);
+    Ok(())
+}
+
+/// Emits one declaration or signed integer output statement.
+/// C `long long` is 64 bits on the supported macOS host ABI, matching LLVM i64.
+pub fn generate_statement<'ctx>(
+    context: &'ctx Context,
+    module: &Module<'ctx>,
+    builder: &Builder<'ctx>,
+    bindings: &mut HashMap<String, IntValue<'ctx>>,
+    stmt: &Stmt,
+) -> Result<(), CodegenError> {
+    match &stmt.kind {
+        StmtKind::Set { .. } => generate_declaration(context, builder, bindings, stmt),
+        StmtKind::Show(expr) => {
+            validate_insertion_point(builder, stmt.span)?;
+            let value = generate_expression(context, builder, bindings, expr)?;
+            let printf_type = context
+                .i32_type()
+                .fn_type(&[context.ptr_type(AddressSpace::default()).into()], true);
+            let printf = match module.get_function("printf") {
+                Some(function) if function.get_type() == printf_type => function,
+                Some(_) => return Err(CodegenError::InvalidRuntimeDeclaration),
+                None => module.add_function("printf", printf_type, None),
+            };
+            let format = match module.get_global(".cheeku.format.i64") {
+                Some(global) => global,
+                None => builder
+                    .build_global_string_ptr("%lld\n", ".cheeku.format.i64")
+                    .map_err(|source| CodegenError::BuildOutput {
+                        source,
+                        span: stmt.span,
+                    })?,
+            };
+            builder
+                .build_call(
+                    printf,
+                    &[format.as_pointer_value().into(), value.into()],
+                    "printf_result",
+                )
+                .map_err(|source| CodegenError::BuildOutput {
+                    source,
+                    span: stmt.span,
+                })?;
+            Ok(())
+        }
+    }
+}
+
+/// Generates a verified native main function from a semantically validated AST.
+pub fn generate_program<'ctx>(
+    context: &'ctx Context,
+    statements: &[Stmt],
+) -> Result<Module<'ctx>, CodegenError> {
+    let module = context.create_module("cheeku");
+    let builder = context.create_builder();
+    let main = module.add_function("main", context.i32_type().fn_type(&[], false), None);
+    builder.position_at_end(context.append_basic_block(main, "entry"));
+    let mut bindings = HashMap::new();
+    for statement in statements {
+        generate_statement(context, &module, &builder, &mut bindings, statement)?;
+    }
+    builder
+        .build_return(Some(&context.i32_type().const_zero()))
+        .map_err(CodegenError::BuildReturn)?;
+    module
+        .verify()
+        .map_err(|message| CodegenError::Verification(message.to_string()))?;
+    Ok(module)
 }
 
 /// Generates a verified module containing `main`, which returns an i32 zero.

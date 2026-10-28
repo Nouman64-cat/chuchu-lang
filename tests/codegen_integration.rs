@@ -1,10 +1,294 @@
-use chuchu::ast::{BinaryOperator, Expr, ExprKind};
-use chuchu::codegen::{CodegenError, generate_expression, generate_module};
+use std::collections::HashMap;
+
+use chuchu::ast::{BinaryOperator, Expr, ExprKind, Stmt};
+use chuchu::codegen::{
+    CodegenError, generate_declaration, generate_expression, generate_module, generate_program,
+};
 use chuchu::lexer::tokenize;
 use chuchu::parser::Parser;
 use chuchu::token::Span;
+use inkwell::builder::Builder;
 use inkwell::context::Context;
-use inkwell::values::InstructionOpcode;
+use inkwell::module::Module;
+use inkwell::values::{InstructionOpcode, IntValue};
+
+fn parse_statement(source: &str) -> Stmt {
+    let tokens = tokenize(source).expect("Statement should tokenize");
+    Parser::new(tokens)
+        .parse_statement()
+        .expect("Statement should parse")
+}
+
+#[test]
+fn generates_complete_program_with_shared_printf() {
+    let context = Context::create();
+    let statements =
+        Parser::new(tokenize("set x to 10\nset y to x + 20\nshow y\nshow 42\nshow x + y").unwrap())
+            .parse_program()
+            .unwrap();
+    let module = generate_program(&context, &statements).expect("Program should generate");
+    module.verify().expect("Program should verify");
+    let main = module.get_function("main").expect("Main should exist");
+    assert_eq!(
+        main.get_type().get_return_type(),
+        Some(context.i32_type().into())
+    );
+    let printf = module
+        .get_function("printf")
+        .expect("Printf should be declared");
+    assert!(printf.get_type().is_var_arg());
+    assert_eq!(printf.count_params(), 1);
+    assert_eq!(module.get_functions().count(), 2);
+    assert_eq!(module.get_globals().count(), 1);
+    let ir = module.print_to_string().to_string();
+    assert_eq!(ir.matches("call i32 (ptr, ...) @printf").count(), 3);
+    assert!(ir.contains("%lld\\0A\\00"));
+    assert!(ir.contains("ret i32 0"));
+    assert!(!ir.contains("alloca"));
+}
+
+#[test]
+fn generates_empty_program_without_output_runtime() {
+    let context = Context::create();
+    let module = generate_program(&context, &[]).expect("Empty program should generate");
+    assert!(module.get_function("printf").is_none());
+    module.verify().expect("Empty program should verify");
+}
+
+#[test]
+fn program_generation_propagates_declaration_errors() {
+    let context = Context::create();
+    let statements = Parser::new(tokenize("set x to 1\nset x to 2").unwrap())
+        .parse_program()
+        .unwrap();
+    assert!(
+        matches!(generate_program(&context, &statements), Err(CodegenError::DuplicateDeclaration { name, .. }) if name == "x")
+    );
+}
+
+fn binding_test_function(context: &Context) -> (Module<'_>, Builder<'_>) {
+    let module = context.create_module("binding_test");
+    let builder = context.create_builder();
+    let function = module.add_function("test", context.i64_type().fn_type(&[], false), None);
+    builder.position_at_end(context.append_basic_block(function, "entry"));
+    (module, builder)
+}
+
+fn verify_binding_function<'ctx>(
+    module: &Module<'ctx>,
+    builder: &Builder<'ctx>,
+    value: IntValue<'ctx>,
+) {
+    builder
+        .build_return(Some(&value))
+        .expect("Return should build");
+    module.verify().expect("Binding module should verify");
+    assert!(!module.print_to_string().to_string().contains("alloca"));
+}
+
+#[test]
+fn generates_variable_declaration() {
+    let context = Context::create();
+    let (module, builder) = binding_test_function(&context);
+    let mut bindings = HashMap::new();
+
+    generate_declaration(
+        &context,
+        &builder,
+        &mut bindings,
+        &parse_statement("set x to 10"),
+    )
+    .expect("Declaration should generate");
+
+    assert_eq!(bindings.len(), 1);
+    assert_eq!(bindings["x"].get_type(), context.i64_type());
+    assert_eq!(bindings["x"].get_sign_extended_constant(), Some(10));
+    verify_binding_function(&module, &builder, bindings["x"]);
+}
+
+#[test]
+fn resolves_declared_identifier_to_same_llvm_value() {
+    let context = Context::create();
+    let (module, builder) = binding_test_function(&context);
+    let mut bindings = HashMap::new();
+    generate_declaration(
+        &context,
+        &builder,
+        &mut bindings,
+        &parse_statement("set x to 10"),
+    )
+    .expect("Declaration should generate");
+
+    let value = generate_expression(&context, &builder, &bindings, &parse_expression("x"))
+        .expect("Identifier should resolve");
+    assert_eq!(value, bindings["x"]);
+    verify_binding_function(&module, &builder, value);
+}
+
+#[test]
+fn generates_addition_with_previously_declared_variable() {
+    let context = Context::create();
+    let (module, builder) = binding_test_function(&context);
+    let mut bindings = HashMap::new();
+    generate_declaration(
+        &context,
+        &builder,
+        &mut bindings,
+        &parse_statement("set x to 10"),
+    )
+    .expect("Declaration should generate");
+
+    let value = generate_expression(&context, &builder, &bindings, &parse_expression("x + 20"))
+        .expect("Addition should generate");
+    assert_eq!(value.get_type(), context.i64_type());
+    assert_eq!(value.get_sign_extended_constant(), Some(30));
+    verify_binding_function(&module, &builder, value);
+}
+
+#[test]
+fn generates_declarations_referencing_earlier_bindings() {
+    let context = Context::create();
+    let (module, builder) = binding_test_function(&context);
+    let mut bindings = HashMap::new();
+
+    for source in [
+        "set x to 10",
+        "set y to x + 20",
+        "set z to x + y + 20",
+        "set alias to z",
+    ] {
+        generate_declaration(&context, &builder, &mut bindings, &parse_statement(source))
+            .expect("Declaration should generate");
+    }
+    assert_eq!(bindings.len(), 4);
+    assert_eq!(bindings["y"].get_sign_extended_constant(), Some(30));
+    assert_eq!(bindings["z"].get_sign_extended_constant(), Some(60));
+    assert_eq!(bindings["alias"], bindings["z"]);
+    verify_binding_function(&module, &builder, bindings["alias"]);
+}
+
+#[test]
+fn rejects_duplicate_bindings_without_overwriting() {
+    let context = Context::create();
+    let (module, builder) = binding_test_function(&context);
+    let mut bindings = HashMap::new();
+    generate_declaration(
+        &context,
+        &builder,
+        &mut bindings,
+        &parse_statement("set x to 10"),
+    )
+    .expect("First declaration should generate");
+    let original = bindings.clone();
+
+    for source in ["  set x to 20", "set x to unknown"] {
+        let statement = parse_statement(source);
+        assert!(
+            matches!(generate_declaration(&context, &builder, &mut bindings, &statement),
+            Err(CodegenError::DuplicateDeclaration { name, span })
+                if name == "x" && span == statement.span)
+        );
+        assert_eq!(bindings, original);
+    }
+    verify_binding_function(&module, &builder, bindings["x"]);
+}
+
+#[test]
+fn failed_initializers_do_not_register_bindings() {
+    let context = Context::create();
+    let (module, builder) = binding_test_function(&context);
+    let mut bindings = HashMap::new();
+    generate_declaration(
+        &context,
+        &builder,
+        &mut bindings,
+        &parse_statement("set prior to 10"),
+    )
+    .expect("Earlier declaration should generate");
+    let original = bindings.clone();
+
+    for (source, name, span) in [
+        ("set x to unknown", "unknown", Span { start: 9, end: 16 }),
+        ("set x to x + 20", "x", Span { start: 9, end: 10 }),
+        (
+            "set x to prior + unknown",
+            "unknown",
+            Span { start: 17, end: 24 },
+        ),
+    ] {
+        assert!(
+            matches!(generate_declaration(&context, &builder, &mut bindings, &parse_statement(source)),
+            Err(CodegenError::UndefinedVariable { name: actual, span: actual_span })
+                if actual == name && actual_span == span)
+        );
+        assert_eq!(bindings, original);
+    }
+    assert!(matches!(
+        generate_declaration(
+            &context,
+            &builder,
+            &mut bindings,
+            &parse_statement("set x to 9223372036854775808")
+        ),
+        Err(CodegenError::InvalidIntegerLiteral {
+            span: Span { start: 9, end: 28 },
+            ..
+        })
+    ));
+    assert_eq!(bindings, original);
+
+    generate_declaration(
+        &context,
+        &builder,
+        &mut bindings,
+        &parse_statement("set x to prior"),
+    )
+    .expect("Failed declarations should not reserve a name");
+    verify_binding_function(&module, &builder, bindings["x"]);
+}
+
+#[test]
+fn binding_environments_are_independent() {
+    let context = Context::create();
+    let (module, builder) = binding_test_function(&context);
+    let mut first = HashMap::new();
+    let mut second = HashMap::new();
+    generate_declaration(
+        &context,
+        &builder,
+        &mut first,
+        &parse_statement("set x to 10"),
+    )
+    .expect("First environment should accept declaration");
+    assert!(
+        matches!(generate_expression(&context, &builder, &second, &parse_expression("x")),
+        Err(CodegenError::UndefinedVariable { name, .. }) if name == "x")
+    );
+    generate_declaration(
+        &context,
+        &builder,
+        &mut second,
+        &parse_statement("set x to 20"),
+    )
+    .expect("Second environment should accept same name");
+    assert_eq!(first["x"].get_sign_extended_constant(), Some(10));
+    assert_eq!(second["x"].get_sign_extended_constant(), Some(20));
+    verify_binding_function(&module, &builder, second["x"]);
+}
+
+#[test]
+fn rejects_show_in_declaration_codegen() {
+    let context = Context::create();
+    let (module, builder) = binding_test_function(&context);
+    let mut bindings = HashMap::new();
+    let statement = parse_statement("show 42");
+    assert!(
+        matches!(generate_declaration(&context, &builder, &mut bindings, &statement),
+        Err(CodegenError::UnsupportedStatement { span }) if span == statement.span)
+    );
+    assert!(bindings.is_empty());
+    verify_binding_function(&module, &builder, context.i64_type().const_zero());
+}
 
 fn parse_expression(source: &str) -> Expr {
     let tokens = tokenize(source).expect("Expression should tokenize");
@@ -21,8 +305,8 @@ fn assert_generated_addition(expression: &Expr, expected: i64) {
     let entry = context.append_basic_block(function, "entry");
     builder.position_at_end(entry);
 
-    let value =
-        generate_expression(&context, &builder, expression).expect("Addition should generate");
+    let value = generate_expression(&context, &builder, &HashMap::new(), expression)
+        .expect("Addition should generate");
     assert_eq!(value.get_type(), context.i64_type());
     // LLVM may fold constant-only additions instead of retaining add instructions.
     assert_eq!(value.get_sign_extended_constant(), Some(expected));
@@ -78,7 +362,7 @@ fn propagates_integer_errors_inside_additions() {
             .find("9223372036854775808")
             .expect("Overflowing literal should exist");
         assert!(
-            matches!(generate_expression(&context, &builder, &expression),
+            matches!(generate_expression(&context, &builder, &HashMap::new(), &expression),
             Err(CodegenError::InvalidIntegerLiteral { literal, span })
                 if literal == "9223372036854775808" && span == Span { start, end: start + 19 })
         );
@@ -104,7 +388,7 @@ fn propagates_integer_errors_inside_additions() {
             span: Span { start: 0, end: 8 },
         };
         assert!(
-            matches!(generate_expression(&context, &builder, &expression),
+            matches!(generate_expression(&context, &builder, &HashMap::new(), &expression),
             Err(CodegenError::InvalidIntegerLiteral { literal, span })
                 if literal == "bad" && span == Span { start: 5, end: 8 })
         );
@@ -119,7 +403,7 @@ fn propagates_integer_errors_inside_additions() {
 }
 
 #[test]
-fn propagates_unsupported_identifier_errors_inside_additions() {
+fn propagates_undefined_identifier_errors_inside_additions() {
     let context = Context::create();
     let module = context.create_module("unsupported_addition_test");
     let builder = context.create_builder();
@@ -130,8 +414,8 @@ fn propagates_unsupported_identifier_errors_inside_additions() {
         let expression = parse_expression(source);
         let start = source.find("unknown").expect("Identifier should exist");
         assert!(
-            matches!(generate_expression(&context, &builder, &expression),
-            Err(CodegenError::UnsupportedExpression { span }) if span == Span { start, end: start + 7 })
+            matches!(generate_expression(&context, &builder, &HashMap::new(), &expression),
+            Err(CodegenError::UndefinedVariable { name, span }) if name == "unknown" && span == Span { start, end: start + 7 })
         );
     }
 
@@ -149,7 +433,7 @@ fn rejects_addition_without_valid_insertion_point() {
     let builder = context.create_builder();
     let expression = parse_expression("10 + 20");
     assert!(
-        matches!(generate_expression(&context, &builder, &expression),
+        matches!(generate_expression(&context, &builder, &HashMap::new(), &expression),
         Err(CodegenError::InvalidInsertionPoint { span }) if span == expression.span)
     );
 
@@ -161,7 +445,7 @@ fn rejects_addition_without_valid_insertion_point() {
         .expect("Return should build");
 
     assert!(
-        matches!(generate_expression(&context, &builder, &expression),
+        matches!(generate_expression(&context, &builder, &HashMap::new(), &expression),
         Err(CodegenError::InvalidInsertionPoint { span }) if span == expression.span)
     );
     module
@@ -173,7 +457,7 @@ fn rejects_addition_without_valid_insertion_point() {
 fn generates_integer_literal_42() {
     let context = Context::create();
     let builder = context.create_builder();
-    let value = generate_expression(&context, &builder, &parse_expression("42"))
+    let value = generate_expression(&context, &builder, &HashMap::new(), &parse_expression("42"))
         .expect("Integer literal should generate");
 
     assert_eq!(value.get_sign_extended_constant(), Some(42));
@@ -184,7 +468,7 @@ fn generates_integer_literal_42() {
 fn generates_integer_literal_zero() {
     let context = Context::create();
     let builder = context.create_builder();
-    let value = generate_expression(&context, &builder, &parse_expression("0"))
+    let value = generate_expression(&context, &builder, &HashMap::new(), &parse_expression("0"))
         .expect("Zero literal should generate");
 
     assert_eq!(value.get_sign_extended_constant(), Some(0));
@@ -195,8 +479,13 @@ fn generates_integer_literal_zero() {
 fn generates_largest_signed_integer_literal() {
     let context = Context::create();
     let builder = context.create_builder();
-    let value = generate_expression(&context, &builder, &parse_expression("9223372036854775807"))
-        .expect("Largest signed i64 literal should generate");
+    let value = generate_expression(
+        &context,
+        &builder,
+        &HashMap::new(),
+        &parse_expression("9223372036854775807"),
+    )
+    .expect("Largest signed i64 literal should generate");
 
     assert_eq!(value.get_sign_extended_constant(), Some(i64::MAX));
     assert_eq!(value.get_type(), context.i64_type());
@@ -212,7 +501,7 @@ fn rejects_out_of_range_integer_literals() {
         "999999999999999999999999999999",
     ] {
         let expression = parse_expression(&format!("  {literal}"));
-        let error = generate_expression(&context, &builder, &expression)
+        let error = generate_expression(&context, &builder, &HashMap::new(), &expression)
             .expect_err("Literal should overflow i64");
 
         assert!(
@@ -245,7 +534,7 @@ fn rejects_invalid_integer_ast_literals() {
         };
 
         assert!(
-            matches!(generate_expression(&context, &builder, &expression),
+            matches!(generate_expression(&context, &builder, &HashMap::new(), &expression),
             Err(CodegenError::InvalidIntegerLiteral { literal: actual, span: actual_span })
                 if actual == literal && actual_span == span)
         );
@@ -253,14 +542,14 @@ fn rejects_invalid_integer_ast_literals() {
 }
 
 #[test]
-fn rejects_unsupported_expression_kinds() {
+fn rejects_undefined_identifiers() {
     let context = Context::create();
     let builder = context.create_builder();
     for source in ["  total", "unknown"] {
         let expression = parse_expression(source);
         assert!(
-            matches!(generate_expression(&context, &builder, &expression),
-            Err(CodegenError::UnsupportedExpression { span }) if span == expression.span)
+            matches!(generate_expression(&context, &builder, &HashMap::new(), &expression),
+            Err(CodegenError::UndefinedVariable { name, span }) if name == source.trim() && span == expression.span)
         );
     }
 }
