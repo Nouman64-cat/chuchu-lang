@@ -10,6 +10,8 @@ use inkwell::values::IntValue;
 use crate::ast::{BinaryOperator, Expr, ExprKind, Stmt, StmtKind};
 use crate::token::Span;
 
+mod program;
+
 #[derive(Debug)]
 pub enum CodegenError {
     BuildReturn(BuilderError),
@@ -23,6 +25,9 @@ pub enum CodegenError {
     UnsupportedStatement { span: Span },
     BuildOutput { source: BuilderError, span: Span },
     InvalidRuntimeDeclaration,
+    Build { source: BuilderError, span: Span },
+    InvalidType { message: &'static str, span: Span },
+    InvalidFloatLiteral { literal: String, span: Span },
 }
 
 impl fmt::Display for CodegenError {
@@ -78,6 +83,19 @@ impl fmt::Display for CodegenError {
                 formatter,
                 "Existing printf declaration has an incompatible type"
             ),
+            Self::Build { source, span } => write!(
+                formatter,
+                "LLVM builder error at {}..{}: {source}",
+                span.start, span.end
+            ),
+            Self::InvalidType { message, span } => {
+                write!(formatter, "{message} at {}..{}", span.start, span.end)
+            }
+            Self::InvalidFloatLiteral { literal, span } => write!(
+                formatter,
+                "Invalid or non-finite Float literal {literal:?} at {}..{}",
+                span.start, span.end
+            ),
         }
     }
 }
@@ -88,6 +106,7 @@ impl std::error::Error for CodegenError {
             Self::BuildReturn(error) => Some(error),
             Self::BuildAddition { source, .. } => Some(source),
             Self::BuildOutput { source, .. } => Some(source),
+            Self::Build { source, .. } => Some(source),
             Self::Verification(_)
             | Self::InvalidIntegerLiteral { .. }
             | Self::UnsupportedExpression { .. }
@@ -95,16 +114,19 @@ impl std::error::Error for CodegenError {
             | Self::UndefinedVariable { .. }
             | Self::DuplicateDeclaration { .. }
             | Self::UnsupportedStatement { .. }
-            | Self::InvalidRuntimeDeclaration => None,
+            | Self::InvalidRuntimeDeclaration
+            | Self::InvalidType { .. }
+            | Self::InvalidFloatLiteral { .. } => None,
         }
     }
 }
 
-/// Generates integer literals, identifier references, and additions.
+/// Compatibility utility for Phase 5 integer literals, SSA references, and raw LLVM additions.
+/// Source-language checked arithmetic and typed storage are implemented by `generate_program`.
 /// Bindings must belong to the same LLVM context and current function as the builder.
 /// Additions require the builder to be positioned in an unterminated function block.
 /// Signed i64 is a provisional backend representation, not a language-level width guarantee.
-/// Signed overflow semantics remain undecided; additions set neither `nsw` nor `nuw`.
+/// This low-level utility sets neither `nsw` nor `nuw`; it does not implement runtime checks.
 pub fn generate_expression<'ctx>(
     context: &'ctx Context,
     builder: &Builder<'ctx>,
@@ -146,6 +168,7 @@ pub fn generate_expression<'ctx>(
                     span: expr.span,
                 })
         }
+        _ => Err(CodegenError::UnsupportedExpression { span: expr.span }),
     }
 }
 
@@ -226,6 +249,7 @@ pub fn generate_statement<'ctx>(
                 })?;
             Ok(())
         }
+        _ => Err(CodegenError::UnsupportedStatement { span: stmt.span }),
     }
 }
 
@@ -234,21 +258,7 @@ pub fn generate_program<'ctx>(
     context: &'ctx Context,
     statements: &[Stmt],
 ) -> Result<Module<'ctx>, CodegenError> {
-    let module = context.create_module("cheeku");
-    let builder = context.create_builder();
-    let main = module.add_function("main", context.i32_type().fn_type(&[], false), None);
-    builder.position_at_end(context.append_basic_block(main, "entry"));
-    let mut bindings = HashMap::new();
-    for statement in statements {
-        generate_statement(context, &module, &builder, &mut bindings, statement)?;
-    }
-    builder
-        .build_return(Some(&context.i32_type().const_zero()))
-        .map_err(CodegenError::BuildReturn)?;
-    module
-        .verify()
-        .map_err(|message| CodegenError::Verification(message.to_string()))?;
-    Ok(module)
+    program::generate(context, statements)
 }
 
 /// Generates a verified module containing `main`, which returns an i32 zero.

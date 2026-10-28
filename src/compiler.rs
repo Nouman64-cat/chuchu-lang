@@ -52,6 +52,7 @@ impl fmt::Display for CompileError {
                     ParseError::ExpectedStatementSeparator { span } => {
                         ("newline between statements", span)
                     }
+                    ParseError::ExpectedToken { expected, span } => (*expected, span),
                 };
                 write!(f, "Expected {expected} at {}..{}", span.start, span.end)
             }
@@ -64,6 +65,52 @@ impl fmt::Display for CompileError {
                 TypeError::DuplicateDeclaration { name, span } => write!(
                     f,
                     "Duplicate declaration of {name:?} at {}..{}",
+                    span.start, span.end
+                ),
+                TypeError::InvalidOperands { left, right, span } => write!(
+                    f,
+                    "Unsupported operand types {left:?} and {right:?} at {}..{}",
+                    span.start, span.end
+                ),
+                TypeError::Mismatch {
+                    expected,
+                    actual,
+                    span,
+                } => write!(
+                    f,
+                    "Type mismatch: expected {expected:?}, found {actual:?} at {}..{}",
+                    span.start, span.end
+                ),
+                TypeError::InvalidCondition { span } => {
+                    write!(f, "Condition must be Bool at {}..{}", span.start, span.end)
+                }
+                TypeError::InvalidFunction {
+                    name,
+                    message,
+                    span,
+                } => write!(
+                    f,
+                    "Function {name:?}: {message} at {}..{}",
+                    span.start, span.end
+                ),
+                TypeError::InvalidArray { message, span } => write!(
+                    f,
+                    "Invalid array: {message} at {}..{}",
+                    span.start, span.end
+                ),
+                TypeError::InvalidLiteral { literal, span } => write!(
+                    f,
+                    "Invalid or non-finite numeric literal {literal:?} at {}..{}",
+                    span.start, span.end
+                ),
+                TypeError::InvalidReturn { span } => write!(
+                    f,
+                    "Return is only valid inside a function at {}..{}",
+                    span.start, span.end
+                ),
+                TypeError::MissingReturn { name, span } => write!(
+                    f,
+                    "Function {name:?} must return a value on all paths at {}..{}",
                     span.start, span.end
                 ),
             },

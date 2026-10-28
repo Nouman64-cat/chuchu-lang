@@ -38,13 +38,26 @@ fn generates_complete_program_with_shared_printf() {
         .expect("Printf should be declared");
     assert!(printf.get_type().is_var_arg());
     assert_eq!(printf.count_params(), 1);
-    assert_eq!(module.get_functions().count(), 2);
-    assert_eq!(module.get_globals().count(), 1);
+    assert_eq!(
+        module
+            .get_functions()
+            .filter(|function| function.get_name().to_bytes() == b"printf")
+            .count(),
+        1
+    );
+    assert_eq!(
+        module
+            .get_globals()
+            .filter(|global| global.get_name().to_bytes() == b".cheeku.format.i64")
+            .count(),
+        1
+    );
     let ir = module.print_to_string().to_string();
     assert_eq!(ir.matches("call i32 (ptr, ...) @printf").count(), 3);
     assert!(ir.contains("%lld\\0A\\00"));
     assert!(ir.contains("ret i32 0"));
-    assert!(!ir.contains("alloca"));
+    // Program locals now use entry-block storage to support reassignment and control flow.
+    assert!(ir.contains("alloca i64"));
 }
 
 #[test]
@@ -53,6 +66,48 @@ fn generates_empty_program_without_output_runtime() {
     let module = generate_program(&context, &[]).expect("Empty program should generate");
     assert!(module.get_function("printf").is_none());
     module.verify().expect("Empty program should verify");
+}
+
+#[test]
+fn phase6_storage_is_allocated_only_in_function_entries() {
+    let context = Context::create();
+    let statements = Parser::new(tokenize("fn f(n: Int) -> Int {\nset i to 0\nwhile i < n {\nset a to [1, 2] * [3, 4]\ni = i + 1\n}\nreturn i\n}\nshow f(2)").unwrap()).parse_program().unwrap();
+    let module = generate_program(&context, &statements).expect("Program should generate");
+    for function in module
+        .get_functions()
+        .filter(|function| function.count_basic_blocks() > 0)
+    {
+        assert!(function.verify(false));
+        let entry = function.get_first_basic_block().unwrap();
+        for block in function.get_basic_blocks() {
+            for instruction in block.get_instructions() {
+                if instruction.get_opcode() == InstructionOpcode::Alloca {
+                    assert_eq!(block, entry);
+                }
+            }
+        }
+    }
+    let ir = module.print_to_string().to_string();
+    assert!(ir.contains("llvm.sadd.with.overflow.i64"));
+    assert!(ir.contains("llvm.smul.with.overflow.i64"));
+    assert!(!ir.contains("nsw"));
+    assert!(!ir.contains("nuw"));
+}
+
+#[test]
+fn phase6_codegen_rejects_invalid_types_without_panicking() {
+    let context = Context::create();
+    for source in [
+        "show true + 1",
+        "show [1][false]",
+        "show missing(1)",
+        "fn f() -> Int { show 1 }",
+    ] {
+        let statements = Parser::new(tokenize(source).unwrap())
+            .parse_program()
+            .unwrap();
+        assert!(generate_program(&context, &statements).is_err(), "{source}");
+    }
 }
 
 #[test]

@@ -29,6 +29,13 @@ pub fn tokenize(source: &str) -> Result<Vec<Token>, LexError> {
                     "set" => TokenKind::Set,
                     "to" => TokenKind::To,
                     "show" => TokenKind::Show,
+                    "true" => TokenKind::True,
+                    "false" => TokenKind::False,
+                    "if" => TokenKind::If,
+                    "else" => TokenKind::Else,
+                    "while" => TokenKind::While,
+                    "fn" => TokenKind::Fn,
+                    "return" => TokenKind::Return,
                     name => TokenKind::Identifier(name.to_owned()),
                 }
             }
@@ -42,9 +49,83 @@ pub fn tokenize(source: &str) -> Result<Vec<Token>, LexError> {
                     }
                 }
 
-                TokenKind::Integer(source[start..end].to_owned())
+                let mut float = false;
+                if characters.peek().is_some_and(|&(_, c)| c == '.') {
+                    float = true;
+                    if let Some((position, _)) = characters.next() {
+                        end = position + 1;
+                    }
+                    while let Some(&(position, c)) = characters.peek() {
+                        if !c.is_ascii_digit() {
+                            break;
+                        }
+                        characters.next();
+                        end = position + 1;
+                    }
+                }
+                if characters
+                    .peek()
+                    .is_some_and(|&(_, c)| c == 'e' || c == 'E')
+                {
+                    float = true;
+                    if let Some((position, _)) = characters.next() {
+                        end = position + 1;
+                    }
+                    if characters
+                        .peek()
+                        .is_some_and(|&(_, c)| c == '+' || c == '-')
+                        && let Some((position, _)) = characters.next()
+                    {
+                        end = position + 1;
+                    }
+                    while let Some(&(position, c)) = characters.peek() {
+                        if !c.is_ascii_digit() {
+                            break;
+                        }
+                        characters.next();
+                        end = position + 1;
+                    }
+                }
+                if float {
+                    TokenKind::Float(source[start..end].to_owned())
+                } else {
+                    TokenKind::Integer(source[start..end].to_owned())
+                }
             }
             '+' => TokenKind::Plus,
+            '*' => TokenKind::Star,
+            '/' => TokenKind::Slash,
+            '(' => TokenKind::LeftParen,
+            ')' => TokenKind::RightParen,
+            '[' => TokenKind::LeftBracket,
+            ']' => TokenKind::RightBracket,
+            ',' => TokenKind::Comma,
+            ':' => TokenKind::Colon,
+            '-' | '=' | '!' | '<' | '>' => {
+                let pair = characters
+                    .peek()
+                    .is_some_and(|&(_, c)| if character == '-' { c == '>' } else { c == '=' });
+                if pair && let Some((position, _)) = characters.next() {
+                    end = position + 1;
+                }
+                match (character, pair) {
+                    ('-', true) => TokenKind::Arrow,
+                    ('-', false) => TokenKind::Minus,
+                    ('=', true) => TokenKind::Equal,
+                    ('=', false) => TokenKind::Assign,
+                    ('!', true) => TokenKind::NotEqual,
+                    ('<', true) => TokenKind::LessEqual,
+                    ('<', false) => TokenKind::Less,
+                    ('>', true) => TokenKind::GreaterEqual,
+                    ('>', false) => TokenKind::Greater,
+                    _ => {
+                        return Err(LexError {
+                            character,
+                            span: Span { start, end },
+                        });
+                    }
+                }
+            }
             '{' => TokenKind::LeftBrace,
             '}' => TokenKind::RightBrace,
             '\n' => TokenKind::Newline,
@@ -77,6 +158,42 @@ pub fn tokenize(source: &str) -> Result<Vec<Token>, LexError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn phase6_operators_and_float_exponents_have_exact_spans() {
+        let tokens = tokenize("-1.5e-2<=0").unwrap();
+        assert_eq!(
+            tokens[0],
+            Token {
+                kind: TokenKind::Minus,
+                span: Span { start: 0, end: 1 }
+            }
+        );
+        assert_eq!(
+            tokens[1],
+            Token {
+                kind: TokenKind::Float("1.5e-2".to_owned()),
+                span: Span { start: 1, end: 7 }
+            }
+        );
+        assert_eq!(
+            tokens[2],
+            Token {
+                kind: TokenKind::LessEqual,
+                span: Span { start: 7, end: 9 }
+            }
+        );
+    }
+
+    #[test]
+    fn phase6_keywords_require_identifier_boundaries() {
+        let tokens = tokenize("while1 if_value return_value").unwrap();
+        assert!(
+            tokens[..3]
+                .iter()
+                .all(|token| matches!(token.kind, TokenKind::Identifier(_)))
+        );
+    }
 
     #[test]
     fn tokenizes_integer_literals() {

@@ -1,0 +1,6 @@
+set a to [1, 2, 3]
+set b to [4, 5, 6]
+set result to a * b
+show sum(result)
+show sqrt(9.0)
+show abs(-7)

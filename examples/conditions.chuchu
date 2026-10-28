@@ -1,0 +1,6 @@
+set score to 85
+if score >= 80 {
+    show 1
+} else {
+    show 0
+}

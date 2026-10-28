@@ -1,0 +1,5 @@
+set counter to 0
+while counter < 5 {
+    show counter
+    counter = counter + 1
+}

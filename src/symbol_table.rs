@@ -10,6 +10,7 @@ pub enum SymbolError {
 #[derive(Debug, Default)]
 pub struct SymbolTable {
     symbols: HashMap<String, Type>,
+    scopes: Vec<HashMap<String, Type>>,
 }
 
 impl SymbolTable {
@@ -18,7 +19,8 @@ impl SymbolTable {
     }
 
     pub fn declare(&mut self, name: String, ty: Type) -> Result<(), SymbolError> {
-        match self.symbols.entry(name) {
+        let symbols = self.scopes.last_mut().unwrap_or(&mut self.symbols);
+        match symbols.entry(name) {
             Entry::Vacant(entry) => {
                 entry.insert(ty);
                 Ok(())
@@ -30,7 +32,18 @@ impl SymbolTable {
     }
 
     pub fn lookup(&self, name: &str) -> Option<Type> {
-        self.symbols.get(name).copied()
+        self.scopes
+            .iter()
+            .rev()
+            .find_map(|scope| scope.get(name).copied())
+            .or_else(|| self.symbols.get(name).copied())
+    }
+
+    pub fn enter_scope(&mut self) {
+        self.scopes.push(HashMap::new());
+    }
+    pub fn exit_scope(&mut self) {
+        self.scopes.pop();
     }
 }
 
