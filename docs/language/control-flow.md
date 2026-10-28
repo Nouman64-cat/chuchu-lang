@@ -10,7 +10,7 @@ description: "Write Chuchu if/else branches and while loops with boolean conditi
 ## If and else
 
 ```chuchu
-set score to 85
+assign score to 85
 if score >= 80 {
     show 1
 } else {
@@ -21,7 +21,7 @@ if score >= 80 {
 This prints `1`. The `else` block is optional. Braces are required around each branch. Put a nested `if` inside an `else` block when you need another decision; `else if` shorthand is not supported.
 
 ```chuchu
-set score to 85
+assign score to 85
 if score >= 90 {
     show 3
 } else {
@@ -38,7 +38,7 @@ if score >= 90 {
 A `while` loop evaluates its condition before each iteration:
 
 ```chuchu
-set counter to 0
+assign counter to 0
 while counter < 5 {
     show counter
     reassign counter to counter + 1
@@ -50,10 +50,10 @@ This prints `0` through `4`. Update the values controlling your condition so the
 ## Nested loops
 
 ```chuchu
-set i to 0
-set total to 0
+assign i to 0
+assign total to 0
 while i < 3 {
-    set j to 0
+    assign j to 0
     while j < 2 {
         reassign total to total + 1
         reassign j to j + 1

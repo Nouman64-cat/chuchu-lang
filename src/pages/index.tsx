@@ -8,8 +8,8 @@ const example = `function square(x: int) -> int {
     return x * x
 }
 
-set numbers to [1, 2, 3, 4]
-set total to sum(numbers)
+assign numbers to [1, 2, 3, 4]
+assign total to sum(numbers)
 
 show square(total)`;
 const paths = [
@@ -39,7 +39,7 @@ export default function Home(): ReactNode {
           </div>
         </section>
         <section className={styles.principles} aria-label="Language essentials">
-          <div><span className={styles.smallIcon} aria-hidden="true">Aa</span><h2>Read it like a thought.</h2><p><code>set</code>, <code>to</code>, <code>show</code>. A small vocabulary that keeps your ideas in focus.</p></div>
+          <div><span className={styles.smallIcon} aria-hidden="true">Aa</span><h2>Read it like a thought.</h2><p><code>assign</code>, <code>to</code>, <code>show</code>. A small vocabulary that keeps your ideas in focus.</p></div>
           <div><span className={styles.smallIcon} aria-hidden="true">{ '{ }' }</span><h2>Simple, with structure.</h2><p>Inferred local types. Explicit function signatures. Checked arithmetic and array access.</p></div>
           <div><span className={styles.smallIcon} aria-hidden="true">↗</span><h2>From source to native.</h2><p>An LLVM compiler with four optimization levels, from an unoptimized baseline to O3.</p></div>
         </section>

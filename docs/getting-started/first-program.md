@@ -6,8 +6,8 @@ description: "Write, compile, and run a Chuchu program using variables, function
 Create a file named `hello.chuchu`:
 
 ```chuchu title="hello.chuchu"
-set x to 10
-set y to 20
+assign x to 10
+assign y to 20
 show x + y
 ```
 
@@ -22,7 +22,7 @@ cheeku hello.chuchu -o hello
 30
 ```
 
-`set` introduces a variable. `to` separates its name from its value. `show` prints a scalar value followed by a newline. Each statement is separated by a newline.
+`assign` introduces a variable. `to` separates its name from its value. `show` prints a scalar value followed by a newline. Each statement is separated by a newline.
 
 :::tip Using a compiler you have not installed
 Replace `cheeku` with the path to your release binary, such as `./target/release/cheeku` from the compiler repository.
@@ -33,7 +33,7 @@ Replace `cheeku` with the path to your release binary, such as `./target/release
 A variable keeps the type inferred from its declaration. Use `reassign` to update it:
 
 ```chuchu
-set counter to 0
+assign counter to 0
 while counter < 3 {
     show counter
     reassign counter to counter + 1
@@ -59,8 +59,8 @@ The output is `100`. The argument and return value are integers.
 ## Work with a numerical array
 
 ```chuchu
-set a to [1, 2, 3]
-set b to [4, 5, 6]
+assign a to [1, 2, 3]
+assign b to [4, 5, 6]
 show sum(a * b)
 ```
 

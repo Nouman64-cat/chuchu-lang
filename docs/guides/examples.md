@@ -13,9 +13,9 @@ cheeku example.chuchu -o example
 ## Circle area
 
 ```chuchu
-set pi to 3.14159
-set radius to 5.0
-set area to pi * radius * radius
+assign pi to 3.14159
+assign radius to 5.0
+assign area to pi * radius * radius
 show area
 ```
 
@@ -39,8 +39,8 @@ Output: `120`.
 ## Dot product
 
 ```chuchu
-set a to [1, 2, 3]
-set b to [4, 5, 6]
+assign a to [1, 2, 3]
+assign b to [4, 5, 6]
 show sum(a * b)
 ```
 
@@ -60,10 +60,10 @@ Output: `4.5`. The integer argument widens to float.
 ## Nested iteration
 
 ```chuchu
-set i to 0
-set total to 0
+assign i to 0
+assign total to 0
 while i < 3 {
-    set j to 0
+    assign j to 0
     while j < 2 {
         reassign total to total + i * j
         reassign j to j + 1
