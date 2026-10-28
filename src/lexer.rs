@@ -34,7 +34,8 @@ pub fn tokenize(source: &str) -> Result<Vec<Token>, LexError> {
                     "if" => TokenKind::If,
                     "else" => TokenKind::Else,
                     "while" => TokenKind::While,
-                    "fn" => TokenKind::Fn,
+                    "function" => TokenKind::Function,
+                    "reassign" => TokenKind::Reassign,
                     "return" => TokenKind::Return,
                     name => TokenKind::Identifier(name.to_owned()),
                 }
@@ -187,11 +188,27 @@ mod tests {
 
     #[test]
     fn phase6_keywords_require_identifier_boundaries() {
-        let tokens = tokenize("while1 if_value return_value").unwrap();
+        let tokens = tokenize("while1 if_value return_value function_name reassignment").unwrap();
         assert!(
-            tokens[..3]
+            tokens[..5]
                 .iter()
                 .all(|token| matches!(token.kind, TokenKind::Identifier(_)))
+        );
+    }
+
+    #[test]
+    fn recognizes_function_and_reassign_keywords() {
+        let tokens = tokenize("function reassign function_name reassignment").unwrap();
+        let kinds: Vec<TokenKind> = tokens.into_iter().map(|token| token.kind).collect();
+        assert_eq!(
+            kinds,
+            vec![
+                TokenKind::Function,
+                TokenKind::Reassign,
+                TokenKind::Identifier("function_name".to_owned()),
+                TokenKind::Identifier("reassignment".to_owned()),
+                TokenKind::Eof,
+            ]
         );
     }
 

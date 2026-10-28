@@ -42,7 +42,8 @@ To make the `cheeku` command available on your Cargo binary path, run
 
 Cheeku validates the source through the lexer, parser, and type checker before
 generating LLVM IR. Locals use scoped entry-block storage for reassignment and
-control flow. `show` uses type-aware C `printf` output for Int, Float, and Bool.
+control flow. `show` uses type-aware C `printf` output for the scalar int, float,
+and bool types.
 LLVM emits a host-native object with its detected target triple and
 data layout; system Clang links it. Compilation never runs the generated program.
 Temporary objects are cleaned up, and the requested output is replaced only after
@@ -50,7 +51,7 @@ linking succeeds.
 
 ## Phase 6 language features
 
-- Int, Float, and Bool, with automatic local type inference and Int-to-Float promotion.
+- int, float, and bool types, with automatic local type inference and int-to-float promotion.
 - Arithmetic `+`, `-`, `*`, `/`, unary `-`, parentheses, and comparisons.
 - Braced `if`/`else` and `while`, reassignment, lexical scopes, and inner shadowing.
 - Top-level functions with typed parameters/results, forward calls, and recursion.
@@ -59,7 +60,7 @@ linking succeeds.
 - Scalar numerical built-ins `abs`, `sqrt`, `min`, and `max`.
 
 ```text
-fn square(x: Int) -> Int {
+function square(x: int) -> int {
     return x * x
 }
 set numbers to [1, 2, 3]

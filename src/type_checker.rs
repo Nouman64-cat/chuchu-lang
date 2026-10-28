@@ -432,13 +432,13 @@ mod tests {
     #[test]
     fn phase6_assignment_diagnostic_preserves_rhs_span() {
         let mut checker = TypeChecker::new(SymbolTable::new());
-        let statements = parse_program("set x to 1\nx = true");
+        let statements = parse_program("set x to 1\nreassign x to true");
         assert_eq!(
             checker.check_program(&statements),
             Err(TypeError::Mismatch {
                 expected: Type::Int,
                 actual: Type::Bool,
-                span: Span { start: 15, end: 19 },
+                span: Span { start: 25, end: 29 },
             })
         );
     }
@@ -455,7 +455,7 @@ mod tests {
     fn phase6_function_signature_rejects_wrong_return_type() {
         let mut checker = TypeChecker::new(SymbolTable::new());
         assert!(matches!(
-            checker.check_program(&parse_program("fn f() -> Bool { return 1 }")),
+            checker.check_program(&parse_program("function f() -> bool { return 1 }")),
             Err(TypeError::Mismatch {
                 expected: Type::Bool,
                 actual: Type::Int,

@@ -105,12 +105,12 @@ impl Parser {
     fn annotation(&mut self) -> Result<Type, ParseError> {
         let token = self.token()?;
         let ty = match &token.kind {
-            TokenKind::Identifier(name) if name == "Int" => Type::Int,
-            TokenKind::Identifier(name) if name == "Float" => Type::Float,
-            TokenKind::Identifier(name) if name == "Bool" => Type::Bool,
+            TokenKind::Identifier(name) if name == "int" => Type::Int,
+            TokenKind::Identifier(name) if name == "float" => Type::Float,
+            TokenKind::Identifier(name) if name == "bool" => Type::Bool,
             _ => {
                 return Err(ParseError::ExpectedToken {
-                    expected: "Int, Float, or Bool type",
+                    expected: "int, float, or bool type",
                     span: token.span,
                 });
             }
@@ -134,6 +134,18 @@ impl Parser {
                 let end = value.span.end;
                 (StmtKind::Set { name, value }, end)
             }
+            TokenKind::Reassign => {
+                self.advance();
+                let (name, _) = self.name()?;
+                let token = self.token()?;
+                if token.kind != TokenKind::To {
+                    return Err(ParseError::ExpectedTo { span: token.span });
+                }
+                self.advance();
+                let value = self.parse_expression()?;
+                let end = value.span.end;
+                (StmtKind::Assign { name, value }, end)
+            }
             TokenKind::Show | TokenKind::Return => {
                 self.advance();
                 let expression = self.parse_expression()?;
@@ -146,13 +158,6 @@ impl Parser {
                     },
                     end,
                 )
-            }
-            TokenKind::Identifier(name) => {
-                self.advance();
-                self.require(TokenKind::Assign, "'=' assignment")?;
-                let value = self.parse_expression()?;
-                let end = value.span.end;
-                (StmtKind::Assign { name, value }, end)
             }
             TokenKind::If => {
                 self.advance();
@@ -184,7 +189,7 @@ impl Parser {
                 let (body, end) = self.block()?;
                 (StmtKind::While { condition, body }, end)
             }
-            TokenKind::Fn => {
+            TokenKind::Function => {
                 self.advance();
                 let (name, _) = self.name()?;
                 self.require(TokenKind::LeftParen, "'('")?;

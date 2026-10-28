@@ -104,42 +104,42 @@ fn conditionals_and_nested_branches() {
 #[test]
 fn reassignment_and_conditional_storage() {
     succeeds(
-        "set x to 10\nx = 20\nif true { x = x + 5 } else { x = 0 }\nshow x\nset f to 1.0\nf = x\nshow f",
+        "set x to 10\nreassign x to 20\nif true { reassign x to x + 5 } else { reassign x to 0 }\nshow x\nset f to 1.0\nreassign f to x\nshow f",
         "25\n25\n",
     );
 }
 #[test]
 fn while_reevaluates_conditions() {
     succeeds(
-        "set counter to 0\nwhile counter < 5 {\nshow counter\ncounter = counter + 1\n}",
+        "set counter to 0\nwhile counter < 5 {\nshow counter\nreassign counter to counter + 1\n}",
         "0\n1\n2\n3\n4\n",
     );
 }
 #[test]
 fn nested_loops_and_block_shadowing() {
     succeeds(
-        "set total to 0\nset i to 0\nwhile i < 3 {\nset j to 0\nwhile j < 2 {\ntotal = total + 1\nj = j + 1\n}\ni = i + 1\n}\nset x to 10\nif true {\nset x to x + 20\nshow x\nx = 40\n}\nshow x\nshow total",
+        "set total to 0\nset i to 0\nwhile i < 3 {\nset j to 0\nwhile j < 2 {\nreassign total to total + 1\nreassign j to j + 1\n}\nreassign i to i + 1\n}\nset x to 10\nif true {\nset x to x + 20\nshow x\nreassign x to 40\n}\nshow x\nshow total",
         "30\n10\n6\n",
     );
 }
 #[test]
 fn forward_function_calls_and_multiple_parameters() {
     succeeds(
-        "show add(square(3), 0.5)\nfn square(x: Int) -> Int { return x * x }\nfn add(x: Float, y: Float) -> Float { return x + y }\nfn positive(x: Int) -> Bool { return x > 0 }\nshow positive(2)",
+        "show add(square(3), 0.5)\nfunction square(x: int) -> int { return x * x }\nfunction add(x: float, y: float) -> float { return x + y }\nfunction positive(x: int) -> bool { return x > 0 }\nshow positive(2)",
         "9.5\ntrue\n",
     );
 }
 #[test]
 fn recursive_functions_and_conditional_returns() {
     succeeds(
-        "fn factorial(n: Int) -> Int {\nif n <= 1 { return 1 } else { return n * factorial(n - 1) }\n}\nshow factorial(6)",
+        "function factorial(n: int) -> int {\nif n <= 1 { return 1 } else { return n * factorial(n - 1) }\n}\nshow factorial(6)",
         "720\n",
     );
 }
 #[test]
 fn mutual_recursion_and_return_inside_loop() {
     succeeds(
-        "fn even(n: Int) -> Bool {\nif n == 0 { return true } else { return odd(n - 1) }\n}\nfn odd(n: Int) -> Bool {\nif n == 0 { return false } else { return even(n - 1) }\n}\nfn first(n: Int) -> Int {\nwhile n > 0 { return n }\nreturn 0\n}\nshow even(8)\nshow first(3)",
+        "function even(n: int) -> bool {\nif n == 0 { return true } else { return odd(n - 1) }\n}\nfunction odd(n: int) -> bool {\nif n == 0 { return false } else { return even(n - 1) }\n}\nfunction first(n: int) -> int {\nwhile n > 0 { return n }\nreturn 0\n}\nshow even(8)\nshow first(3)",
         "true\n3\n",
     );
 }
@@ -158,7 +158,7 @@ fn integer_and_float_arrays() {
 #[test]
 fn array_assignment_copies_values() {
     succeeds(
-        "set a to [1, 2]\nset b to a\na = [3, 4]\nshow b[0]\nshow a[0]\nb = b + a\nshow sum(b)",
+        "set a to [1, 2]\nset b to a\nreassign a to [3, 4]\nshow b[0]\nshow a[0]\nreassign b to b + a\nshow sum(b)",
         "1\n3\n10\n",
     );
 }
@@ -179,7 +179,7 @@ fn numerical_builtins_and_nan_comparisons() {
 #[test]
 fn loop_array_temporaries_have_bounded_lifetime() {
     succeeds(
-        "set i to 0\nset total to 0\nwhile i < 1000 {\nset a to [1, 2, 3] * [4, 5, 6]\ntotal = total + sum(a)\ni = i + 1\n}\nshow total",
+        "set i to 0\nset total to 0\nwhile i < 1000 {\nset a to [1, 2, 3] * [4, 5, 6]\nreassign total to total + sum(a)\nreassign i to i + 1\n}\nshow total",
         "32000\n",
     );
 }
@@ -228,16 +228,16 @@ fn invalid_phase6_programs_preserve_existing_executable() {
         "show true + 1",
         "if 1 { show 1 }",
         "while 2.0 { show 1 }",
-        "x = 1",
-        "set x to 1\nx = false",
+        "reassign x to 1",
+        "set x to 1\nreassign x to false",
         "if true { set x to 1 }\nshow x",
-        "fn f(x: Int) -> Int { return x }\nshow f(true)",
-        "fn f() -> Int { show 1 }",
+        "function f(x: int) -> int { return x }\nshow f(true)",
+        "function f() -> int { show 1 }",
         "show missing(1)",
         "set a to [1, 2.0]",
         "show [1][true]",
         "set a to [1] + [1, 2]",
-        "fn f(x: Array) -> Int { return 1 }",
+        "function f(x: Array) -> int { return 1 }",
         "show 1e9999",
         "show -9223372036854775809",
     ] {

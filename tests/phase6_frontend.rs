@@ -17,8 +17,7 @@ fn check(source: &str) -> Result<(), TypeError> {
 
 #[test]
 fn lexes_phase6_tokens_with_utf8_error_spans() {
-    let source =
-        "- * / ( ) [ ] , : -> = == != < <= > >= true false if else while fn return 1.25 2e-3";
+    let source = "- * / ( ) [ ] , : -> = == != < <= > >= true false if else while function reassign return 1.25 2e-3";
     let tokens = tokenize(source).unwrap();
     assert_eq!(tokens[0].kind, TokenKind::Minus);
     assert!(
@@ -78,7 +77,8 @@ fn parses_precedence_associativity_and_grouping() {
 
 #[test]
 fn parses_functions_blocks_and_calls() {
-    let statements = parse("fn f(x: Int, y: Float) -> Bool {\nreturn x < y\n}\nshow f(1, 2.0)");
+    let statements =
+        parse("function f(x: int, y: float) -> bool {\nreturn x < y\n}\nshow f(1, 2.0)");
     let StmtKind::Function {
         parameters,
         return_type,
@@ -104,7 +104,7 @@ fn rejects_missing_delimiters_and_separators() {
         "show (1 + 2",
         "show [1, 2",
         "show 1 show 2",
-        "fn f(x Int) -> Int { return x }",
+        "function f(x int) -> int { return x }",
     ] {
         let result = Parser::new(tokenize(source).unwrap()).parse_program();
         assert!(result.is_err(), "{source}");
@@ -146,7 +146,7 @@ fn infers_scalar_and_array_types() {
 #[test]
 fn validates_scopes_shadowing_and_assignments() {
     assert_eq!(
-        check("set x to 1\nif true {\nset x to 2\nx = 3\n}\nx = 4\nshow x"),
+        check("set x to 1\nif true {\nset x to 2\nreassign x to 3\n}\nreassign x to 4\nshow x"),
         Ok(())
     );
     assert!(matches!(
@@ -154,35 +154,35 @@ fn validates_scopes_shadowing_and_assignments() {
         Err(TypeError::UndefinedVariable { .. })
     ));
     assert!(matches!(
-        check("missing = 1"),
+        check("reassign missing to 1"),
         Err(TypeError::UndefinedVariable { .. })
     ));
     assert!(matches!(
-        check("set x to 1\nx = 2.0"),
+        check("set x to 1\nreassign x to 2.0"),
         Err(TypeError::Mismatch { .. })
     ));
-    assert_eq!(check("set x to 1.0\nx = 2"), Ok(()));
+    assert_eq!(check("set x to 1.0\nreassign x to 2"), Ok(()));
 }
 
 #[test]
 fn validates_forward_recursive_and_typed_function_calls() {
     assert_eq!(
         check(
-            "show f(3)\nfn f(x: Int) -> Int {\nif x == 0 { return 1 } else { return f(x - 1) }\n}"
+            "show f(3)\nfunction f(x: int) -> int {\nif x == 0 { return 1 } else { return f(x - 1) }\n}"
         ),
         Ok(())
     );
     for source in [
-        "fn f(x: Int) -> Int { show x }",
-        "fn f(x: Int) -> Int { return true }",
-        "fn f(x: Int) -> Int { return x }\nshow f(true)",
+        "function f(x: int) -> int { show x }",
+        "function f(x: int) -> int { return true }",
+        "function f(x: int) -> int { return x }\nshow f(true)",
         "show missing(1)",
-        "fn f(x: Int) -> Int { return x }\nshow f(1, 2)",
-        "fn f(x: Int, x: Int) -> Int { return x }",
+        "function f(x: int) -> int { return x }\nshow f(1, 2)",
+        "function f(x: int, x: int) -> int { return x }",
         "return 1",
-        "fn f() -> Int { return 1 }\nfn f() -> Int { return 2 }",
-        "set x to 1\nfn f() -> Int { return x }",
-        "fn sqrt(x: Float) -> Float { return x }",
+        "function f() -> int { return 1 }\nfunction f() -> int { return 2 }",
+        "set x to 1\nfunction f() -> int { return x }",
+        "function sqrt(x: float) -> float { return x }",
     ] {
         assert!(check(source).is_err(), "{source}");
     }

@@ -12,7 +12,8 @@ pub enum TokenKind {
     If,
     Else,
     While,
-    Fn,
+    Function,
+    Reassign,
     Return,
 
     Plus,
