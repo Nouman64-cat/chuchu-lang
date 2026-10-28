@@ -1,0 +1,3603 @@
+{
+  "schema": 1,
+  "created_utc": "2026-10-28T18:49:46.912227+00:00",
+  "environment": {
+    "cpu_count": 12,
+    "ram_bytes": "17179869184",
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "cpu": "Apple M2 Pro",
+    "os": "ProductName:\t\tmacOS\nProductVersion:\t\t26.6.2\nBuildVersion:\t\t25G83",
+    "rust": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+    "c": "Apple clang version 21.0.0 (clang-2100.3.34.2)\nTarget: arm64-apple-darwin25.6.0\nThread model: posix\nInstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin",
+    "python": "3.14.6 (main, Jun 10 2026, 10:03:53) [Clang 21.0.0 (clang-2100.0.123.102)]",
+    "llvm": "23.1.4"
+  },
+  "git_revision": "50b0ba6266bf93f8a4981d1361db8a7a59c2b8c0",
+  "compiler_sha256": "079cbdfa1e12f9c7f781e6f9207860232613118a8858e714147202f04546636a",
+  "source_hashes": {
+    "chuchu/nested_loops.chuchu": "7370831e1a0aee3b48e878310a930d5444cf7911de9cdd8646da091290381294",
+    "chuchu/array_reduce.chuchu": "13e513ada9f81e333141d242ff4e6b47d20d778422539902025616b346dc491d",
+    "chuchu/integer_loop.chuchu": "4a69da7ec54b4818a7f43b1ad97a9c52e77400c8a262c5bb718cb21be73051f3",
+    "chuchu/recursion.chuchu": "ec422c993fcabef4ebe4f5aaf3894912afd4e0c6532a44ce19e77240dfe625d5",
+    "chuchu/array_multiply.chuchu": "54a52db04af23d0c1d1e99ef7597596c495d1966988b04246499fb35aa00dc3a",
+    "chuchu/float_loop.chuchu": "1fce58eeef2f51b224583596c72c2e4da86cfd971af5c04536849454d1396b68",
+    "chuchu/function_calls.chuchu": "4f579b954cf77c9ca3fff47d1c21ae912789b529bf2f59f858667dc688f273b7",
+    "chuchu/array_copies.chuchu": "6185e8ac0e579e98820f70a381bd4a3bd62da6607ff6d7537600e3350f73e17a",
+    "reference/python/array_copies.py": "1277cfc04f471439247cd775683e76a00ca6621b257f56f78182a9d745ab193f",
+    "reference/python/array_multiply.py": "193cdd7cf408504bf27fed0ea063e97a7e92d32f22e47df37ef6b6df53aa7d1d",
+    "reference/python/nested_loops.py": "7df6bc176b3c1c3bb8351b6e999013af07e6f969cd5f3f4b70b0c7b3eda928f3",
+    "reference/python/function_calls.py": "400ee288a1582bc5e1d5043d62210b60d14a613d1c2ea508f6fd93a2f4ffaef6",
+    "reference/python/float_loop.py": "348a158450206396712e93d25e52de419f77b12dbb1287187ae598d17e7ced17",
+    "reference/python/recursion.py": "eac5eede214b69a69ff12562a9fdf93e4c8c4463c698415b9edd4bec323e6bc2",
+    "reference/python/integer_loop.py": "2620820c772e9cab5c72a533135bf2b050f20bb98e709b034ad5a86ef965a044",
+    "reference/python/array_reduce.py": "aa2da29fb375c0b4bdb4c46d7fec4cab1afbebccf7143f95a3b7e0c39eea3b78",
+    "reference/rust/nested_loops.rs": "f3e29a840bc55a8e69c47eee2ee25362d0164c112229784e83de8e6014fb52b8",
+    "reference/rust/array_multiply.rs": "07695f70b11fcab45999fda6bd11f02f1475df61defa462b3894dffa704d3400",
+    "reference/rust/array_copies.rs": "91dfa46d418e26b3b0f72fd068e37425139e214e57f79d85834ebf6a26067561",
+    "reference/rust/integer_loop.rs": "0b0c32050d4c3a348fa00009ccfb9921bf74c89a732067b0af8eeec016516697",
+    "reference/rust/array_reduce.rs": "293e16770b8db7d9b22f576c5f4e08e3c1dec27cff71c92272df5b9478ce6c08",
+    "reference/rust/function_calls.rs": "17511fde71051aa20c9119e3d19bdf40bd991ea79dd00fd0ce0ef7a65320e96e",
+    "reference/rust/recursion.rs": "a1ebbd330b1c6ac2dfd67cba5990749bb87363f05f142b2dc9c43c468d3b483b",
+    "reference/rust/float_loop.rs": "53fe83152bc886b86a1e41d9516d56e72ff02fd19a398cf7070c0ae3e48616b3",
+    "reference/c/nested_loops.c": "202d443f8dea8109e64f8fded1eaf5ad20b3931fa1e88d71260d2b90e0586e09",
+    "reference/c/array_multiply.c": "ccd104fbc0712422454db0241189831ec7ccce5162f1fafd5098b208a47d0420",
+    "reference/c/function_calls.c": "8358e6790d9d9c0c32d7d27e71a2786fd183d15b91b1fd500cde61f626ed0bd6",
+    "reference/c/recursion.c": "fde2a06c437b6c12ed56f1b83c0cfd221939d46e304c42287ed371883fc79e3e",
+    "reference/c/array_reduce.c": "b5e3c30ee559cf7a15f7f9f5e9d2ed5daf6148a130f75ec96b40b30e009cbefc",
+    "reference/c/array_copies.c": "9525a6f46f0163815fb6cabf16f7a8843d868d83d1319ec763e2ec8c3cce1806",
+    "reference/c/integer_loop.c": "fa5daed10037d9e1b7df5200b4807f84a27c1ca44469b42fb319323321c8233a",
+    "reference/c/float_loop.c": "8892059ff78ba08418c6fccd457768fe6ca8571063628a17c3317b9ac68aaf8e"
+  },
+  "config": {
+    "repetitions": 3,
+    "compile_repetitions": 2,
+    "warmups": 1,
+    "cpu": "generic",
+    "rust_flags": "-O -C target-cpu=generic",
+    "c_flags": "-O2 -ffp-contract=off",
+    "timing": "wall process time including startup; compilation excluded from execution",
+    "memory": "one separate macOS /usr/bin/time -l run, bytes"
+  },
+  "workloads": [
+    "integer_loop",
+    "float_loop",
+    "function_calls",
+    "recursion",
+    "nested_loops",
+    "array_multiply",
+    "array_reduce",
+    "array_copies"
+  ],
+  "results": [
+    {
+      "workload": "integer_loop",
+      "variant": "chuchu-O0",
+      "parameters": {
+        "iterations": 3000000
+      },
+      "compilation": {
+        "samples_s": [
+          0.224113084,
+          0.05828625
+        ],
+        "median_s": 0.141199667,
+        "q1_s": 0.0997429585,
+        "q3_s": 0.1826563755,
+        "iqr_s": 0.08291341699999999
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 3.125e-06,
+          "parse_s": 1.8416e-05,
+          "type_s": 2.1792e-05,
+          "ir_s": 0.008113125,
+          "target_setup_s": 0.009053334,
+          "optimization_s": 1.4792e-05,
+          "object_s": 0.022825584,
+          "link_s": 0.057174375,
+          "total_s": 0.098633
+        },
+        {
+          "lex_s": 2.75e-06,
+          "parse_s": 3.792e-06,
+          "type_s": 8.542e-06,
+          "ir_s": 0.000131875,
+          "target_setup_s": 0.00013675,
+          "optimization_s": 5.458e-06,
+          "object_s": 0.001319125,
+          "link_s": 0.042009,
+          "total_s": 0.0442415
+        }
+      ],
+      "executable_bytes": 33512,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 38453248,
+      "inspection": {
+        "allocas": 2,
+        "loads": 5,
+        "stores": 4,
+        "llvm_lines": 70,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/integer_loop-chuchu-O0.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/integer_loop-chuchu-O0.s",
+      "execution": {
+        "samples_s": [
+          0.008960666,
+          0.00722325,
+          0.007045833
+        ],
+        "median_s": 0.00722325,
+        "q1_s": 0.007134541499999999,
+        "q3_s": 0.008091958,
+        "iqr_s": 0.0009574165000000006
+      }
+    },
+    {
+      "workload": "integer_loop",
+      "variant": "chuchu-O1",
+      "parameters": {
+        "iterations": 3000000
+      },
+      "compilation": {
+        "samples_s": [
+          0.105297958,
+          0.061550958
+        ],
+        "median_s": 0.083424458,
+        "q1_s": 0.07248770800000001,
+        "q3_s": 0.094361208,
+        "iqr_s": 0.02187349999999999
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 2.792e-06,
+          "parse_s": 4.167e-06,
+          "type_s": 3.542e-06,
+          "ir_s": 0.00012225,
+          "target_setup_s": 0.000134833,
+          "optimization_s": 0.024550583,
+          "object_s": 0.016126875,
+          "link_s": 0.049726625,
+          "total_s": 0.091232917
+        },
+        {
+          "lex_s": 2.75e-06,
+          "parse_s": 4.084e-06,
+          "type_s": 3.25e-06,
+          "ir_s": 0.000123709,
+          "target_setup_s": 0.000131291,
+          "optimization_s": 0.001693542,
+          "object_s": 0.001853583,
+          "link_s": 0.043010417,
+          "total_s": 0.04743875
+        }
+      ],
+      "executable_bytes": 33512,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 40992768,
+      "inspection": {
+        "allocas": 0,
+        "loads": 0,
+        "stores": 0,
+        "llvm_lines": 52,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/integer_loop-chuchu-O1.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/integer_loop-chuchu-O1.s",
+      "execution": {
+        "samples_s": [
+          0.005407375,
+          0.003921792,
+          0.00423675
+        ],
+        "median_s": 0.00423675,
+        "q1_s": 0.004079271000000001,
+        "q3_s": 0.0048220625,
+        "iqr_s": 0.0007427914999999993
+      }
+    },
+    {
+      "workload": "integer_loop",
+      "variant": "chuchu-O2",
+      "parameters": {
+        "iterations": 3000000
+      },
+      "compilation": {
+        "samples_s": [
+          0.069421667,
+          0.0635335
+        ],
+        "median_s": 0.0664775835,
+        "q1_s": 0.06500554175,
+        "q3_s": 0.06794962525,
+        "iqr_s": 0.0029440835
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 3.291e-06,
+          "parse_s": 4.208e-06,
+          "type_s": 4.084e-06,
+          "ir_s": 0.000144209,
+          "target_setup_s": 0.000149792,
+          "optimization_s": 0.006974916,
+          "object_s": 0.002104583,
+          "link_s": 0.04428775,
+          "total_s": 0.054293959
+        },
+        {
+          "lex_s": 3e-06,
+          "parse_s": 4.042e-06,
+          "type_s": 3.208e-06,
+          "ir_s": 0.00012525,
+          "target_setup_s": 0.000123833,
+          "optimization_s": 0.001922542,
+          "object_s": 0.001949667,
+          "link_s": 0.0439605,
+          "total_s": 0.048743459
+        }
+      ],
+      "executable_bytes": 33512,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 42057728,
+      "inspection": {
+        "allocas": 0,
+        "loads": 0,
+        "stores": 0,
+        "llvm_lines": 52,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/integer_loop-chuchu-O2.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/integer_loop-chuchu-O2.s",
+      "execution": {
+        "samples_s": [
+          0.005126916,
+          0.004035958,
+          0.00402
+        ],
+        "median_s": 0.004035958,
+        "q1_s": 0.004027979,
+        "q3_s": 0.004581437,
+        "iqr_s": 0.0005534579999999997
+      }
+    },
+    {
+      "workload": "integer_loop",
+      "variant": "chuchu-O3",
+      "parameters": {
+        "iterations": 3000000
+      },
+      "compilation": {
+        "samples_s": [
+          0.063422708,
+          0.064399542
+        ],
+        "median_s": 0.063911125,
+        "q1_s": 0.0636669165,
+        "q3_s": 0.0641553335,
+        "iqr_s": 0.000488416999999991
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 2.917e-06,
+          "parse_s": 3.916e-06,
+          "type_s": 3.208e-06,
+          "ir_s": 0.000120667,
+          "target_setup_s": 0.000117,
+          "optimization_s": 0.002100375,
+          "object_s": 0.00189425,
+          "link_s": 0.044544334,
+          "total_s": 0.049310666
+        },
+        {
+          "lex_s": 2.875e-06,
+          "parse_s": 3.958e-06,
+          "type_s": 3.833e-06,
+          "ir_s": 0.00012925,
+          "target_setup_s": 0.000126042,
+          "optimization_s": 0.001874,
+          "object_s": 0.001906917,
+          "link_s": 0.045683083,
+          "total_s": 0.050359625
+        }
+      ],
+      "executable_bytes": 33512,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 42156032,
+      "inspection": {
+        "allocas": 0,
+        "loads": 0,
+        "stores": 0,
+        "llvm_lines": 52,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/integer_loop-chuchu-O3.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/integer_loop-chuchu-O3.s",
+      "execution": {
+        "samples_s": [
+          0.005773875,
+          0.004261792,
+          0.004698792
+        ],
+        "median_s": 0.004698792,
+        "q1_s": 0.004480292,
+        "q3_s": 0.005236333500000001,
+        "iqr_s": 0.0007560415000000004
+      }
+    },
+    {
+      "workload": "integer_loop",
+      "variant": "rust",
+      "parameters": {
+        "iterations": 3000000
+      },
+      "compilation": {
+        "samples_s": [
+          0.541442708,
+          0.142289166
+        ],
+        "median_s": 0.341865937,
+        "q1_s": 0.24207755150000002,
+        "q3_s": 0.4416543225000001,
+        "iqr_s": 0.19957677100000007
+      },
+      "compilation_stages": [],
+      "executable_bytes": 471040,
+      "peak_rss_bytes": 1556480,
+      "compile_peak_rss_bytes": 92520448,
+      "execution": {
+        "samples_s": [
+          0.006257542,
+          0.005208834,
+          0.0045875
+        ],
+        "median_s": 0.005208834,
+        "q1_s": 0.004898167,
+        "q3_s": 0.005733188,
+        "iqr_s": 0.000835021
+      }
+    },
+    {
+      "workload": "integer_loop",
+      "variant": "c",
+      "parameters": {
+        "iterations": 3000000
+      },
+      "compilation": {
+        "samples_s": [
+          0.234554542,
+          0.099568083
+        ],
+        "median_s": 0.1670613125,
+        "q1_s": 0.13331469775000002,
+        "q3_s": 0.20080792725,
+        "iqr_s": 0.06749322949999997
+      },
+      "compilation_stages": [],
+      "executable_bytes": 33504,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 40796160,
+      "execution": {
+        "samples_s": [
+          0.005706125,
+          0.004318792,
+          0.00482575
+        ],
+        "median_s": 0.00482575,
+        "q1_s": 0.004572271,
+        "q3_s": 0.0052659375,
+        "iqr_s": 0.0006936664999999996
+      }
+    },
+    {
+      "workload": "integer_loop",
+      "variant": "python",
+      "parameters": {
+        "iterations": 3000000
+      },
+      "compilation": null,
+      "compilation_stages": [],
+      "executable_bytes": null,
+      "peak_rss_bytes": 15122432,
+      "compile_peak_rss_bytes": null,
+      "execution": {
+        "samples_s": [
+          0.273420917,
+          0.258398292,
+          0.293339125
+        ],
+        "median_s": 0.273420917,
+        "q1_s": 0.2659096045,
+        "q3_s": 0.283380021,
+        "iqr_s": 0.017470416499999974
+      }
+    },
+    {
+      "workload": "float_loop",
+      "variant": "chuchu-O0",
+      "parameters": {
+        "iterations": 1000000
+      },
+      "compilation": {
+        "samples_s": [
+          0.08850125,
+          0.063341125
+        ],
+        "median_s": 0.0759211875,
+        "q1_s": 0.06963115624999999,
+        "q3_s": 0.08221121875000001,
+        "iqr_s": 0.012580062500000017
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 3.166e-06,
+          "parse_s": 5.125e-06,
+          "type_s": 6.041e-06,
+          "ir_s": 0.000384084,
+          "target_setup_s": 0.000302542,
+          "optimization_s": 5.542e-06,
+          "object_s": 0.004322125,
+          "link_s": 0.061650542,
+          "total_s": 0.067548125
+        },
+        {
+          "lex_s": 3.292e-06,
+          "parse_s": 4.208e-06,
+          "type_s": 5.958e-06,
+          "ir_s": 0.00018325,
+          "target_setup_s": 0.000147625,
+          "optimization_s": 6.125e-06,
+          "object_s": 0.001422042,
+          "link_s": 0.045615458,
+          "total_s": 0.048077125
+        }
+      ],
+      "executable_bytes": 33512,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 38109184,
+      "inspection": {
+        "allocas": 2,
+        "loads": 4,
+        "stores": 4,
+        "llvm_lines": 58,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/float_loop-chuchu-O0.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/float_loop-chuchu-O0.s",
+      "execution": {
+        "samples_s": [
+          0.00874625,
+          0.0078195,
+          0.008438959
+        ],
+        "median_s": 0.008438959,
+        "q1_s": 0.0081292295,
+        "q3_s": 0.0085926045,
+        "iqr_s": 0.00046337500000000025
+      }
+    },
+    {
+      "workload": "float_loop",
+      "variant": "chuchu-O1",
+      "parameters": {
+        "iterations": 1000000
+      },
+      "compilation": {
+        "samples_s": [
+          0.068265958,
+          0.063644875
+        ],
+        "median_s": 0.0659554165,
+        "q1_s": 0.06480014575000001,
+        "q3_s": 0.06711068725,
+        "iqr_s": 0.002310541499999985
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 2.916e-06,
+          "parse_s": 5.292e-06,
+          "type_s": 8.709e-06,
+          "ir_s": 0.000142625,
+          "target_setup_s": 0.000133833,
+          "optimization_s": 0.004000416,
+          "object_s": 0.0034855,
+          "link_s": 0.045432709,
+          "total_s": 0.053827458
+        },
+        {
+          "lex_s": 3.25e-06,
+          "parse_s": 4.916e-06,
+          "type_s": 5.584e-06,
+          "ir_s": 0.000149541,
+          "target_setup_s": 0.000141041,
+          "optimization_s": 0.001699125,
+          "object_s": 0.001938541,
+          "link_s": 0.043673125,
+          "total_s": 0.048261875
+        }
+      ],
+      "executable_bytes": 33432,
+      "peak_rss_bytes": 1359872,
+      "compile_peak_rss_bytes": 40370176,
+      "inspection": {
+        "allocas": 0,
+        "loads": 0,
+        "stores": 0,
+        "llvm_lines": 30,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/float_loop-chuchu-O1.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/float_loop-chuchu-O1.s",
+      "execution": {
+        "samples_s": [
+          0.005748125,
+          0.006817875,
+          0.006555417
+        ],
+        "median_s": 0.006555417,
+        "q1_s": 0.006151771,
+        "q3_s": 0.006686646,
+        "iqr_s": 0.0005348749999999998
+      }
+    },
+    {
+      "workload": "float_loop",
+      "variant": "chuchu-O2",
+      "parameters": {
+        "iterations": 1000000
+      },
+      "compilation": {
+        "samples_s": [
+          0.058934083,
+          0.060738667
+        ],
+        "median_s": 0.059836375,
+        "q1_s": 0.059385229,
+        "q3_s": 0.060287521000000004,
+        "iqr_s": 0.0009022920000000059
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 7.125e-06,
+          "parse_s": 3.959e-06,
+          "type_s": 4.583e-06,
+          "ir_s": 0.000151625,
+          "target_setup_s": 0.000119917,
+          "optimization_s": 0.002306708,
+          "object_s": 0.001745333,
+          "link_s": 0.040430666,
+          "total_s": 0.045269292
+        },
+        {
+          "lex_s": 2.75e-06,
+          "parse_s": 4.083e-06,
+          "type_s": 4.625e-06,
+          "ir_s": 0.000137375,
+          "target_setup_s": 0.000123709,
+          "optimization_s": 0.001714917,
+          "object_s": 0.001718792,
+          "link_s": 0.042699792,
+          "total_s": 0.047003
+        }
+      ],
+      "executable_bytes": 33432,
+      "peak_rss_bytes": 1359872,
+      "compile_peak_rss_bytes": 41484288,
+      "inspection": {
+        "allocas": 0,
+        "loads": 0,
+        "stores": 0,
+        "llvm_lines": 30,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/float_loop-chuchu-O2.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/float_loop-chuchu-O2.s",
+      "execution": {
+        "samples_s": [
+          0.006306875,
+          0.005060708,
+          0.006360542
+        ],
+        "median_s": 0.006306875,
+        "q1_s": 0.0056837915,
+        "q3_s": 0.0063337085,
+        "iqr_s": 0.0006499169999999999
+      }
+    },
+    {
+      "workload": "float_loop",
+      "variant": "chuchu-O3",
+      "parameters": {
+        "iterations": 1000000
+      },
+      "compilation": {
+        "samples_s": [
+          0.071093417,
+          0.06302
+        ],
+        "median_s": 0.0670567085,
+        "q1_s": 0.06503835425,
+        "q3_s": 0.06907506275000001,
+        "iqr_s": 0.004036708500000014
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 3.417e-06,
+          "parse_s": 5.041e-06,
+          "type_s": 6.834e-06,
+          "ir_s": 0.000174333,
+          "target_setup_s": 0.000158208,
+          "optimization_s": 0.002577292,
+          "object_s": 0.002251709,
+          "link_s": 0.050348625,
+          "total_s": 0.056177958
+        },
+        {
+          "lex_s": 3e-06,
+          "parse_s": 4.25e-06,
+          "type_s": 8.208e-06,
+          "ir_s": 0.000140916,
+          "target_setup_s": 0.000133666,
+          "optimization_s": 0.001727459,
+          "object_s": 0.001957083,
+          "link_s": 0.044465875,
+          "total_s": 0.049099542
+        }
+      ],
+      "executable_bytes": 33432,
+      "peak_rss_bytes": 1359872,
+      "compile_peak_rss_bytes": 41582592,
+      "inspection": {
+        "allocas": 0,
+        "loads": 0,
+        "stores": 0,
+        "llvm_lines": 30,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/float_loop-chuchu-O3.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/float_loop-chuchu-O3.s",
+      "execution": {
+        "samples_s": [
+          0.005545084,
+          0.006057291,
+          0.005397042
+        ],
+        "median_s": 0.005545084,
+        "q1_s": 0.005471063,
+        "q3_s": 0.0058011875,
+        "iqr_s": 0.00033012449999999995
+      }
+    },
+    {
+      "workload": "float_loop",
+      "variant": "rust",
+      "parameters": {
+        "iterations": 1000000
+      },
+      "compilation": {
+        "samples_s": [
+          0.21598425,
+          0.13402375
+        ],
+        "median_s": 0.175004,
+        "q1_s": 0.154513875,
+        "q3_s": 0.195494125,
+        "iqr_s": 0.040980249999999996
+      },
+      "compilation_stages": [],
+      "executable_bytes": 490592,
+      "peak_rss_bytes": 1589248,
+      "compile_peak_rss_bytes": 92717056,
+      "execution": {
+        "samples_s": [
+          0.008849042,
+          0.006022417,
+          0.005859291
+        ],
+        "median_s": 0.006022417,
+        "q1_s": 0.005940854000000001,
+        "q3_s": 0.0074357295,
+        "iqr_s": 0.0014948754999999994
+      }
+    },
+    {
+      "workload": "float_loop",
+      "variant": "c",
+      "parameters": {
+        "iterations": 1000000
+      },
+      "compilation": {
+        "samples_s": [
+          0.086264125,
+          0.076834958
+        ],
+        "median_s": 0.08154954149999999,
+        "q1_s": 0.07919224975,
+        "q3_s": 0.08390683324999999,
+        "iqr_s": 0.004714583499999994
+      },
+      "compilation_stages": [],
+      "executable_bytes": 33440,
+      "peak_rss_bytes": 1359872,
+      "compile_peak_rss_bytes": 39878656,
+      "execution": {
+        "samples_s": [
+          0.008972583,
+          0.005300959,
+          0.004899833
+        ],
+        "median_s": 0.005300959,
+        "q1_s": 0.005100396,
+        "q3_s": 0.007136771,
+        "iqr_s": 0.002036375
+      }
+    },
+    {
+      "workload": "float_loop",
+      "variant": "python",
+      "parameters": {
+        "iterations": 1000000
+      },
+      "compilation": null,
+      "compilation_stages": [],
+      "executable_bytes": null,
+      "peak_rss_bytes": 15138816,
+      "compile_peak_rss_bytes": null,
+      "execution": {
+        "samples_s": [
+          0.108163042,
+          0.095263208,
+          0.096466333
+        ],
+        "median_s": 0.096466333,
+        "q1_s": 0.0958647705,
+        "q3_s": 0.1023146875,
+        "iqr_s": 0.0064499169999999995
+      }
+    },
+    {
+      "workload": "function_calls",
+      "variant": "chuchu-O0",
+      "parameters": {
+        "calls": 300000
+      },
+      "compilation": {
+        "samples_s": [
+          0.069292459,
+          0.059836792
+        ],
+        "median_s": 0.0645646255,
+        "q1_s": 0.06220070875,
+        "q3_s": 0.06692854225,
+        "iqr_s": 0.0047278335000000005
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 3.708e-06,
+          "parse_s": 6.125e-06,
+          "type_s": 4.916e-06,
+          "ir_s": 0.000159667,
+          "target_setup_s": 0.0001435,
+          "optimization_s": 7.458e-06,
+          "object_s": 0.002142834,
+          "link_s": 0.051359083,
+          "total_s": 0.054743375
+        },
+        {
+          "lex_s": 3.875e-06,
+          "parse_s": 6.417e-06,
+          "type_s": 5.25e-06,
+          "ir_s": 0.000150292,
+          "target_setup_s": 0.000129709,
+          "optimization_s": 8.375e-06,
+          "object_s": 0.001490542,
+          "link_s": 0.042489709,
+          "total_s": 0.044901916
+        }
+      ],
+      "executable_bytes": 33576,
+      "peak_rss_bytes": 1359872,
+      "compile_peak_rss_bytes": 38354944,
+      "inspection": {
+        "allocas": 3,
+        "loads": 7,
+        "stores": 5,
+        "llvm_lines": 109,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/function_calls-chuchu-O0.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/function_calls-chuchu-O0.s",
+      "execution": {
+        "samples_s": [
+          0.005104625,
+          0.004381333,
+          0.005420292
+        ],
+        "median_s": 0.005104625,
+        "q1_s": 0.004742979,
+        "q3_s": 0.0052624585,
+        "iqr_s": 0.0005194795000000004
+      }
+    },
+    {
+      "workload": "function_calls",
+      "variant": "chuchu-O1",
+      "parameters": {
+        "calls": 300000
+      },
+      "compilation": {
+        "samples_s": [
+          0.069227916,
+          0.064281166
+        ],
+        "median_s": 0.066754541,
+        "q1_s": 0.0655178535,
+        "q3_s": 0.0679912285,
+        "iqr_s": 0.002473375
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 3.458e-06,
+          "parse_s": 5.792e-06,
+          "type_s": 4.916e-06,
+          "ir_s": 0.000169292,
+          "target_setup_s": 0.000129625,
+          "optimization_s": 0.007327833,
+          "object_s": 0.004981584,
+          "link_s": 0.04183025,
+          "total_s": 0.055099625
+        },
+        {
+          "lex_s": 3.875e-06,
+          "parse_s": 6.25e-06,
+          "type_s": 5.375e-06,
+          "ir_s": 0.00018875,
+          "target_setup_s": 0.000167792,
+          "optimization_s": 0.002829125,
+          "object_s": 0.00259875,
+          "link_s": 0.042530375,
+          "total_s": 0.049023833
+        }
+      ],
+      "executable_bytes": 33576,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 41811968,
+      "inspection": {
+        "allocas": 0,
+        "loads": 0,
+        "stores": 0,
+        "llvm_lines": 107,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/function_calls-chuchu-O1.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/function_calls-chuchu-O1.s",
+      "execution": {
+        "samples_s": [
+          0.004037291,
+          0.004554125,
+          0.003482667
+        ],
+        "median_s": 0.004037291,
+        "q1_s": 0.003759979,
+        "q3_s": 0.0042957080000000005,
+        "iqr_s": 0.0005357290000000004
+      }
+    },
+    {
+      "workload": "function_calls",
+      "variant": "chuchu-O2",
+      "parameters": {
+        "calls": 300000
+      },
+      "compilation": {
+        "samples_s": [
+          0.070374833,
+          0.062438584
+        ],
+        "median_s": 0.0664067085,
+        "q1_s": 0.06442264624999999,
+        "q3_s": 0.06839077075,
+        "iqr_s": 0.003968124500000003
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 3.167e-06,
+          "parse_s": 6.333e-06,
+          "type_s": 5.542e-06,
+          "ir_s": 0.000149625,
+          "target_setup_s": 0.00011825,
+          "optimization_s": 0.006957708,
+          "object_s": 0.003126583,
+          "link_s": 0.045294542,
+          "total_s": 0.056308583
+        },
+        {
+          "lex_s": 3.583e-06,
+          "parse_s": 5.958e-06,
+          "type_s": 5.417e-06,
+          "ir_s": 0.000147417,
+          "target_setup_s": 0.000129792,
+          "optimization_s": 0.002654541,
+          "object_s": 0.002476,
+          "link_s": 0.041553125,
+          "total_s": 0.047643708
+        }
+      ],
+      "executable_bytes": 33576,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 43106304,
+      "inspection": {
+        "allocas": 0,
+        "loads": 0,
+        "stores": 0,
+        "llvm_lines": 87,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/function_calls-chuchu-O2.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/function_calls-chuchu-O2.s",
+      "execution": {
+        "samples_s": [
+          0.004167541,
+          0.003170917,
+          0.003074041
+        ],
+        "median_s": 0.003170917,
+        "q1_s": 0.003122479,
+        "q3_s": 0.0036692290000000004,
+        "iqr_s": 0.0005467500000000004
+      }
+    },
+    {
+      "workload": "function_calls",
+      "variant": "chuchu-O3",
+      "parameters": {
+        "calls": 300000
+      },
+      "compilation": {
+        "samples_s": [
+          0.060750334,
+          0.131054041
+        ],
+        "median_s": 0.09590218750000001,
+        "q1_s": 0.07832626075,
+        "q3_s": 0.11347811425000001,
+        "iqr_s": 0.03515185350000001
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 3.667e-06,
+          "parse_s": 9.333e-06,
+          "type_s": 4.958e-06,
+          "ir_s": 0.000152625,
+          "target_setup_s": 0.000123417,
+          "optimization_s": 0.002396208,
+          "object_s": 0.002230417,
+          "link_s": 0.041236791,
+          "total_s": 0.046702708
+        },
+        {
+          "lex_s": 4.209e-06,
+          "parse_s": 8.333e-06,
+          "type_s": 6.542e-06,
+          "ir_s": 0.000175458,
+          "target_setup_s": 0.000390625,
+          "optimization_s": 0.00722875,
+          "object_s": 0.005118875,
+          "link_s": 0.088106334,
+          "total_s": 0.102071208
+        }
+      ],
+      "executable_bytes": 33576,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 43302912,
+      "inspection": {
+        "allocas": 0,
+        "loads": 0,
+        "stores": 0,
+        "llvm_lines": 87,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/function_calls-chuchu-O3.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/function_calls-chuchu-O3.s",
+      "execution": {
+        "samples_s": [
+          0.004296375,
+          0.003456625,
+          0.005235667
+        ],
+        "median_s": 0.004296375,
+        "q1_s": 0.0038764999999999997,
+        "q3_s": 0.0047660210000000005,
+        "iqr_s": 0.0008895210000000008
+      }
+    },
+    {
+      "workload": "function_calls",
+      "variant": "rust",
+      "parameters": {
+        "calls": 300000
+      },
+      "compilation": {
+        "samples_s": [
+          0.144664833,
+          0.143166917
+        ],
+        "median_s": 0.143915875,
+        "q1_s": 0.143541396,
+        "q3_s": 0.144290354,
+        "iqr_s": 0.0007489580000000218
+      },
+      "compilation_stages": [],
+      "executable_bytes": 471040,
+      "peak_rss_bytes": 1556480,
+      "compile_peak_rss_bytes": 92766208,
+      "execution": {
+        "samples_s": [
+          0.00620525,
+          0.00376275,
+          0.003212458
+        ],
+        "median_s": 0.00376275,
+        "q1_s": 0.003487604,
+        "q3_s": 0.004984,
+        "iqr_s": 0.0014963959999999997
+      }
+    },
+    {
+      "workload": "function_calls",
+      "variant": "c",
+      "parameters": {
+        "calls": 300000
+      },
+      "compilation": {
+        "samples_s": [
+          0.098065625,
+          0.078295125
+        ],
+        "median_s": 0.088180375,
+        "q1_s": 0.08323775,
+        "q3_s": 0.09312300000000001,
+        "iqr_s": 0.009885250000000012
+      },
+      "compilation_stages": [],
+      "executable_bytes": 33504,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 40960000,
+      "execution": {
+        "samples_s": [
+          0.003637625,
+          0.003695916,
+          0.004099375
+        ],
+        "median_s": 0.003695916,
+        "q1_s": 0.0036667705,
+        "q3_s": 0.0038976454999999997,
+        "iqr_s": 0.00023087499999999974
+      }
+    },
+    {
+      "workload": "function_calls",
+      "variant": "python",
+      "parameters": {
+        "calls": 300000
+      },
+      "compilation": null,
+      "compilation_stages": [],
+      "executable_bytes": null,
+      "peak_rss_bytes": 15171584,
+      "compile_peak_rss_bytes": null,
+      "execution": {
+        "samples_s": [
+          0.063579791,
+          0.057724792,
+          0.060526584
+        ],
+        "median_s": 0.060526584,
+        "q1_s": 0.059125687999999996,
+        "q3_s": 0.062053187499999996,
+        "iqr_s": 0.0029274995
+      }
+    },
+    {
+      "workload": "recursion",
+      "variant": "chuchu-O0",
+      "parameters": {
+        "fibonacci_n": 28
+      },
+      "compilation": {
+        "samples_s": [
+          0.07024575,
+          0.060870542
+        ],
+        "median_s": 0.065558146,
+        "q1_s": 0.063214344,
+        "q3_s": 0.06790194799999999,
+        "iqr_s": 0.004687603999999984
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 3.291e-06,
+          "parse_s": 8.417e-06,
+          "type_s": 6.459e-06,
+          "ir_s": 0.000161584,
+          "target_setup_s": 0.000214875,
+          "optimization_s": 9.542e-06,
+          "object_s": 0.002402333,
+          "link_s": 0.050654916,
+          "total_s": 0.054371917
+        },
+        {
+          "lex_s": 3.25e-06,
+          "parse_s": 5.958e-06,
+          "type_s": 5.917e-06,
+          "ir_s": 0.000165583,
+          "target_setup_s": 0.000141541,
+          "optimization_s": 7.334e-06,
+          "object_s": 0.001461083,
+          "link_s": 0.04396475,
+          "total_s": 0.046433166
+        }
+      ],
+      "executable_bytes": 33560,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 38060032,
+      "inspection": {
+        "allocas": 1,
+        "loads": 4,
+        "stores": 1,
+        "llvm_lines": 89,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [],
+        "reachable_recursion": true,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/recursion-chuchu-O0.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/recursion-chuchu-O0.s",
+      "execution": {
+        "samples_s": [
+          0.00597475,
+          0.004663875,
+          0.004788666
+        ],
+        "median_s": 0.004788666,
+        "q1_s": 0.004726270499999999,
+        "q3_s": 0.005381708,
+        "iqr_s": 0.0006554375000000006
+      }
+    },
+    {
+      "workload": "recursion",
+      "variant": "chuchu-O1",
+      "parameters": {
+        "fibonacci_n": 28
+      },
+      "compilation": {
+        "samples_s": [
+          0.064543166,
+          0.059659708
+        ],
+        "median_s": 0.062101436999999995,
+        "q1_s": 0.060880572499999994,
+        "q3_s": 0.0633223015,
+        "iqr_s": 0.0024417290000000036
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 2.875e-06,
+          "parse_s": 5.416e-06,
+          "type_s": 6.167e-06,
+          "ir_s": 0.00013375,
+          "target_setup_s": 0.000131084,
+          "optimization_s": 0.002627958,
+          "object_s": 0.002904167,
+          "link_s": 0.0442095,
+          "total_s": 0.050636416
+        },
+        {
+          "lex_s": 3e-06,
+          "parse_s": 5.125e-06,
+          "type_s": 6.5e-06,
+          "ir_s": 0.000143958,
+          "target_setup_s": 0.000143292,
+          "optimization_s": 0.001569416,
+          "object_s": 0.001941667,
+          "link_s": 0.0412865,
+          "total_s": 0.045669958
+        }
+      ],
+      "executable_bytes": 33560,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 39337984,
+      "inspection": {
+        "allocas": 0,
+        "loads": 0,
+        "stores": 0,
+        "llvm_lines": 58,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [],
+        "reachable_recursion": true,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/recursion-chuchu-O1.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/recursion-chuchu-O1.s",
+      "execution": {
+        "samples_s": [
+          0.004568583,
+          0.004507959,
+          0.004174958
+        ],
+        "median_s": 0.004507959,
+        "q1_s": 0.0043414585,
+        "q3_s": 0.004538271,
+        "iqr_s": 0.00019681249999999994
+      }
+    },
+    {
+      "workload": "recursion",
+      "variant": "chuchu-O2",
+      "parameters": {
+        "fibonacci_n": 28
+      },
+      "compilation": {
+        "samples_s": [
+          0.063366875,
+          0.062816667
+        ],
+        "median_s": 0.063091771,
+        "q1_s": 0.062954219,
+        "q3_s": 0.063229323,
+        "iqr_s": 0.00027510399999999824
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 3.375e-06,
+          "parse_s": 5.834e-06,
+          "type_s": 5.375e-06,
+          "ir_s": 0.000149833,
+          "target_setup_s": 0.000135208,
+          "optimization_s": 0.003389875,
+          "object_s": 0.002044417,
+          "link_s": 0.0427185,
+          "total_s": 0.049034791
+        },
+        {
+          "lex_s": 2.875e-06,
+          "parse_s": 5.333e-06,
+          "type_s": 5.375e-06,
+          "ir_s": 0.000147125,
+          "target_setup_s": 0.000179916,
+          "optimization_s": 0.002002,
+          "object_s": 0.002189083,
+          "link_s": 0.043929833,
+          "total_s": 0.049184708
+        }
+      ],
+      "executable_bytes": 33560,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 41041920,
+      "inspection": {
+        "allocas": 0,
+        "loads": 0,
+        "stores": 0,
+        "llvm_lines": 58,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [],
+        "reachable_recursion": true,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/recursion-chuchu-O2.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/recursion-chuchu-O2.s",
+      "execution": {
+        "samples_s": [
+          0.005059292,
+          0.004518292,
+          0.004102542
+        ],
+        "median_s": 0.004518292,
+        "q1_s": 0.004310417,
+        "q3_s": 0.004788792,
+        "iqr_s": 0.00047837499999999963
+      }
+    },
+    {
+      "workload": "recursion",
+      "variant": "chuchu-O3",
+      "parameters": {
+        "fibonacci_n": 28
+      },
+      "compilation": {
+        "samples_s": [
+          0.058351125,
+          0.056469167
+        ],
+        "median_s": 0.057410145999999995,
+        "q1_s": 0.056939656500000005,
+        "q3_s": 0.0578806355,
+        "iqr_s": 0.0009409789999999946
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 2.958e-06,
+          "parse_s": 6.709e-06,
+          "type_s": 5.584e-06,
+          "ir_s": 0.000145667,
+          "target_setup_s": 0.000123042,
+          "optimization_s": 0.00174975,
+          "object_s": 0.001972083,
+          "link_s": 0.040180708,
+          "total_s": 0.044736375
+        },
+        {
+          "lex_s": 2.792e-06,
+          "parse_s": 5.25e-06,
+          "type_s": 5.041e-06,
+          "ir_s": 0.000136625,
+          "target_setup_s": 0.000120958,
+          "optimization_s": 0.001756791,
+          "object_s": 0.001936791,
+          "link_s": 0.038672417,
+          "total_s": 0.043193125
+        }
+      ],
+      "executable_bytes": 33560,
+      "peak_rss_bytes": 1392640,
+      "compile_peak_rss_bytes": 41189376,
+      "inspection": {
+        "allocas": 0,
+        "loads": 0,
+        "stores": 0,
+        "llvm_lines": 58,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [],
+        "reachable_recursion": true,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/recursion-chuchu-O3.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/recursion-chuchu-O3.s",
+      "execution": {
+        "samples_s": [
+          0.006270541,
+          0.004729416,
+          0.004523375
+        ],
+        "median_s": 0.004729416,
+        "q1_s": 0.0046263955,
+        "q3_s": 0.005499978500000001,
+        "iqr_s": 0.0008735830000000007
+      }
+    },
+    {
+      "workload": "recursion",
+      "variant": "rust",
+      "parameters": {
+        "fibonacci_n": 28
+      },
+      "compilation": {
+        "samples_s": [
+          0.137151083,
+          0.148910042
+        ],
+        "median_s": 0.1430305625,
+        "q1_s": 0.14009082275,
+        "q3_s": 0.14597030225,
+        "iqr_s": 0.005879479499999979
+      },
+      "compilation_stages": [],
+      "executable_bytes": 471072,
+      "peak_rss_bytes": 1556480,
+      "compile_peak_rss_bytes": 91783168,
+      "execution": {
+        "samples_s": [
+          0.00680375,
+          0.004217583,
+          0.004149416
+        ],
+        "median_s": 0.004217583,
+        "q1_s": 0.0041834995,
+        "q3_s": 0.0055106665,
+        "iqr_s": 0.0013271669999999998
+      }
+    },
+    {
+      "workload": "recursion",
+      "variant": "c",
+      "parameters": {
+        "fibonacci_n": 28
+      },
+      "compilation": {
+        "samples_s": [
+          0.087213875,
+          0.088755541
+        ],
+        "median_s": 0.087984708,
+        "q1_s": 0.0875992915,
+        "q3_s": 0.0883701245,
+        "iqr_s": 0.0007708329999999985
+      },
+      "compilation_stages": [],
+      "executable_bytes": 33512,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 39731200,
+      "execution": {
+        "samples_s": [
+          0.005312917,
+          0.004243375,
+          0.005378917
+        ],
+        "median_s": 0.005312917,
+        "q1_s": 0.0047781460000000005,
+        "q3_s": 0.005345917,
+        "iqr_s": 0.0005677709999999999
+      }
+    },
+    {
+      "workload": "recursion",
+      "variant": "python",
+      "parameters": {
+        "fibonacci_n": 28
+      },
+      "compilation": null,
+      "compilation_stages": [],
+      "executable_bytes": null,
+      "peak_rss_bytes": 15089664,
+      "compile_peak_rss_bytes": null,
+      "execution": {
+        "samples_s": [
+          0.054141792,
+          0.05507075,
+          0.055905417
+        ],
+        "median_s": 0.05507075,
+        "q1_s": 0.054606271,
+        "q3_s": 0.0554880835,
+        "iqr_s": 0.0008818125000000024
+      }
+    },
+    {
+      "workload": "nested_loops",
+      "variant": "chuchu-O0",
+      "parameters": {
+        "outer": 500,
+        "inner": 500
+      },
+      "compilation": {
+        "samples_s": [
+          0.069269709,
+          0.06029325
+        ],
+        "median_s": 0.0647814795,
+        "q1_s": 0.06253736475,
+        "q3_s": 0.06702559425,
+        "iqr_s": 0.004488229499999996
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 3.167e-06,
+          "parse_s": 5.292e-06,
+          "type_s": 4.792e-06,
+          "ir_s": 0.000149875,
+          "target_setup_s": 0.000137167,
+          "optimization_s": 8.041e-06,
+          "object_s": 0.001359708,
+          "link_s": 0.052162167,
+          "total_s": 0.054785791
+        },
+        {
+          "lex_s": 3.792e-06,
+          "parse_s": 5.459e-06,
+          "type_s": 5.125e-06,
+          "ir_s": 0.000196208,
+          "target_setup_s": 0.000181375,
+          "optimization_s": 8.917e-06,
+          "object_s": 0.001947625,
+          "link_s": 0.042025,
+          "total_s": 0.04524975
+        }
+      ],
+      "executable_bytes": 33512,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 38076416,
+      "inspection": {
+        "allocas": 3,
+        "loads": 8,
+        "stores": 6,
+        "llvm_lines": 115,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/nested_loops-chuchu-O0.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/nested_loops-chuchu-O0.s",
+      "execution": {
+        "samples_s": [
+          0.007289125,
+          0.003767875,
+          0.004459625
+        ],
+        "median_s": 0.004459625,
+        "q1_s": 0.00411375,
+        "q3_s": 0.005874374999999999,
+        "iqr_s": 0.0017606249999999992
+      }
+    },
+    {
+      "workload": "nested_loops",
+      "variant": "chuchu-O1",
+      "parameters": {
+        "outer": 500,
+        "inner": 500
+      },
+      "compilation": {
+        "samples_s": [
+          0.066546375,
+          0.060704
+        ],
+        "median_s": 0.0636251875,
+        "q1_s": 0.06216459375,
+        "q3_s": 0.06508578125,
+        "iqr_s": 0.0029211875000000054
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 3.084e-06,
+          "parse_s": 4.709e-06,
+          "type_s": 4.083e-06,
+          "ir_s": 0.000155833,
+          "target_setup_s": 0.000129958,
+          "optimization_s": 0.003814583,
+          "object_s": 0.002608083,
+          "link_s": 0.045219792,
+          "total_s": 0.052496792
+        },
+        {
+          "lex_s": 3.208e-06,
+          "parse_s": 5.167e-06,
+          "type_s": 4.791e-06,
+          "ir_s": 0.000166917,
+          "target_setup_s": 0.000147542,
+          "optimization_s": 0.002080791,
+          "object_s": 0.002048167,
+          "link_s": 0.041611375,
+          "total_s": 0.046649542
+        }
+      ],
+      "executable_bytes": 33512,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 41172992,
+      "inspection": {
+        "allocas": 0,
+        "loads": 0,
+        "stores": 0,
+        "llvm_lines": 66,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/nested_loops-chuchu-O1.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/nested_loops-chuchu-O1.s",
+      "execution": {
+        "samples_s": [
+          0.003163916,
+          0.004123375,
+          0.003290167
+        ],
+        "median_s": 0.003290167,
+        "q1_s": 0.0032270415,
+        "q3_s": 0.003706771,
+        "iqr_s": 0.0004797295000000001
+      }
+    },
+    {
+      "workload": "nested_loops",
+      "variant": "chuchu-O2",
+      "parameters": {
+        "outer": 500,
+        "inner": 500
+      },
+      "compilation": {
+        "samples_s": [
+          0.061873291,
+          0.060442625
+        ],
+        "median_s": 0.061157958,
+        "q1_s": 0.0608002915,
+        "q3_s": 0.0615156245,
+        "iqr_s": 0.0007153329999999986
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 3.125e-06,
+          "parse_s": 4.834e-06,
+          "type_s": 4.334e-06,
+          "ir_s": 0.000140834,
+          "target_setup_s": 0.000124625,
+          "optimization_s": 0.002544708,
+          "object_s": 0.002049334,
+          "link_s": 0.042365,
+          "total_s": 0.047776125
+        },
+        {
+          "lex_s": 3.25e-06,
+          "parse_s": 4.667e-06,
+          "type_s": 4.458e-06,
+          "ir_s": 0.000145167,
+          "target_setup_s": 0.000123625,
+          "optimization_s": 0.002335875,
+          "object_s": 0.002011625,
+          "link_s": 0.041397875,
+          "total_s": 0.04661975
+        }
+      ],
+      "executable_bytes": 33512,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 42467328,
+      "inspection": {
+        "allocas": 0,
+        "loads": 0,
+        "stores": 0,
+        "llvm_lines": 66,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/nested_loops-chuchu-O2.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/nested_loops-chuchu-O2.s",
+      "execution": {
+        "samples_s": [
+          0.00387825,
+          0.003033166,
+          0.003430167
+        ],
+        "median_s": 0.003430167,
+        "q1_s": 0.0032316665,
+        "q3_s": 0.0036542085,
+        "iqr_s": 0.00042254200000000014
+      }
+    },
+    {
+      "workload": "nested_loops",
+      "variant": "chuchu-O3",
+      "parameters": {
+        "outer": 500,
+        "inner": 500
+      },
+      "compilation": {
+        "samples_s": [
+          0.062508375,
+          0.06328375
+        ],
+        "median_s": 0.0628960625,
+        "q1_s": 0.06270221875000001,
+        "q3_s": 0.06308990625,
+        "iqr_s": 0.00038768749999998353
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 3.25e-06,
+          "parse_s": 6.125e-06,
+          "type_s": 7.084e-06,
+          "ir_s": 0.000149208,
+          "target_setup_s": 0.000127,
+          "optimization_s": 0.002496042,
+          "object_s": 0.002022875,
+          "link_s": 0.043209417,
+          "total_s": 0.048562875
+        },
+        {
+          "lex_s": 3.25e-06,
+          "parse_s": 5.834e-06,
+          "type_s": 8.125e-06,
+          "ir_s": 0.000143333,
+          "target_setup_s": 0.000132916,
+          "optimization_s": 0.002318625,
+          "object_s": 0.002082125,
+          "link_s": 0.043943208,
+          "total_s": 0.049280709
+        }
+      ],
+      "executable_bytes": 33512,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 42467328,
+      "inspection": {
+        "allocas": 0,
+        "loads": 0,
+        "stores": 0,
+        "llvm_lines": 66,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/nested_loops-chuchu-O3.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/nested_loops-chuchu-O3.s",
+      "execution": {
+        "samples_s": [
+          0.003144042,
+          0.004149083,
+          0.00305425
+        ],
+        "median_s": 0.003144042,
+        "q1_s": 0.003099146,
+        "q3_s": 0.0036465624999999996,
+        "iqr_s": 0.0005474164999999995
+      }
+    },
+    {
+      "workload": "nested_loops",
+      "variant": "rust",
+      "parameters": {
+        "outer": 500,
+        "inner": 500
+      },
+      "compilation": {
+        "samples_s": [
+          0.155513042,
+          0.127787333
+        ],
+        "median_s": 0.1416501875,
+        "q1_s": 0.13471876025,
+        "q3_s": 0.14858161474999998,
+        "iqr_s": 0.013862854499999966
+      },
+      "compilation_stages": [],
+      "executable_bytes": 471040,
+      "peak_rss_bytes": 1572864,
+      "compile_peak_rss_bytes": 92766208,
+      "execution": {
+        "samples_s": [
+          0.004882291,
+          0.003637875,
+          0.003291542
+        ],
+        "median_s": 0.003637875,
+        "q1_s": 0.0034647085,
+        "q3_s": 0.0042600830000000004,
+        "iqr_s": 0.0007953745000000003
+      }
+    },
+    {
+      "workload": "nested_loops",
+      "variant": "c",
+      "parameters": {
+        "outer": 500,
+        "inner": 500
+      },
+      "compilation": {
+        "samples_s": [
+          0.088746875,
+          0.08096025
+        ],
+        "median_s": 0.08485356250000001,
+        "q1_s": 0.08290690625,
+        "q3_s": 0.08680021875,
+        "iqr_s": 0.0038933125000000096
+      },
+      "compilation_stages": [],
+      "executable_bytes": 33504,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 41222144,
+      "execution": {
+        "samples_s": [
+          0.003398958,
+          0.003084125,
+          0.003128625
+        ],
+        "median_s": 0.003128625,
+        "q1_s": 0.0031063749999999998,
+        "q3_s": 0.0032637915,
+        "iqr_s": 0.00015741650000000024
+      }
+    },
+    {
+      "workload": "nested_loops",
+      "variant": "python",
+      "parameters": {
+        "outer": 500,
+        "inner": 500
+      },
+      "compilation": null,
+      "compilation_stages": [],
+      "executable_bytes": null,
+      "peak_rss_bytes": 15089664,
+      "compile_peak_rss_bytes": null,
+      "execution": {
+        "samples_s": [
+          0.047826542,
+          0.044350709,
+          0.051314459
+        ],
+        "median_s": 0.047826542,
+        "q1_s": 0.0460886255,
+        "q3_s": 0.0495705005,
+        "iqr_s": 0.0034818750000000023
+      }
+    },
+    {
+      "workload": "array_multiply",
+      "variant": "chuchu-O0",
+      "parameters": {
+        "iterations": 30000,
+        "elements": 64
+      },
+      "compilation": {
+        "samples_s": [
+          0.07693175,
+          0.065159583
+        ],
+        "median_s": 0.0710456665,
+        "q1_s": 0.06810262475,
+        "q3_s": 0.07398870825,
+        "iqr_s": 0.0058860835
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 1.4292e-05,
+          "parse_s": 1.4459e-05,
+          "type_s": 8e-06,
+          "ir_s": 0.000478916,
+          "target_setup_s": 0.000245875,
+          "optimization_s": 2.75e-05,
+          "object_s": 0.004658209,
+          "link_s": 0.053431459,
+          "total_s": 0.059710667
+        },
+        {
+          "lex_s": 1.8416e-05,
+          "parse_s": 1.8667e-05,
+          "type_s": 8.042e-06,
+          "ir_s": 0.000279791,
+          "target_setup_s": 0.000149208,
+          "optimization_s": 3.1583e-05,
+          "object_s": 0.003581292,
+          "link_s": 0.045321208,
+          "total_s": 0.050156417
+        }
+      ],
+      "executable_bytes": 33512,
+      "peak_rss_bytes": 1359872,
+      "compile_peak_rss_bytes": 38174720,
+      "inspection": {
+        "allocas": 18,
+        "loads": 23,
+        "stores": 151,
+        "llvm_lines": 410,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/array_multiply-chuchu-O0.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/array_multiply-chuchu-O0.s",
+      "execution": {
+        "samples_s": [
+          0.024453416,
+          0.024804875,
+          0.024057958
+        ],
+        "median_s": 0.024453416,
+        "q1_s": 0.024255686999999998,
+        "q3_s": 0.024629145499999998,
+        "iqr_s": 0.00037345849999999986
+      }
+    },
+    {
+      "workload": "array_multiply",
+      "variant": "chuchu-O1",
+      "parameters": {
+        "iterations": 30000,
+        "elements": 64
+      },
+      "compilation": {
+        "samples_s": [
+          0.1018045,
+          0.083719084
+        ],
+        "median_s": 0.09276179200000001,
+        "q1_s": 0.088240438,
+        "q3_s": 0.097283146,
+        "iqr_s": 0.009042707999999997
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 1.3125e-05,
+          "parse_s": 1.725e-05,
+          "type_s": 7.583e-06,
+          "ir_s": 0.000244583,
+          "target_setup_s": 0.000121208,
+          "optimization_s": 0.01562175,
+          "object_s": 0.020016083,
+          "link_s": 0.050807792,
+          "total_s": 0.08758425
+        },
+        {
+          "lex_s": 1.2833e-05,
+          "parse_s": 1.6833e-05,
+          "type_s": 1.1542e-05,
+          "ir_s": 0.000251583,
+          "target_setup_s": 0.000127916,
+          "optimization_s": 0.010459042,
+          "object_s": 0.015962209,
+          "link_s": 0.04214125,
+          "total_s": 0.069710459
+        }
+      ],
+      "executable_bytes": 33432,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 45285376,
+      "inspection": {
+        "allocas": 7,
+        "loads": 389,
+        "stores": 322,
+        "llvm_lines": 1034,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/array_multiply-chuchu-O1.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/array_multiply-chuchu-O1.s",
+      "execution": {
+        "samples_s": [
+          0.0071855,
+          0.007384541,
+          0.006739166
+        ],
+        "median_s": 0.0071855,
+        "q1_s": 0.006962333,
+        "q3_s": 0.007285020499999999,
+        "iqr_s": 0.0003226874999999992
+      }
+    },
+    {
+      "workload": "array_multiply",
+      "variant": "chuchu-O2",
+      "parameters": {
+        "iterations": 30000,
+        "elements": 64
+      },
+      "compilation": {
+        "samples_s": [
+          0.098636542,
+          0.089312042
+        ],
+        "median_s": 0.09397429199999999,
+        "q1_s": 0.091643167,
+        "q3_s": 0.09630541699999999,
+        "iqr_s": 0.004662249999999993
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 1.45e-05,
+          "parse_s": 1.95e-05,
+          "type_s": 9.75e-06,
+          "ir_s": 0.000271833,
+          "target_setup_s": 0.0001325,
+          "optimization_s": 0.028055625,
+          "object_s": 0.010898542,
+          "link_s": 0.043029917,
+          "total_s": 0.083196417
+        },
+        {
+          "lex_s": 1.5875e-05,
+          "parse_s": 1.3375e-05,
+          "type_s": 6.917e-06,
+          "ir_s": 0.000255709,
+          "target_setup_s": 0.000138375,
+          "optimization_s": 0.018494916,
+          "object_s": 0.008862,
+          "link_s": 0.046389167,
+          "total_s": 0.074870417
+        }
+      ],
+      "executable_bytes": 33432,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 50708480,
+      "inspection": {
+        "allocas": 1,
+        "loads": 2,
+        "stores": 32,
+        "llvm_lines": 501,
+        "vector_arithmetic_ir": 64,
+        "vector_arithmetic_assembly": 64,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/array_multiply-chuchu-O2.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/array_multiply-chuchu-O2.s",
+      "execution": {
+        "samples_s": [
+          0.004922125,
+          0.004478,
+          0.004888666
+        ],
+        "median_s": 0.004888666,
+        "q1_s": 0.004683333,
+        "q3_s": 0.0049053955,
+        "iqr_s": 0.00022206250000000004
+      }
+    },
+    {
+      "workload": "array_multiply",
+      "variant": "chuchu-O3",
+      "parameters": {
+        "iterations": 30000,
+        "elements": 64
+      },
+      "compilation": {
+        "samples_s": [
+          0.0943145,
+          0.084745917
+        ],
+        "median_s": 0.0895302085,
+        "q1_s": 0.08713806275,
+        "q3_s": 0.09192235425,
+        "iqr_s": 0.00478429150000001
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 2.2625e-05,
+          "parse_s": 1.8708e-05,
+          "type_s": 7.542e-06,
+          "ir_s": 0.000283458,
+          "target_setup_s": 0.000166375,
+          "optimization_s": 0.020541791,
+          "object_s": 0.006978584,
+          "link_s": 0.050485916,
+          "total_s": 0.079342667
+        },
+        {
+          "lex_s": 1.5209e-05,
+          "parse_s": 1.6e-05,
+          "type_s": 7.459e-06,
+          "ir_s": 0.000285541,
+          "target_setup_s": 0.00012425,
+          "optimization_s": 0.019121209,
+          "object_s": 0.007159333,
+          "link_s": 0.042477583,
+          "total_s": 0.06992375
+        }
+      ],
+      "executable_bytes": 33432,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 50135040,
+      "inspection": {
+        "allocas": 0,
+        "loads": 0,
+        "stores": 0,
+        "llvm_lines": 541,
+        "vector_arithmetic_ir": 64,
+        "vector_arithmetic_assembly": 64,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/array_multiply-chuchu-O3.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/array_multiply-chuchu-O3.s",
+      "execution": {
+        "samples_s": [
+          0.004682334,
+          0.004848666,
+          0.003990542
+        ],
+        "median_s": 0.004682334,
+        "q1_s": 0.004336438,
+        "q3_s": 0.0047655,
+        "iqr_s": 0.000429062
+      }
+    },
+    {
+      "workload": "array_multiply",
+      "variant": "rust",
+      "parameters": {
+        "iterations": 30000,
+        "elements": 64
+      },
+      "compilation": {
+        "samples_s": [
+          0.220265792,
+          0.163739417
+        ],
+        "median_s": 0.1920026045,
+        "q1_s": 0.17787101075,
+        "q3_s": 0.20613419825,
+        "iqr_s": 0.02826318750000001
+      },
+      "compilation_stages": [],
+      "executable_bytes": 490608,
+      "peak_rss_bytes": 1589248,
+      "compile_peak_rss_bytes": 97337344,
+      "execution": {
+        "samples_s": [
+          0.006361333,
+          0.004284667,
+          0.0061875
+        ],
+        "median_s": 0.0061875,
+        "q1_s": 0.0052360835000000005,
+        "q3_s": 0.0062744165,
+        "iqr_s": 0.0010383329999999998
+      }
+    },
+    {
+      "workload": "array_multiply",
+      "variant": "c",
+      "parameters": {
+        "iterations": 30000,
+        "elements": 64
+      },
+      "compilation": {
+        "samples_s": [
+          0.121137417,
+          0.084295083
+        ],
+        "median_s": 0.10271625000000001,
+        "q1_s": 0.0935056665,
+        "q3_s": 0.11192683349999999,
+        "iqr_s": 0.01842116699999999
+      },
+      "compilation_stages": [],
+      "executable_bytes": 33568,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 41877504,
+      "execution": {
+        "samples_s": [
+          0.00468925,
+          0.005203958,
+          0.007233916
+        ],
+        "median_s": 0.005203958,
+        "q1_s": 0.004946604,
+        "q3_s": 0.006218937,
+        "iqr_s": 0.0012723329999999996
+      }
+    },
+    {
+      "workload": "array_multiply",
+      "variant": "python",
+      "parameters": {
+        "iterations": 30000,
+        "elements": 64
+      },
+      "compilation": null,
+      "compilation_stages": [],
+      "executable_bytes": null,
+      "peak_rss_bytes": 15368192,
+      "compile_peak_rss_bytes": null,
+      "execution": {
+        "samples_s": [
+          0.181487334,
+          0.178996291,
+          0.171308416
+        ],
+        "median_s": 0.178996291,
+        "q1_s": 0.1751523535,
+        "q3_s": 0.1802418125,
+        "iqr_s": 0.005089458999999991
+      }
+    },
+    {
+      "workload": "array_multiply",
+      "variant": "chuchu-O3-no-vectorize",
+      "parameters": {
+        "iterations": 30000,
+        "elements": 64
+      },
+      "compilation": {
+        "samples_s": [
+          0.10534975,
+          0.095418583
+        ],
+        "median_s": 0.10038416650000001,
+        "q1_s": 0.09790137475,
+        "q3_s": 0.10286695825,
+        "iqr_s": 0.004965583499999995
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 1.5375e-05,
+          "parse_s": 1.5792e-05,
+          "type_s": 8.334e-06,
+          "ir_s": 0.00033,
+          "target_setup_s": 0.000368875,
+          "optimization_s": 0.02088025,
+          "object_s": 0.008394292,
+          "link_s": 0.050982958,
+          "total_s": 0.081861708
+        },
+        {
+          "lex_s": 1.5042e-05,
+          "parse_s": 1.9625e-05,
+          "type_s": 8.583e-06,
+          "ir_s": 0.000273583,
+          "target_setup_s": 0.000140875,
+          "optimization_s": 0.020460166,
+          "object_s": 0.007723,
+          "link_s": 0.050260333,
+          "total_s": 0.079723417
+        }
+      ],
+      "executable_bytes": 33432,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 50085888,
+      "inspection": {
+        "allocas": 0,
+        "loads": 0,
+        "stores": 0,
+        "llvm_lines": 541,
+        "vector_arithmetic_ir": 64,
+        "vector_arithmetic_assembly": 64,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/array_multiply-chuchu-O3-no-vectorize.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/array_multiply-chuchu-O3-no-vectorize.s",
+      "execution": {
+        "samples_s": [
+          0.005169834,
+          0.004244375,
+          0.00462
+        ],
+        "median_s": 0.00462,
+        "q1_s": 0.0044321875,
+        "q3_s": 0.004894917,
+        "iqr_s": 0.0004627295
+      }
+    },
+    {
+      "workload": "array_reduce",
+      "variant": "chuchu-O0",
+      "parameters": {
+        "iterations": 30000,
+        "elements": 64
+      },
+      "compilation": {
+        "samples_s": [
+          0.063574209,
+          0.06109025
+        ],
+        "median_s": 0.0623322295,
+        "q1_s": 0.061711239749999994,
+        "q3_s": 0.06295321925000001,
+        "iqr_s": 0.0012419795000000178
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 1.4792e-05,
+          "parse_s": 1.85e-05,
+          "type_s": 5.667e-06,
+          "ir_s": 0.000244416,
+          "target_setup_s": 0.000155208,
+          "optimization_s": 2.6667e-05,
+          "object_s": 0.003064375,
+          "link_s": 0.043395458,
+          "total_s": 0.04784675
+        },
+        {
+          "lex_s": 1.9959e-05,
+          "parse_s": 1.675e-05,
+          "type_s": 5.292e-06,
+          "ir_s": 0.000260917,
+          "target_setup_s": 0.000165334,
+          "optimization_s": 2.5292e-05,
+          "object_s": 0.003014125,
+          "link_s": 0.042276125,
+          "total_s": 0.046440833
+        }
+      ],
+      "executable_bytes": 33512,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 38043648,
+      "inspection": {
+        "allocas": 13,
+        "loads": 17,
+        "stores": 145,
+        "llvm_lines": 414,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/array_reduce-chuchu-O0.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/array_reduce-chuchu-O0.s",
+      "execution": {
+        "samples_s": [
+          0.016953542,
+          0.012981042,
+          0.012424791
+        ],
+        "median_s": 0.012981042,
+        "q1_s": 0.0127029165,
+        "q3_s": 0.014967292,
+        "iqr_s": 0.0022643755000000005
+      }
+    },
+    {
+      "workload": "array_reduce",
+      "variant": "chuchu-O1",
+      "parameters": {
+        "iterations": 30000,
+        "elements": 64
+      },
+      "compilation": {
+        "samples_s": [
+          0.078466083,
+          0.07833825
+        ],
+        "median_s": 0.07840216650000001,
+        "q1_s": 0.07837020825,
+        "q3_s": 0.07843412475,
+        "iqr_s": 6.391649999999693e-05
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 1.1917e-05,
+          "parse_s": 1.7042e-05,
+          "type_s": 5.583e-06,
+          "ir_s": 0.000240458,
+          "target_setup_s": 0.000125417,
+          "optimization_s": 0.008483084,
+          "object_s": 0.01089525,
+          "link_s": 0.043448834,
+          "total_s": 0.063908458
+        },
+        {
+          "lex_s": 1.65e-05,
+          "parse_s": 1.8375e-05,
+          "type_s": 4.917e-06,
+          "ir_s": 0.000240792,
+          "target_setup_s": 0.000135166,
+          "optimization_s": 0.007151084,
+          "object_s": 0.010866958,
+          "link_s": 0.04439225,
+          "total_s": 0.06359575
+        }
+      ],
+      "executable_bytes": 33512,
+      "peak_rss_bytes": 1359872,
+      "compile_peak_rss_bytes": 44548096,
+      "inspection": {
+        "allocas": 4,
+        "loads": 195,
+        "stores": 193,
+        "llvm_lines": 679,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/array_reduce-chuchu-O1.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/array_reduce-chuchu-O1.s",
+      "execution": {
+        "samples_s": [
+          0.005683958,
+          0.005442583,
+          0.0059045
+        ],
+        "median_s": 0.005683958,
+        "q1_s": 0.0055632705,
+        "q3_s": 0.005794229,
+        "iqr_s": 0.0002309584999999996
+      }
+    },
+    {
+      "workload": "array_reduce",
+      "variant": "chuchu-O2",
+      "parameters": {
+        "iterations": 30000,
+        "elements": 64
+      },
+      "compilation": {
+        "samples_s": [
+          0.079554917,
+          0.083811209
+        ],
+        "median_s": 0.081683063,
+        "q1_s": 0.08061899,
+        "q3_s": 0.082747136,
+        "iqr_s": 0.0021281459999999974
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 1.1042e-05,
+          "parse_s": 1.6834e-05,
+          "type_s": 5.292e-06,
+          "ir_s": 0.000242416,
+          "target_setup_s": 0.000124708,
+          "optimization_s": 0.012240416,
+          "object_s": 0.009966875,
+          "link_s": 0.042016292,
+          "total_s": 0.065326458
+        },
+        {
+          "lex_s": 1.4458e-05,
+          "parse_s": 1.6791e-05,
+          "type_s": 5e-06,
+          "ir_s": 0.000241625,
+          "target_setup_s": 0.000128958,
+          "optimization_s": 0.012158791,
+          "object_s": 0.010018333,
+          "link_s": 0.045822875,
+          "total_s": 0.069172792
+        }
+      ],
+      "executable_bytes": 33512,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 48545792,
+      "inspection": {
+        "allocas": 4,
+        "loads": 195,
+        "stores": 161,
+        "llvm_lines": 615,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/array_reduce-chuchu-O2.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/array_reduce-chuchu-O2.s",
+      "execution": {
+        "samples_s": [
+          0.005598959,
+          0.006029583,
+          0.004984916
+        ],
+        "median_s": 0.005598959,
+        "q1_s": 0.0052919375,
+        "q3_s": 0.005814270999999999,
+        "iqr_s": 0.0005223334999999996
+      }
+    },
+    {
+      "workload": "array_reduce",
+      "variant": "chuchu-O3",
+      "parameters": {
+        "iterations": 30000,
+        "elements": 64
+      },
+      "compilation": {
+        "samples_s": [
+          0.088006167,
+          0.082338125
+        ],
+        "median_s": 0.085172146,
+        "q1_s": 0.0837551355,
+        "q3_s": 0.0865891565,
+        "iqr_s": 0.002834021000000006
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 1.5416e-05,
+          "parse_s": 1.8791e-05,
+          "type_s": 6.042e-06,
+          "ir_s": 0.000268083,
+          "target_setup_s": 0.000147917,
+          "optimization_s": 0.015638084,
+          "object_s": 0.01026325,
+          "link_s": 0.045890625,
+          "total_s": 0.073000834
+        },
+        {
+          "lex_s": 1.3208e-05,
+          "parse_s": 1.9e-05,
+          "type_s": 7.833e-06,
+          "ir_s": 0.000271083,
+          "target_setup_s": 0.000138417,
+          "optimization_s": 0.014740917,
+          "object_s": 0.010026209,
+          "link_s": 0.04197175,
+          "total_s": 0.067942083
+        }
+      ],
+      "executable_bytes": 33512,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 49299456,
+      "inspection": {
+        "allocas": 3,
+        "loads": 194,
+        "stores": 97,
+        "llvm_lines": 847,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/array_reduce-chuchu-O3.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/array_reduce-chuchu-O3.s",
+      "execution": {
+        "samples_s": [
+          0.005930125,
+          0.004957042,
+          0.00480675
+        ],
+        "median_s": 0.004957042,
+        "q1_s": 0.004881896,
+        "q3_s": 0.0054435835,
+        "iqr_s": 0.0005616874999999997
+      }
+    },
+    {
+      "workload": "array_reduce",
+      "variant": "rust",
+      "parameters": {
+        "iterations": 30000,
+        "elements": 64
+      },
+      "compilation": {
+        "samples_s": [
+          0.156599917,
+          0.162165667
+        ],
+        "median_s": 0.159382792,
+        "q1_s": 0.15799135450000001,
+        "q3_s": 0.1607742295,
+        "iqr_s": 0.0027828749999999902
+      },
+      "compilation_stages": [],
+      "executable_bytes": 471040,
+      "peak_rss_bytes": 1572864,
+      "compile_peak_rss_bytes": 96256000,
+      "execution": {
+        "samples_s": [
+          0.004569584,
+          0.006237125,
+          0.004913833
+        ],
+        "median_s": 0.004913833,
+        "q1_s": 0.0047417085000000005,
+        "q3_s": 0.0055754789999999995,
+        "iqr_s": 0.000833770499999999
+      }
+    },
+    {
+      "workload": "array_reduce",
+      "variant": "c",
+      "parameters": {
+        "iterations": 30000,
+        "elements": 64
+      },
+      "compilation": {
+        "samples_s": [
+          0.092855875,
+          0.07500825
+        ],
+        "median_s": 0.0839320625,
+        "q1_s": 0.07947015625,
+        "q3_s": 0.08839396875,
+        "iqr_s": 0.008923812499999989
+      },
+      "compilation_stages": [],
+      "executable_bytes": 33776,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 41435136,
+      "execution": {
+        "samples_s": [
+          0.007403666,
+          0.004207334,
+          0.004404875
+        ],
+        "median_s": 0.004404875,
+        "q1_s": 0.0043061045,
+        "q3_s": 0.005904270499999999,
+        "iqr_s": 0.0015981659999999998
+      }
+    },
+    {
+      "workload": "array_reduce",
+      "variant": "python",
+      "parameters": {
+        "iterations": 30000,
+        "elements": 64
+      },
+      "compilation": null,
+      "compilation_stages": [],
+      "executable_bytes": null,
+      "peak_rss_bytes": 15286272,
+      "compile_peak_rss_bytes": null,
+      "execution": {
+        "samples_s": [
+          0.153317125,
+          0.144760666,
+          0.133755416
+        ],
+        "median_s": 0.144760666,
+        "q1_s": 0.139258041,
+        "q3_s": 0.1490388955,
+        "iqr_s": 0.009780854499999991
+      }
+    },
+    {
+      "workload": "array_copies",
+      "variant": "chuchu-O0",
+      "parameters": {
+        "iterations": 30000,
+        "elements": 256,
+        "array_bytes": 2048
+      },
+      "compilation": {
+        "samples_s": [
+          0.078845959,
+          0.06840875
+        ],
+        "median_s": 0.07362735449999999,
+        "q1_s": 0.07101805224999999,
+        "q3_s": 0.07623665674999999,
+        "iqr_s": 0.005218604500000001
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 3.7916e-05,
+          "parse_s": 3.9417e-05,
+          "type_s": 1.3583e-05,
+          "ir_s": 0.000485292,
+          "target_setup_s": 0.001720583,
+          "optimization_s": 8.2333e-05,
+          "object_s": 0.00775175,
+          "link_s": 0.049793625,
+          "total_s": 0.060839958
+        },
+        {
+          "lex_s": 3.2208e-05,
+          "parse_s": 4.3959e-05,
+          "type_s": 1.1458e-05,
+          "ir_s": 0.000467,
+          "target_setup_s": 0.00014875,
+          "optimization_s": 8.8542e-05,
+          "object_s": 0.008069,
+          "link_s": 0.043580666,
+          "total_s": 0.053211875
+        }
+      ],
+      "executable_bytes": 50024,
+      "peak_rss_bytes": 1409024,
+      "compile_peak_rss_bytes": 37945344,
+      "inspection": {
+        "allocas": 8,
+        "loads": 11,
+        "stores": 522,
+        "llvm_lines": 1101,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/array_copies-chuchu-O0.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/array_copies-chuchu-O0.s",
+      "execution": {
+        "samples_s": [
+          0.012768083,
+          0.011827875,
+          0.011929167
+        ],
+        "median_s": 0.011929167,
+        "q1_s": 0.011878521,
+        "q3_s": 0.012348624999999998,
+        "iqr_s": 0.00047010399999999897
+      }
+    },
+    {
+      "workload": "array_copies",
+      "variant": "chuchu-O1",
+      "parameters": {
+        "iterations": 30000,
+        "elements": 256,
+        "array_bytes": 2048
+      },
+      "compilation": {
+        "samples_s": [
+          0.071197792,
+          0.07176175
+        ],
+        "median_s": 0.071479771,
+        "q1_s": 0.0713387815,
+        "q3_s": 0.07162076049999999,
+        "iqr_s": 0.00028197899999998777
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 3.7708e-05,
+          "parse_s": 3.6e-05,
+          "type_s": 1.0708e-05,
+          "ir_s": 0.000473166,
+          "target_setup_s": 0.000129917,
+          "optimization_s": 0.0104625,
+          "object_s": 0.001731333,
+          "link_s": 0.042976084,
+          "total_s": 0.057041417
+        },
+        {
+          "lex_s": 3.9667e-05,
+          "parse_s": 4.1333e-05,
+          "type_s": 1.3e-05,
+          "ir_s": 0.000506292,
+          "target_setup_s": 0.000146625,
+          "optimization_s": 0.012106833,
+          "object_s": 0.001763834,
+          "link_s": 0.040924041,
+          "total_s": 0.056958875
+        }
+      ],
+      "executable_bytes": 33432,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 49283072,
+      "inspection": {
+        "allocas": 0,
+        "loads": 0,
+        "stores": 0,
+        "llvm_lines": 31,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/array_copies-chuchu-O1.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/array_copies-chuchu-O1.s",
+      "execution": {
+        "samples_s": [
+          0.00455725,
+          0.004147125,
+          0.003005209
+        ],
+        "median_s": 0.004147125,
+        "q1_s": 0.003576167,
+        "q3_s": 0.0043521875,
+        "iqr_s": 0.0007760205000000003
+      }
+    },
+    {
+      "workload": "array_copies",
+      "variant": "chuchu-O2",
+      "parameters": {
+        "iterations": 30000,
+        "elements": 256,
+        "array_bytes": 2048
+      },
+      "compilation": {
+        "samples_s": [
+          0.073075583,
+          0.073035375
+        ],
+        "median_s": 0.073055479,
+        "q1_s": 0.073045427,
+        "q3_s": 0.073065531,
+        "iqr_s": 2.0104000000006894e-05
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 3.6583e-05,
+          "parse_s": 6.7625e-05,
+          "type_s": 1.3958e-05,
+          "ir_s": 0.000490083,
+          "target_setup_s": 0.000149375,
+          "optimization_s": 0.01104425,
+          "object_s": 0.001822667,
+          "link_s": 0.04321475,
+          "total_s": 0.058067
+        },
+        {
+          "lex_s": 3.5959e-05,
+          "parse_s": 4.7834e-05,
+          "type_s": 1.0459e-05,
+          "ir_s": 0.000456416,
+          "target_setup_s": 0.000150917,
+          "optimization_s": 0.01144275,
+          "object_s": 0.0019165,
+          "link_s": 0.042966292,
+          "total_s": 0.058377667
+        }
+      ],
+      "executable_bytes": 33432,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 50823168,
+      "inspection": {
+        "allocas": 0,
+        "loads": 0,
+        "stores": 0,
+        "llvm_lines": 31,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/array_copies-chuchu-O2.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/array_copies-chuchu-O2.s",
+      "execution": {
+        "samples_s": [
+          0.003589875,
+          0.003593458,
+          0.003763875
+        ],
+        "median_s": 0.003593458,
+        "q1_s": 0.0035916665,
+        "q3_s": 0.0036786665,
+        "iqr_s": 8.699999999999984e-05
+      }
+    },
+    {
+      "workload": "array_copies",
+      "variant": "chuchu-O3",
+      "parameters": {
+        "iterations": 30000,
+        "elements": 256,
+        "array_bytes": 2048
+      },
+      "compilation": {
+        "samples_s": [
+          0.072088667,
+          0.072108292
+        ],
+        "median_s": 0.0720984795,
+        "q1_s": 0.07209357325,
+        "q3_s": 0.07210338575,
+        "iqr_s": 9.81249999999767e-06
+      },
+      "compilation_stages": [
+        {
+          "lex_s": 4.1417e-05,
+          "parse_s": 5.4125e-05,
+          "type_s": 1.7875e-05,
+          "ir_s": 0.000532666,
+          "target_setup_s": 0.000152625,
+          "optimization_s": 0.012342791,
+          "object_s": 0.0019945,
+          "link_s": 0.04105575,
+          "total_s": 0.05745825
+        },
+        {
+          "lex_s": 3.7083e-05,
+          "parse_s": 3.8291e-05,
+          "type_s": 1.0792e-05,
+          "ir_s": 0.000491583,
+          "target_setup_s": 0.000122458,
+          "optimization_s": 0.010584917,
+          "object_s": 0.001806542,
+          "link_s": 0.043305459,
+          "total_s": 0.057836
+        }
+      ],
+      "executable_bytes": 33432,
+      "peak_rss_bytes": 1376256,
+      "compile_peak_rss_bytes": 50642944,
+      "inspection": {
+        "allocas": 0,
+        "loads": 0,
+        "stores": 0,
+        "llvm_lines": 31,
+        "vector_arithmetic_ir": 0,
+        "vector_arithmetic_assembly": 0,
+        "reachable_loop_functions": [
+          "main"
+        ],
+        "reachable_recursion": false,
+        "classification": "runtime loops/recursion retained; static inputs"
+      },
+      "ir_path": "target/cheeku-bench/1793213386477619000/array_copies-chuchu-O3.ll",
+      "assembly_path": "target/cheeku-bench/1793213386477619000/array_copies-chuchu-O3.s",
+      "execution": {
+        "samples_s": [
+          0.003437291,
+          0.003557625,
+          0.003857292
+        ],
+        "median_s": 0.003557625,
+        "q1_s": 0.003497458,
+        "q3_s": 0.0037074585,
+        "iqr_s": 0.00021000049999999985
+      }
+    },
+    {
+      "workload": "array_copies",
+      "variant": "rust",
+      "parameters": {
+        "iterations": 30000,
+        "elements": 256,
+        "array_bytes": 2048
+      },
+      "compilation": {
+        "samples_s": [
+          0.147785875,
+          0.130958583
+        ],
+        "median_s": 0.13937222900000001,
+        "q1_s": 0.135165406,
+        "q3_s": 0.143579052,
+        "iqr_s": 0.008413646000000025
+      },
+      "compilation_stages": [],
+      "executable_bytes": 490608,
+      "peak_rss_bytes": 1589248,
+      "compile_peak_rss_bytes": 93388800,
+      "execution": {
+        "samples_s": [
+          0.003274458,
+          0.003451542,
+          0.003564792
+        ],
+        "median_s": 0.003451542,
+        "q1_s": 0.003363,
+        "q3_s": 0.003508167,
+        "iqr_s": 0.00014516699999999987
+      }
+    },
+    {
+      "workload": "array_copies",
+      "variant": "c",
+      "parameters": {
+        "iterations": 30000,
+        "elements": 256,
+        "array_bytes": 2048
+      },
+      "compilation": {
+        "samples_s": [
+          0.083843625,
+          0.074525708
+        ],
+        "median_s": 0.0791846665,
+        "q1_s": 0.07685518725,
+        "q3_s": 0.08151414575000002,
+        "iqr_s": 0.004658958500000018
+      },
+      "compilation_stages": [],
+      "executable_bytes": 33664,
+      "peak_rss_bytes": 1392640,
+      "compile_peak_rss_bytes": 40239104,
+      "execution": {
+        "samples_s": [
+          0.005520541,
+          0.005340667,
+          0.005155292
+        ],
+        "median_s": 0.005340667,
+        "q1_s": 0.0052479795,
+        "q3_s": 0.005430604,
+        "iqr_s": 0.00018262450000000076
+      }
+    },
+    {
+      "workload": "array_copies",
+      "variant": "python",
+      "parameters": {
+        "iterations": 30000,
+        "elements": 256,
+        "array_bytes": 2048
+      },
+      "compilation": null,
+      "compilation_stages": [],
+      "executable_bytes": null,
+      "peak_rss_bytes": 16138240,
+      "compile_peak_rss_bytes": null,
+      "execution": {
+        "samples_s": [
+          0.046401292,
+          0.048468125,
+          0.044325708
+        ],
+        "median_s": 0.046401292,
+        "q1_s": 0.0453635,
+        "q3_s": 0.0474347085,
+        "iqr_s": 0.0020712084999999977
+      }
+    }
+  ],
+  "skipped": [],
+  "compiler_throughput": [
+    {
+      "statements": 33,
+      "source_bytes": 569,
+      "variant": "chuchu-O0",
+      "compilation": {
+        "samples_s": [
+          0.317039917,
+          0.068202875
+        ],
+        "median_s": 0.192621396,
+        "q1_s": 0.1304121355,
+        "q3_s": 0.25483065650000003,
+        "iqr_s": 0.12441852100000003
+      },
+      "stages": [
+        {
+          "lex_s": 9e-06,
+          "parse_s": 4.1417e-05,
+          "type_s": 3.5958e-05,
+          "ir_s": 0.00488425,
+          "target_setup_s": 0.007031875,
+          "optimization_s": 1.25e-05,
+          "object_s": 0.032225916,
+          "link_s": 0.123856666,
+          "total_s": 0.170544375
+        },
+        {
+          "lex_s": 7.958e-06,
+          "parse_s": 9.125e-06,
+          "type_s": 9.083e-06,
+          "ir_s": 0.000110791,
+          "target_setup_s": 0.000141917,
+          "optimization_s": 4.167e-06,
+          "object_s": 0.001341334,
+          "link_s": 0.046525417,
+          "total_s": 0.048841666
+        }
+      ]
+    },
+    {
+      "statements": 33,
+      "source_bytes": 569,
+      "variant": "chuchu-O1",
+      "compilation": {
+        "samples_s": [
+          0.123854709,
+          0.058069083
+        ],
+        "median_s": 0.090961896,
+        "q1_s": 0.0745154895,
+        "q3_s": 0.1074083025,
+        "iqr_s": 0.03289281299999999
+      },
+      "stages": [
+        {
+          "lex_s": 1.5458e-05,
+          "parse_s": 1.4542e-05,
+          "type_s": 1.2916e-05,
+          "ir_s": 0.000188333,
+          "target_setup_s": 0.000205958,
+          "optimization_s": 0.024185333,
+          "object_s": 0.021635334,
+          "link_s": 0.052343625,
+          "total_s": 0.099582625
+        },
+        {
+          "lex_s": 8.125e-06,
+          "parse_s": 7.625e-06,
+          "type_s": 7.333e-06,
+          "ir_s": 9.0709e-05,
+          "target_setup_s": 0.000121291,
+          "optimization_s": 0.001026167,
+          "object_s": 0.001413042,
+          "link_s": 0.040797416,
+          "total_s": 0.04406125
+        }
+      ]
+    },
+    {
+      "statements": 33,
+      "source_bytes": 569,
+      "variant": "chuchu-O2",
+      "compilation": {
+        "samples_s": [
+          0.087242,
+          0.058798417
+        ],
+        "median_s": 0.0730202085,
+        "q1_s": 0.06590931275,
+        "q3_s": 0.08013110425,
+        "iqr_s": 0.014221791499999997
+      },
+      "stages": [
+        {
+          "lex_s": 8.292e-06,
+          "parse_s": 9.125e-06,
+          "type_s": 8.833e-06,
+          "ir_s": 0.000109667,
+          "target_setup_s": 0.000141959,
+          "optimization_s": 0.007937459,
+          "object_s": 0.002157458,
+          "link_s": 0.049465584,
+          "total_s": 0.060486375
+        },
+        {
+          "lex_s": 6.959e-06,
+          "parse_s": 7.584e-06,
+          "type_s": 6.791e-06,
+          "ir_s": 0.000162625,
+          "target_setup_s": 0.000132667,
+          "optimization_s": 0.001140666,
+          "object_s": 0.001433167,
+          "link_s": 0.041186542,
+          "total_s": 0.044626083
+        }
+      ]
+    },
+    {
+      "statements": 33,
+      "source_bytes": 569,
+      "variant": "chuchu-O3",
+      "compilation": {
+        "samples_s": [
+          0.087224166,
+          0.06322875
+        ],
+        "median_s": 0.075226458,
+        "q1_s": 0.069227604,
+        "q3_s": 0.08122531200000001,
+        "iqr_s": 0.01199770800000001
+      },
+      "stages": [
+        {
+          "lex_s": 1.0125e-05,
+          "parse_s": 1.3167e-05,
+          "type_s": 1.2041e-05,
+          "ir_s": 0.000147042,
+          "target_setup_s": 0.000195916,
+          "optimization_s": 0.001599333,
+          "object_s": 0.002177542,
+          "link_s": 0.062039959,
+          "total_s": 0.066947458
+        },
+        {
+          "lex_s": 1.0666e-05,
+          "parse_s": 8.042e-06,
+          "type_s": 7.667e-06,
+          "ir_s": 0.000103625,
+          "target_setup_s": 0.000133666,
+          "optimization_s": 0.001212167,
+          "object_s": 0.001578875,
+          "link_s": 0.044322667,
+          "total_s": 0.047929916
+        }
+      ]
+    },
+    {
+      "statements": 257,
+      "source_bytes": 4914,
+      "variant": "chuchu-O0",
+      "compilation": {
+        "samples_s": [
+          0.093084584,
+          0.077382708
+        ],
+        "median_s": 0.085233646,
+        "q1_s": 0.081308177,
+        "q3_s": 0.08915911500000001,
+        "iqr_s": 0.007850938000000016
+      },
+      "stages": [
+        {
+          "lex_s": 7.375e-05,
+          "parse_s": 6.0417e-05,
+          "type_s": 5.4916e-05,
+          "ir_s": 0.000433875,
+          "target_setup_s": 0.000219,
+          "optimization_s": 4.8625e-05,
+          "object_s": 0.003013291,
+          "link_s": 0.061749416,
+          "total_s": 0.066619333
+        },
+        {
+          "lex_s": 4.6542e-05,
+          "parse_s": 3.7333e-05,
+          "type_s": 3.1e-05,
+          "ir_s": 0.00024475,
+          "target_setup_s": 0.00015025,
+          "optimization_s": 2.8208e-05,
+          "object_s": 0.002186667,
+          "link_s": 0.057819708,
+          "total_s": 0.061346625
+        }
+      ]
+    },
+    {
+      "statements": 257,
+      "source_bytes": 4914,
+      "variant": "chuchu-O1",
+      "compilation": {
+        "samples_s": [
+          0.100071208,
+          0.066710084
+        ],
+        "median_s": 0.083390646,
+        "q1_s": 0.07505036500000001,
+        "q3_s": 0.09173092699999999,
+        "iqr_s": 0.016680561999999982
+      },
+      "stages": [
+        {
+          "lex_s": 7.4666e-05,
+          "parse_s": 5.8542e-05,
+          "type_s": 4.4834e-05,
+          "ir_s": 0.000366625,
+          "target_setup_s": 0.000190917,
+          "optimization_s": 0.00208825,
+          "object_s": 0.002241166,
+          "link_s": 0.0698335,
+          "total_s": 0.075820959
+        },
+        {
+          "lex_s": 4.9208e-05,
+          "parse_s": 3.5292e-05,
+          "type_s": 3.6459e-05,
+          "ir_s": 0.000269959,
+          "target_setup_s": 0.000157542,
+          "optimization_s": 0.001635416,
+          "object_s": 0.001858667,
+          "link_s": 0.045537917,
+          "total_s": 0.050241875
+        }
+      ]
+    },
+    {
+      "statements": 257,
+      "source_bytes": 4914,
+      "variant": "chuchu-O2",
+      "compilation": {
+        "samples_s": [
+          0.085780291,
+          0.061817625
+        ],
+        "median_s": 0.073798958,
+        "q1_s": 0.0678082915,
+        "q3_s": 0.07978962449999999,
+        "iqr_s": 0.011981332999999983
+      },
+      "stages": [
+        {
+          "lex_s": 4.0458e-05,
+          "parse_s": 3.1292e-05,
+          "type_s": 2.7666e-05,
+          "ir_s": 0.0002435,
+          "target_setup_s": 0.000147834,
+          "optimization_s": 0.001551625,
+          "object_s": 0.001564209,
+          "link_s": 0.060508708,
+          "total_s": 0.064711959
+        },
+        {
+          "lex_s": 4.0875e-05,
+          "parse_s": 3.5084e-05,
+          "type_s": 2.7375e-05,
+          "ir_s": 0.00023575,
+          "target_setup_s": 0.0001295,
+          "optimization_s": 0.001406208,
+          "object_s": 0.001481458,
+          "link_s": 0.042410084,
+          "total_s": 0.046351041
+        }
+      ]
+    },
+    {
+      "statements": 257,
+      "source_bytes": 4914,
+      "variant": "chuchu-O3",
+      "compilation": {
+        "samples_s": [
+          0.091114459,
+          0.061976791
+        ],
+        "median_s": 0.076545625,
+        "q1_s": 0.069261208,
+        "q3_s": 0.083830042,
+        "iqr_s": 0.014568833999999989
+      },
+      "stages": [
+        {
+          "lex_s": 6.9208e-05,
+          "parse_s": 5.4541e-05,
+          "type_s": 4.5875e-05,
+          "ir_s": 0.000411958,
+          "target_setup_s": 0.000237208,
+          "optimization_s": 0.002171375,
+          "object_s": 0.00240775,
+          "link_s": 0.06032425,
+          "total_s": 0.066491834
+        },
+        {
+          "lex_s": 4.3292e-05,
+          "parse_s": 3.475e-05,
+          "type_s": 2.7125e-05,
+          "ir_s": 0.000224333,
+          "target_setup_s": 0.000124875,
+          "optimization_s": 0.001333666,
+          "object_s": 0.001485292,
+          "link_s": 0.042984084,
+          "total_s": 0.046832625
+        }
+      ]
+    },
+    {
+      "statements": 1025,
+      "source_bytes": 20323,
+      "variant": "chuchu-O0",
+      "compilation": {
+        "samples_s": [
+          0.098614334,
+          0.070022375
+        ],
+        "median_s": 0.0843183545,
+        "q1_s": 0.07717036475,
+        "q3_s": 0.09146634425,
+        "iqr_s": 0.0142959795
+      },
+      "stages": [
+        {
+          "lex_s": 0.000124792,
+          "parse_s": 0.000119458,
+          "type_s": 9.9083e-05,
+          "ir_s": 0.000790709,
+          "target_setup_s": 0.000145417,
+          "optimization_s": 0.000131875,
+          "object_s": 0.015863417,
+          "link_s": 0.056195125,
+          "total_s": 0.07441225
+        },
+        {
+          "lex_s": 0.000106292,
+          "parse_s": 0.00010725,
+          "type_s": 8.4583e-05,
+          "ir_s": 0.000635,
+          "target_setup_s": 0.000130333,
+          "optimization_s": 0.00010725,
+          "object_s": 0.010235625,
+          "link_s": 0.043494125,
+          "total_s": 0.05575725
+        }
+      ]
+    },
+    {
+      "statements": 1025,
+      "source_bytes": 20323,
+      "variant": "chuchu-O1",
+      "compilation": {
+        "samples_s": [
+          0.094700084,
+          0.066468
+        ],
+        "median_s": 0.080584042,
+        "q1_s": 0.073526021,
+        "q3_s": 0.08764206299999999,
+        "iqr_s": 0.014116041999999995
+      },
+      "stages": [
+        {
+          "lex_s": 0.000193708,
+          "parse_s": 0.000197125,
+          "type_s": 0.000171958,
+          "ir_s": 0.001222458,
+          "target_setup_s": 0.0002035,
+          "optimization_s": 0.002873667,
+          "object_s": 0.002066792,
+          "link_s": 0.064283375,
+          "total_s": 0.072192709
+        },
+        {
+          "lex_s": 0.000113625,
+          "parse_s": 0.0001095,
+          "type_s": 9.5959e-05,
+          "ir_s": 0.000658084,
+          "target_setup_s": 0.000150333,
+          "optimization_s": 0.002082542,
+          "object_s": 0.001579458,
+          "link_s": 0.045570875,
+          "total_s": 0.051069375
+        }
+      ]
+    },
+    {
+      "statements": 1025,
+      "source_bytes": 20323,
+      "variant": "chuchu-O2",
+      "compilation": {
+        "samples_s": [
+          0.094520875,
+          0.075952708
+        ],
+        "median_s": 0.08523679149999999,
+        "q1_s": 0.08059474975,
+        "q3_s": 0.08987883325,
+        "iqr_s": 0.009284083499999998
+      },
+      "stages": [
+        {
+          "lex_s": 0.000199958,
+          "parse_s": 0.000217166,
+          "type_s": 0.000177,
+          "ir_s": 0.001324875,
+          "target_setup_s": 0.000219459,
+          "optimization_s": 0.003374084,
+          "object_s": 0.002340042,
+          "link_s": 0.0647405,
+          "total_s": 0.073625333
+        },
+        {
+          "lex_s": 0.000133834,
+          "parse_s": 0.000133417,
+          "type_s": 9.1167e-05,
+          "ir_s": 0.000708333,
+          "target_setup_s": 0.000573375,
+          "optimization_s": 0.002500958,
+          "object_s": 0.001763292,
+          "link_s": 0.050901916,
+          "total_s": 0.057621417
+        }
+      ]
+    },
+    {
+      "statements": 1025,
+      "source_bytes": 20323,
+      "variant": "chuchu-O3",
+      "compilation": {
+        "samples_s": [
+          0.087508,
+          0.065411458
+        ],
+        "median_s": 0.076459729,
+        "q1_s": 0.0709355935,
+        "q3_s": 0.0819838645,
+        "iqr_s": 0.011048270999999998
+      },
+      "stages": [
+        {
+          "lex_s": 0.000110459,
+          "parse_s": 0.000108709,
+          "type_s": 8.9125e-05,
+          "ir_s": 0.000758459,
+          "target_setup_s": 0.000149792,
+          "optimization_s": 0.002548583,
+          "object_s": 0.002295959,
+          "link_s": 0.063241542,
+          "total_s": 0.070208875
+        },
+        {
+          "lex_s": 0.000103084,
+          "parse_s": 0.000104084,
+          "type_s": 8.6833e-05,
+          "ir_s": 0.000653583,
+          "target_setup_s": 0.000158583,
+          "optimization_s": 0.003910791,
+          "object_s": 0.001710125,
+          "link_s": 0.04298775,
+          "total_s": 0.050467959
+        }
+      ]
+    }
+  ],
+  "startup_controls": {
+    "native-empty": {
+      "samples_s": [
+        0.0035225,
+        0.002669875,
+        0.002473875
+      ],
+      "median_s": 0.002669875,
+      "q1_s": 0.002571875,
+      "q3_s": 0.0030961875,
+      "iqr_s": 0.0005243125
+    },
+    "python-empty": {
+      "samples_s": [
+        0.034161291,
+        0.027141333,
+        0.029061042
+      ],
+      "median_s": 0.029061042,
+      "q1_s": 0.0281011875,
+      "q3_s": 0.0316111665,
+      "iqr_s": 0.0035099790000000033
+    }
+  }
+}

@@ -4,76 +4,76 @@ Execution is wall time per process (ms), including startup; compilation excluded
 
 | Workload | chuchu-O0 | chuchu-O1 | chuchu-O2 | chuchu-O3 | rust | c | python |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| integer_loop | 7.228 | 3.618 | 3.899 | 3.513 | 5.310 | 3.905 | 255.861 |
-| float_loop | 8.332 | 5.449 | 5.435 | 4.964 | 5.330 | 4.672 | 98.013 |
-| function_calls | 4.072 | 2.618 | 2.700 | 2.741 | 3.529 | 3.133 | 62.516 |
-| recursion | 4.575 | 3.980 | 3.990 | 3.890 | 4.398 | 3.580 | 49.637 |
-| nested_loops | 4.520 | 2.772 | 2.602 | 2.672 | 3.146 | 2.545 | 47.598 |
-| array_multiply | 24.075 | 6.406 | 4.603 | 3.553 | 4.425 | 4.017 | 186.255 |
-| array_reduce | 12.125 | 4.985 | 4.773 | 4.439 | 3.998 | 3.991 | 140.601 |
-| array_copies | 11.740 | 2.759 | 2.760 | 2.719 | 3.467 | 5.238 | 45.447 |
+| integer_loop | 8.001 | 4.365 | 5.034 | 4.756 | 4.658 | 4.712 | 261.405 |
+| float_loop | 8.739 | 6.082 | 5.905 | 5.465 | 5.896 | 5.337 | 91.509 |
+| function_calls | 4.155 | 3.630 | 3.626 | 3.447 | 3.575 | 3.578 | 61.651 |
+| recursion | 5.686 | 4.709 | 4.306 | 4.517 | 4.820 | 4.180 | 51.523 |
+| nested_loops | 3.947 | 3.316 | 3.570 | 4.050 | 3.414 | 3.489 | 43.209 |
+| array_multiply | 23.813 | 6.940 | 4.792 | 4.438 | 4.754 | 5.013 | 183.108 |
+| array_reduce | 12.470 | 5.749 | 5.261 | 5.205 | 4.624 | 4.360 | 142.902 |
+| array_copies | 12.531 | 3.290 | 3.387 | 3.505 | 3.483 | 5.341 | 48.464 |
 
 ## Individual measurements
 
 | Workload / variant | Median ms | IQR ms | Compile ms | Bytes | Peak RSS bytes |
 |---|---:|---:|---:|---:|---:|
-| integer_loop / chuchu-O0 | 7.228 | 1.303 | 52.284 | 33512 | 1359872 |
-| integer_loop / chuchu-O1 | 3.618 | 0.643 | 64.423 | 33512 | 1376256 |
-| integer_loop / chuchu-O2 | 3.899 | 1.096 | 62.668 | 33512 | 1376256 |
-| integer_loop / chuchu-O3 | 3.513 | 0.369 | 54.325 | 33512 | 1376256 |
-| integer_loop / rust | 5.310 | 4.137 | 92.006 | 471040 | 1556480 |
-| integer_loop / c | 3.905 | 0.563 | 57.964 | 33504 | 1376256 |
-| integer_loop / python | 255.861 | 9.047 | N/A | N/A | 15138816 |
-| float_loop / chuchu-O0 | 8.332 | 0.883 | 52.477 | 33512 | 1376256 |
-| float_loop / chuchu-O1 | 5.449 | 0.717 | 52.668 | 33432 | 1359872 |
-| float_loop / chuchu-O2 | 5.435 | 0.944 | 50.547 | 33432 | 1359872 |
-| float_loop / chuchu-O3 | 4.964 | 0.457 | 53.138 | 33432 | 1359872 |
-| float_loop / rust | 5.330 | 1.252 | 105.921 | 490592 | 1589248 |
-| float_loop / c | 4.672 | 0.773 | 70.237 | 33440 | 1359872 |
-| float_loop / python | 98.013 | 7.625 | N/A | N/A | 15171584 |
-| function_calls / chuchu-O0 | 4.072 | 0.816 | 54.570 | 33576 | 1359872 |
-| function_calls / chuchu-O1 | 2.618 | 0.341 | 60.636 | 33576 | 1376256 |
-| function_calls / chuchu-O2 | 2.700 | 0.691 | 54.713 | 33576 | 1376256 |
-| function_calls / chuchu-O3 | 2.741 | 0.350 | 54.599 | 33576 | 1376256 |
-| function_calls / rust | 3.529 | 0.706 | 92.162 | 471040 | 1556480 |
-| function_calls / c | 3.133 | 0.740 | 60.224 | 33504 | 1376256 |
-| function_calls / python | 62.516 | 4.720 | N/A | N/A | 15122432 |
-| recursion / chuchu-O0 | 4.575 | 0.789 | 49.681 | 33560 | 1376256 |
-| recursion / chuchu-O1 | 3.980 | 0.622 | 51.902 | 33560 | 1376256 |
-| recursion / chuchu-O2 | 3.990 | 0.368 | 62.801 | 33560 | 1376256 |
-| recursion / chuchu-O3 | 3.890 | 1.669 | 52.747 | 33560 | 1376256 |
-| recursion / rust | 4.398 | 1.879 | 96.518 | 471072 | 1556480 |
-| recursion / c | 3.580 | 0.947 | 59.411 | 33512 | 1376256 |
-| recursion / python | 49.637 | 5.047 | N/A | N/A | 15122432 |
-| nested_loops / chuchu-O0 | 4.520 | 1.870 | 57.849 | 33512 | 1376256 |
-| nested_loops / chuchu-O1 | 2.772 | 0.857 | 51.262 | 33512 | 1376256 |
-| nested_loops / chuchu-O2 | 2.602 | 0.249 | 52.709 | 33512 | 1376256 |
-| nested_loops / chuchu-O3 | 2.672 | 0.782 | 55.620 | 33512 | 1376256 |
-| nested_loops / rust | 3.146 | 1.794 | 94.827 | 471040 | 1572864 |
-| nested_loops / c | 2.545 | 0.376 | 55.941 | 33504 | 1376256 |
-| nested_loops / python | 47.598 | 5.397 | N/A | N/A | 15237120 |
-| array_multiply / chuchu-O0 | 24.075 | 2.591 | 55.451 | 33512 | 1376256 |
-| array_multiply / chuchu-O1 | 6.406 | 1.157 | 100.636 | 33432 | 1376256 |
-| array_multiply / chuchu-O2 | 4.603 | 0.740 | 81.162 | 33432 | 1376256 |
-| array_multiply / chuchu-O3 | 3.553 | 0.884 | 84.092 | 33432 | 1376256 |
-| array_multiply / rust | 4.425 | 0.575 | 115.159 | 490608 | 1589248 |
-| array_multiply / c | 4.017 | 1.035 | 75.689 | 33568 | 1376256 |
-| array_multiply / python | 186.255 | 72.910 | N/A | N/A | 15450112 |
-| array_multiply / chuchu-O3-no-vectorize | 3.419 | 0.416 | 81.663 | 33432 | 1376256 |
-| array_reduce / chuchu-O0 | 12.125 | 1.469 | 53.842 | 33512 | 1376256 |
-| array_reduce / chuchu-O1 | 4.985 | 0.717 | 71.174 | 33512 | 1359872 |
-| array_reduce / chuchu-O2 | 4.773 | 1.340 | 77.501 | 33512 | 1376256 |
-| array_reduce / chuchu-O3 | 4.439 | 0.462 | 74.326 | 33512 | 1376256 |
-| array_reduce / rust | 3.998 | 0.965 | 109.378 | 471040 | 1572864 |
-| array_reduce / c | 3.991 | 0.403 | 97.122 | 33776 | 1376256 |
-| array_reduce / python | 140.601 | 1.963 | N/A | N/A | 15269888 |
-| array_copies / chuchu-O0 | 11.740 | 0.465 | 72.286 | 50024 | 1409024 |
-| array_copies / chuchu-O1 | 2.759 | 0.429 | 66.788 | 33432 | 1376256 |
-| array_copies / chuchu-O2 | 2.760 | 0.798 | 61.088 | 33432 | 1376256 |
-| array_copies / chuchu-O3 | 2.719 | 0.383 | 67.133 | 33432 | 1376256 |
-| array_copies / rust | 3.467 | 2.121 | 96.994 | 490608 | 1589248 |
-| array_copies / c | 5.238 | 1.092 | 59.056 | 33664 | 1392640 |
-| array_copies / python | 45.447 | 4.871 | N/A | N/A | 16121856 |
+| integer_loop / chuchu-O0 | 8.001 | 1.492 | 70.871 | 33512 | 1359872 |
+| integer_loop / chuchu-O1 | 4.365 | 0.410 | 62.007 | 33512 | 1376256 |
+| integer_loop / chuchu-O2 | 5.034 | 1.076 | 65.768 | 33512 | 1376256 |
+| integer_loop / chuchu-O3 | 4.756 | 0.855 | 62.817 | 33512 | 1376256 |
+| integer_loop / rust | 4.658 | 0.886 | 142.543 | 471040 | 1556480 |
+| integer_loop / c | 4.712 | 1.256 | 91.441 | 33504 | 1376256 |
+| integer_loop / python | 261.405 | 10.132 | N/A | N/A | 15106048 |
+| float_loop / chuchu-O0 | 8.739 | 0.707 | 58.655 | 33512 | 1376256 |
+| float_loop / chuchu-O1 | 6.082 | 0.603 | 64.824 | 33432 | 1359872 |
+| float_loop / chuchu-O2 | 5.905 | 0.914 | 59.891 | 33432 | 1359872 |
+| float_loop / chuchu-O3 | 5.465 | 0.379 | 59.500 | 33432 | 1376256 |
+| float_loop / rust | 5.896 | 0.800 | 138.838 | 490592 | 1589248 |
+| float_loop / c | 5.337 | 0.492 | 76.386 | 33440 | 1359872 |
+| float_loop / python | 91.509 | 6.328 | N/A | N/A | 15106048 |
+| function_calls / chuchu-O0 | 4.155 | 0.179 | 63.764 | 33576 | 1359872 |
+| function_calls / chuchu-O1 | 3.630 | 0.407 | 75.165 | 33576 | 1376256 |
+| function_calls / chuchu-O2 | 3.626 | 0.170 | 62.683 | 33576 | 1376256 |
+| function_calls / chuchu-O3 | 3.447 | 0.633 | 61.870 | 33576 | 1376256 |
+| function_calls / rust | 3.575 | 0.665 | 136.796 | 471040 | 1556480 |
+| function_calls / c | 3.578 | 0.392 | 79.669 | 33504 | 1376256 |
+| function_calls / python | 61.651 | 1.406 | N/A | N/A | 15171584 |
+| recursion / chuchu-O0 | 5.686 | 0.711 | 72.639 | 33560 | 1376256 |
+| recursion / chuchu-O1 | 4.709 | 0.570 | 63.468 | 33560 | 1376256 |
+| recursion / chuchu-O2 | 4.306 | 0.388 | 62.430 | 33560 | 1376256 |
+| recursion / chuchu-O3 | 4.517 | 0.686 | 61.480 | 33560 | 1376256 |
+| recursion / rust | 4.820 | 1.203 | 144.956 | 471072 | 1556480 |
+| recursion / c | 4.180 | 0.776 | 83.308 | 33512 | 1376256 |
+| recursion / python | 51.523 | 4.462 | N/A | N/A | 15155200 |
+| nested_loops / chuchu-O0 | 3.947 | 0.459 | 61.731 | 33512 | 1376256 |
+| nested_loops / chuchu-O1 | 3.316 | 0.332 | 65.914 | 33512 | 1376256 |
+| nested_loops / chuchu-O2 | 3.570 | 0.836 | 65.004 | 33512 | 1376256 |
+| nested_loops / chuchu-O3 | 4.050 | 1.458 | 60.362 | 33512 | 1376256 |
+| nested_loops / rust | 3.414 | 0.104 | 148.906 | 471040 | 1572864 |
+| nested_loops / c | 3.489 | 0.431 | 75.092 | 33504 | 1376256 |
+| nested_loops / python | 43.209 | 2.639 | N/A | N/A | 15138816 |
+| array_multiply / chuchu-O0 | 23.813 | 1.240 | 64.654 | 33512 | 1359872 |
+| array_multiply / chuchu-O1 | 6.940 | 0.939 | 83.336 | 33432 | 1376256 |
+| array_multiply / chuchu-O2 | 4.792 | 0.491 | 85.724 | 33432 | 1376256 |
+| array_multiply / chuchu-O3 | 4.438 | 0.427 | 113.560 | 33432 | 1376256 |
+| array_multiply / rust | 4.754 | 0.911 | 155.851 | 490608 | 1589248 |
+| array_multiply / c | 5.013 | 0.435 | 83.018 | 33568 | 1376256 |
+| array_multiply / python | 183.108 | 9.087 | N/A | N/A | 15433728 |
+| array_multiply / chuchu-O3-no-vectorize | 4.213 | 0.294 | 94.947 | 33432 | 1392640 |
+| array_reduce / chuchu-O0 | 12.470 | 0.741 | 62.978 | 33512 | 1376256 |
+| array_reduce / chuchu-O1 | 5.749 | 0.639 | 81.078 | 33512 | 1359872 |
+| array_reduce / chuchu-O2 | 5.261 | 0.227 | 86.785 | 33512 | 1376256 |
+| array_reduce / chuchu-O3 | 5.205 | 0.975 | 90.864 | 33512 | 1376256 |
+| array_reduce / rust | 4.624 | 0.254 | 172.209 | 471040 | 1572864 |
+| array_reduce / c | 4.360 | 0.279 | 78.250 | 33776 | 1376256 |
+| array_reduce / python | 142.902 | 10.366 | N/A | N/A | 15302656 |
+| array_copies / chuchu-O0 | 12.531 | 0.922 | 67.987 | 50024 | 1409024 |
+| array_copies / chuchu-O1 | 3.290 | 0.450 | 70.786 | 33432 | 1376256 |
+| array_copies / chuchu-O2 | 3.387 | 0.584 | 75.375 | 33432 | 1376256 |
+| array_copies / chuchu-O3 | 3.505 | 0.675 | 71.829 | 33432 | 1376256 |
+| array_copies / rust | 3.483 | 0.425 | 144.734 | 490608 | 1589248 |
+| array_copies / c | 5.341 | 0.423 | 72.878 | 33664 | 1392640 |
+| array_copies / python | 48.464 | 4.257 | N/A | N/A | 16056320 |
 
 ## Controlled optimization comparison
 
@@ -81,14 +81,14 @@ Ratios below are O0 median / optimized median (>1 favors optimized), not isolate
 
 | Workload | O0/O1 | O0/O2 | O0/O3 |
 |---|---:|---:|---:|
-| integer_loop | 2.00x | 1.85x | 2.06x |
-| float_loop | 1.53x | 1.53x | 1.68x |
-| function_calls | 1.56x | 1.51x | 1.49x |
-| recursion | 1.15x | 1.15x | 1.18x |
-| nested_loops | 1.63x | 1.74x | 1.69x |
-| array_multiply | 3.76x | 5.23x | 6.78x |
-| array_reduce | 2.43x | 2.54x | 2.73x |
-| array_copies | 4.25x | 4.25x | 4.32x |
+| integer_loop | 1.83x | 1.59x | 1.68x |
+| float_loop | 1.44x | 1.48x | 1.60x |
+| function_calls | 1.14x | 1.15x | 1.21x |
+| recursion | 1.21x | 1.32x | 1.26x |
+| nested_loops | 1.19x | 1.11x | 0.97x |
+| array_multiply | 3.43x | 4.97x | 5.37x |
+| array_reduce | 2.17x | 2.37x | 2.40x |
+| array_copies | 3.81x | 3.70x | 3.58x |
 
 ## IR inspection
 
