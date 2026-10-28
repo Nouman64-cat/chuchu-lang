@@ -38,21 +38,31 @@ fn parses_complete_chuchu_program() {
                 span: Span { start: 12, end: 23 },
             },
             Stmt {
+                kind: StmtKind::Assign {
+                    name: "x".to_owned(),
+                    value: Expr {
+                        kind: ExprKind::Integer("15".to_owned()),
+                        span: Span { start: 39, end: 41 }
+                    },
+                },
+                span: Span { start: 25, end: 41 },
+            },
+            Stmt {
                 kind: StmtKind::Show(Expr {
                     kind: ExprKind::Binary {
                         left: Box::new(Expr {
                             kind: ExprKind::Identifier("x".to_owned()),
-                            span: Span { start: 30, end: 31 },
+                            span: Span { start: 48, end: 49 },
                         }),
                         operator: BinaryOperator::Add,
                         right: Box::new(Expr {
                             kind: ExprKind::Identifier("y".to_owned()),
-                            span: Span { start: 34, end: 35 },
+                            span: Span { start: 52, end: 53 },
                         }),
                     },
-                    span: Span { start: 30, end: 35 },
+                    span: Span { start: 48, end: 53 },
                 }),
-                span: Span { start: 25, end: 35 },
+                span: Span { start: 43, end: 53 },
             },
         ]
     );

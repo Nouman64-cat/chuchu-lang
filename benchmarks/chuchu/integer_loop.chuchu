@@ -1,0 +1,7 @@
+set i to 0
+set total to 0
+while i < 3000000 {
+reassign total to total + i
+reassign i to i + 1
+}
+show total

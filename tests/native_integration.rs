@@ -83,7 +83,7 @@ fn compiles_example_to_default_executable_without_running_it() {
         output.stdout.is_empty(),
         "Compilation must not run the program"
     );
-    run_executable(&directory.path("main"), "30\n");
+    run_executable(&directory.path("main"), "35\n");
     directory.assert_no_temporary_objects();
 }
 

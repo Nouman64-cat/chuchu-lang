@@ -1,0 +1,19 @@
+use std::{path::Path, time::Instant};
+use chuchu::{lexer::tokenize, parser::Parser, symbol_table::SymbolTable, type_checker::TypeChecker, codegen::generate_program, native::{emit_object, link_object}};
+use inkwell::context::Context;
+fn main() {
+    let args: Vec<String> = std::env::args().collect();
+    let source = std::fs::read_to_string(&args[1]).unwrap();
+    let output = Path::new(&args[2]);
+    for sample in 0..5 {
+        let total = Instant::now();
+        let start = Instant::now(); let tokens = tokenize(&source).unwrap(); let lex = start.elapsed().as_secs_f64();
+        let start = Instant::now(); let ast = Parser::new(tokens).parse_program().unwrap(); let parse = start.elapsed().as_secs_f64();
+        let start = Instant::now(); TypeChecker::new(SymbolTable::new()).check_program(&ast).unwrap(); let types = start.elapsed().as_secs_f64();
+        let start = Instant::now(); let context = Context::create(); let module = generate_program(&context, &ast).unwrap(); let ir = start.elapsed().as_secs_f64();
+        module.print_to_file(output.join("before.ll")).unwrap();
+        let start = Instant::now(); emit_object(&module, &output.join("before.o")).unwrap(); let object = start.elapsed().as_secs_f64();
+        let start = Instant::now(); link_object(&output.join("before.o"), &output.join("before-program")).unwrap(); let link = start.elapsed().as_secs_f64();
+        println!("{{\"sample\":{sample},\"lex_s\":{lex},\"parse_s\":{parse},\"type_s\":{types},\"ir_s\":{ir},\"object_with_target_setup_s\":{object},\"link_s\":{link},\"total_with_ir_dump_s\":{}}}", total.elapsed().as_secs_f64());
+    }
+}

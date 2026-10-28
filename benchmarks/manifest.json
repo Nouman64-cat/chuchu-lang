@@ -1,0 +1,71 @@
+[
+  {
+    "name": "integer_loop",
+    "parameters": {
+      "iterations": 3000000
+    },
+    "expected": "4499998500000",
+    "numeric_output": false
+  },
+  {
+    "name": "float_loop",
+    "parameters": {
+      "iterations": 1000000
+    },
+    "expected": "1.2103418252287",
+    "numeric_output": true
+  },
+  {
+    "name": "function_calls",
+    "parameters": {
+      "calls": 300000
+    },
+    "expected": "8999955000950000",
+    "numeric_output": false
+  },
+  {
+    "name": "recursion",
+    "parameters": {
+      "fibonacci_n": 28
+    },
+    "expected": "317811",
+    "numeric_output": false
+  },
+  {
+    "name": "nested_loops",
+    "parameters": {
+      "outer": 500,
+      "inner": 500
+    },
+    "expected": "15562562500",
+    "numeric_output": false
+  },
+  {
+    "name": "array_multiply",
+    "parameters": {
+      "iterations": 30000,
+      "elements": 64
+    },
+    "expected": "577845821120000",
+    "numeric_output": true
+  },
+  {
+    "name": "array_reduce",
+    "parameters": {
+      "iterations": 30000,
+      "elements": 64
+    },
+    "expected": "28861440000",
+    "numeric_output": false
+  },
+  {
+    "name": "array_copies",
+    "parameters": {
+      "iterations": 30000,
+      "elements": 256,
+      "array_bytes": 2048
+    },
+    "expected": "45000",
+    "numeric_output": true
+  }
+]

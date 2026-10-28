@@ -3,6 +3,7 @@ pub mod codegen;
 pub mod compiler;
 pub mod lexer;
 pub mod native;
+pub mod optimization;
 pub mod parser;
 pub mod symbol_table;
 pub mod token;

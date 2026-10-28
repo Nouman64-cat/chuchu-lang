@@ -1,0 +1,106 @@
+{
+  "threshold_percent": 10.0,
+  "noise_limit": 0.15,
+  "results": [
+    {
+      "workload": "integer_loop",
+      "variant": "chuchu-O0",
+      "status": "unreliable/noisy",
+      "baseline_median_s": 0.007228375,
+      "current_median_s": 0.006376458,
+      "percent_change": -11.785733307970336,
+      "baseline_iqr_s": 0.0013034375,
+      "current_iqr_s": 0.0010602505000000002
+    },
+    {
+      "workload": "integer_loop",
+      "variant": "chuchu-O2",
+      "status": "unreliable/noisy",
+      "baseline_median_s": 0.003898667,
+      "current_median_s": 0.00353675,
+      "percent_change": -9.283095991527368,
+      "baseline_iqr_s": 0.0010962710000000002,
+      "current_iqr_s": 0.0005340005000000004
+    },
+    {
+      "workload": "integer_loop",
+      "variant": "chuchu-O3",
+      "status": "unchanged/overlapping intervals",
+      "baseline_median_s": 0.003512542,
+      "current_median_s": 0.003593,
+      "percent_change": 2.2905918277987825,
+      "baseline_iqr_s": 0.00036904150000000024,
+      "current_iqr_s": 0.00040414649999999993
+    },
+    {
+      "workload": "float_loop",
+      "variant": "chuchu-O0",
+      "status": "unchanged/overlapping intervals",
+      "baseline_median_s": 0.008332292,
+      "current_median_s": 0.007734208,
+      "percent_change": -7.177904951002667,
+      "baseline_iqr_s": 0.0008825000000000005,
+      "current_iqr_s": 0.001013957499999999
+    },
+    {
+      "workload": "float_loop",
+      "variant": "chuchu-O2",
+      "status": "unreliable/noisy",
+      "baseline_median_s": 0.005435042,
+      "current_median_s": 0.004602958,
+      "percent_change": -15.30961490269993,
+      "baseline_iqr_s": 0.0009438535000000003,
+      "current_iqr_s": 0.0006198544999999993
+    },
+    {
+      "workload": "float_loop",
+      "variant": "chuchu-O3",
+      "status": "unchanged/overlapping intervals",
+      "baseline_median_s": 0.004963791,
+      "current_median_s": 0.004852792,
+      "percent_change": -2.236173924325191,
+      "baseline_iqr_s": 0.00045668749999999963,
+      "current_iqr_s": 0.0004318544999999995
+    },
+    {
+      "workload": "array_multiply",
+      "variant": "chuchu-O0",
+      "status": "unchanged/overlapping intervals",
+      "baseline_median_s": 0.024074625,
+      "current_median_s": 0.023227292,
+      "percent_change": -3.519610378147109,
+      "baseline_iqr_s": 0.002590979,
+      "current_iqr_s": 0.0019140209999999984
+    },
+    {
+      "workload": "array_multiply",
+      "variant": "chuchu-O2",
+      "status": "unreliable/noisy",
+      "baseline_median_s": 0.004603041,
+      "current_median_s": 0.004167084,
+      "percent_change": -9.471064889493718,
+      "baseline_iqr_s": 0.0007403955000000011,
+      "current_iqr_s": 0.00026377099999999945
+    },
+    {
+      "workload": "array_multiply",
+      "variant": "chuchu-O3",
+      "status": "unreliable/noisy",
+      "baseline_median_s": 0.003553375,
+      "current_median_s": 0.003490375,
+      "percent_change": -1.7729623245506088,
+      "baseline_iqr_s": 0.0008843745,
+      "current_iqr_s": 0.0008717705000000002
+    },
+    {
+      "workload": "array_multiply",
+      "variant": "chuchu-O3-no-vectorize",
+      "status": "unchanged/overlapping intervals",
+      "baseline_median_s": 0.003418792,
+      "current_median_s": 0.003526916,
+      "percent_change": 3.1626375632094694,
+      "baseline_iqr_s": 0.0004155210000000003,
+      "current_iqr_s": 0.0003952084999999995
+    }
+  ]
+}

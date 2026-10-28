@@ -1,0 +1,11 @@
+set i to 0
+set total to 0
+while i < 500 {
+set j to 0
+while j < 500 {
+reassign total to total + i * j
+reassign j to j + 1
+}
+reassign i to i + 1
+}
+show total

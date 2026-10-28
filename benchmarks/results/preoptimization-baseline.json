@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "kind": "genuine pre-optimization baseline",
+  "git_revision": "1eb8ea32729724de9997a3012ffece98484bd720",
+  "compiler_sha256": "6cbe99af9f431a9c459ff7bc11967e63dfa8e79eed7f11bf619672fa5be73a3d",
+  "initial_working_tree": "Initial status was clean; examples/main.chuchu changed during the audit and was preserved. Compiler source was unchanged while this baseline was captured. Stale example assertions were repaired afterward.",
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "machine": "arm64",
+  "llvm": "23.1.4",
+  "rust": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+  "workload_source": "set i to 0\nset total to 0\nwhile i < 200000 {\n    reassign total to total + i\n    reassign i to i + 1\n}\nshow total\n",
+  "stages_seconds": [
+    {
+      "sample": 0,
+      "lex_s": 1.5541e-05,
+      "parse_s": 2.6667e-05,
+      "type_s": 3.3042e-05,
+      "ir_s": 0.007240333,
+      "object_with_target_setup_s": 0.035315917,
+      "link_s": 0.041925167,
+      "total_with_ir_dump_s": 0.086382542
+    },
+    {
+      "sample": 1,
+      "lex_s": 6.584e-06,
+      "parse_s": 4.917e-06,
+      "type_s": 3.375e-06,
+      "ir_s": 7.9917e-05,
+      "object_with_target_setup_s": 0.000845667,
+      "link_s": 0.034882709,
+      "total_with_ir_dump_s": 0.035950625
+    },
+    {
+      "sample": 2,
+      "lex_s": 4.875e-06,
+      "parse_s": 2.417e-06,
+      "type_s": 2.5e-06,
+      "ir_s": 6.7792e-05,
+      "object_with_target_setup_s": 0.00080225,
+      "link_s": 0.03473325,
+      "total_with_ir_dump_s": 0.035730625
+    },
+    {
+      "sample": 3,
+      "lex_s": 3.292e-06,
+      "parse_s": 2.625e-06,
+      "type_s": 1.875e-06,
+      "ir_s": 5.8792e-05,
+      "object_with_target_setup_s": 0.000735958,
+      "link_s": 0.034183667,
+      "total_with_ir_dump_s": 0.0351
+    },
+    {
+      "sample": 4,
+      "lex_s": 4.958e-06,
+      "parse_s": 2.375e-06,
+      "type_s": 2.208e-06,
+      "ir_s": 6.525e-05,
+      "object_with_target_setup_s": 0.000785208,
+      "link_s": 0.036177208,
+      "total_with_ir_dump_s": 0.03716675
+    }
+  ],
+  "optimization_seconds": null,
+  "optimization_note": "No optional LLVM optimization pipeline in this compiler",
+  "execution_seconds": [
+    0.007166625,
+    0.004298583,
+    0.004647625,
+    0.003134167,
+    0.003604875,
+    0.003077875,
+    0.002898916,
+    0.003704958,
+    0.003905167
+  ],
+  "executable_bytes": 33520,
+  "peak_rss_bytes": 1392640,
+  "timing_note": "Repeated in-process frontend stage samples include cold first iteration; object includes target setup. Total includes explicit IR dump. Native execution samples include process launch; compilation is excluded."
+}

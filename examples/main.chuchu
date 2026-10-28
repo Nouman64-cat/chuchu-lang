@@ -1,4 +1,6 @@
 set x to 10
 set y to 20
 
+reassign x to 15
+
 show x + y
