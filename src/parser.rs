@@ -9,6 +9,7 @@ pub enum ParseError {
     ExpectedStatement { span: Span },
     ExpectedIdentifier { span: Span },
     ExpectedTo { span: Span },
+    ExpectedStatementSeparator { span: Span },
     UnexpectedEnd,
 }
 
@@ -32,6 +33,32 @@ impl Parser {
     pub fn advance(&mut self) {
         if self.position + 1 < self.tokens.len() {
             self.position += 1;
+        }
+    }
+
+    pub fn parse_program(&mut self) -> Result<Vec<Stmt>, ParseError> {
+        let mut statements = Vec::new();
+
+        loop {
+            let token = self.current().ok_or(ParseError::UnexpectedEnd)?;
+            match token.kind {
+                TokenKind::Eof => return Ok(statements),
+                TokenKind::Newline => {
+                    if self.position + 1 >= self.tokens.len() {
+                        return Err(ParseError::UnexpectedEnd);
+                    }
+                    self.advance();
+                    continue;
+                }
+                _ => {}
+            }
+
+            statements.push(self.parse_statement()?);
+
+            let token = self.current().ok_or(ParseError::UnexpectedEnd)?;
+            if !matches!(token.kind, TokenKind::Newline | TokenKind::Eof) {
+                return Err(ParseError::ExpectedStatementSeparator { span: token.span });
+            }
         }
     }
 
@@ -128,6 +155,147 @@ mod tests {
     use super::*;
     use crate::lexer::tokenize;
     use crate::token::TokenKind;
+
+    #[test]
+    fn parses_multiple_statements() {
+        let mut parser = Parser::new(tokenize("set x to 10\nshow x").unwrap());
+        assert_eq!(
+            parser.parse_program(),
+            Ok(vec![
+                Stmt {
+                    kind: StmtKind::Set {
+                        name: "x".to_owned(),
+                        value: Expr {
+                            kind: ExprKind::Integer("10".to_owned()),
+                            span: Span { start: 9, end: 11 },
+                        },
+                    },
+                    span: Span { start: 0, end: 11 },
+                },
+                Stmt {
+                    kind: StmtKind::Show(Expr {
+                        kind: ExprKind::Identifier("x".to_owned()),
+                        span: Span { start: 17, end: 18 },
+                    }),
+                    span: Span { start: 12, end: 18 },
+                },
+            ])
+        );
+        assert_eq!(
+            parser.current().map(|token| &token.kind),
+            Some(&TokenKind::Eof)
+        );
+    }
+
+    #[test]
+    fn parses_program_with_blank_lines() {
+        let source = "\n\nshow 1\n\n\nshow 2\n\n";
+        let mut parser = Parser::new(tokenize(source).unwrap());
+        let statements = parser
+            .parse_program()
+            .expect("Blank lines should be allowed");
+        assert_eq!(statements.len(), 2);
+        assert_eq!(statements[0].span, Span { start: 2, end: 8 });
+        assert_eq!(statements[1].span, Span { start: 11, end: 17 });
+        assert_eq!(
+            parser.current().map(|token| &token.kind),
+            Some(&TokenKind::Eof)
+        );
+    }
+
+    #[test]
+    fn parses_empty_program() {
+        for source in ["", " \t", "\n\n"] {
+            let mut parser = Parser::new(tokenize(source).unwrap());
+            assert_eq!(parser.parse_program(), Ok(Vec::new()));
+            assert_eq!(
+                parser.current().map(|token| &token.kind),
+                Some(&TokenKind::Eof)
+            );
+            parser.advance();
+            assert_eq!(
+                parser.current().map(|token| &token.kind),
+                Some(&TokenKind::Eof)
+            );
+        }
+    }
+
+    #[test]
+    fn parses_program_with_trailing_newline() {
+        let mut parser = Parser::new(tokenize("show 42\n").unwrap());
+        assert_eq!(
+            parser.parse_program(),
+            Ok(vec![Stmt {
+                kind: StmtKind::Show(Expr {
+                    kind: ExprKind::Integer("42".to_owned()),
+                    span: Span { start: 5, end: 7 },
+                }),
+                span: Span { start: 0, end: 7 },
+            }])
+        );
+        assert_eq!(
+            parser.current().map(|token| &token.kind),
+            Some(&TokenKind::Eof)
+        );
+    }
+
+    #[test]
+    fn rejects_program_without_statement_separator() {
+        for source in ["show 1 show 2", "show 1 set x to 2", "show 1 2"] {
+            let tokens = tokenize(source).unwrap();
+            let unexpected = tokens[2].clone();
+            let mut parser = Parser::new(tokens);
+            assert_eq!(
+                parser.parse_program(),
+                Err(ParseError::ExpectedStatementSeparator {
+                    span: unexpected.span,
+                })
+            );
+            assert_eq!(parser.current(), Some(&unexpected));
+        }
+    }
+
+    #[test]
+    fn propagates_invalid_program_statement_errors() {
+        for (source, error) in [
+            (
+                "show 1\n+",
+                ParseError::ExpectedStatement {
+                    span: Span { start: 7, end: 8 },
+                },
+            ),
+            (
+                "show 1\nset to 2",
+                ParseError::ExpectedIdentifier {
+                    span: Span { start: 11, end: 13 },
+                },
+            ),
+            (
+                "show 1\nshow",
+                ParseError::ExpectedExpression {
+                    span: Span { start: 11, end: 11 },
+                },
+            ),
+        ] {
+            let mut parser = Parser::new(tokenize(source).unwrap());
+            assert_eq!(parser.parse_program(), Err(error));
+        }
+    }
+
+    #[test]
+    fn rejects_program_token_stream_without_eof() {
+        assert_eq!(
+            Parser::new(Vec::new()).parse_program(),
+            Err(ParseError::UnexpectedEnd)
+        );
+        // A final newline must not loop forever when advance cannot move forward.
+        let mut tokens = tokenize("\n").unwrap();
+        tokens.pop();
+        assert_eq!(
+            Parser::new(tokens).parse_program(),
+            Err(ParseError::UnexpectedEnd)
+        );
+    }
 
     #[test]
     fn parses_variable_declaration() {
