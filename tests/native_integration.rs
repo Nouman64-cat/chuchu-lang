@@ -90,11 +90,12 @@ fn compiles_example_to_default_executable_without_running_it() {
 #[test]
 fn compiles_positive_language_cases() {
     for (source, expected) in [
+        ("assign x to 5\nshow x", "5\n"),
         ("show 42", "42\n"),
         ("show 10 + 20", "30\n"),
-        ("set x to 10\nset y to x + 20\nshow y", "30\n"),
+        ("assign x to 10\nassign y to x + 20\nshow y", "30\n"),
         ("show 10 + 20 + 30", "60\n"),
-        ("set x to 10\nshow x\nshow x + 20\nshow 0", "10\n30\n0\n"),
+        ("assign x to 10\nshow x\nshow x + 20\nshow 0", "10\n30\n0\n"),
         ("show 9223372036854775807", "9223372036854775807\n"),
         ("", ""),
         ("\n\n", ""),
@@ -138,10 +139,11 @@ fn supports_spaces_and_shell_characters_in_paths() {
 #[test]
 fn rejects_invalid_sources_without_creating_executables() {
     for (source, diagnostic) in [
+        ("set x to 5", "Expected statement"),
         ("show unknown", "Undefined variable"),
-        ("set x to 1\nset x to 2", "Duplicate declaration"),
+        ("assign x to 1\nassign x to 2", "Duplicate declaration"),
         ("show @", "Invalid source character"),
-        ("set x 10", "Expected 'to'"),
+        ("assign x 10", "Expected 'to'"),
         ("show", "Expected expression"),
         ("show 1 show 2", "Expected newline"),
         ("show 9223372036854775808", "out-of-range"),

@@ -1,5 +1,9 @@
 # Cheeku benchmarks
 
+Current workloads use `assign` for variable declarations. Saved benchmark results
+and historical profiling sources retain the syntax and source hashes from their
+original runs; regenerate measurements before comparing with the current sources.
+
 The runner requires Python's standard library, a release Cheeku compiler and the
 same macOS Apple Silicon LLVM/Clang setup as the compiler. Rust and C references
 run when `rustc` and `clang` are present; missing tools are recorded as skips.

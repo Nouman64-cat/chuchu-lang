@@ -28,8 +28,8 @@ fn sub(a:i64,b:i64)->i64 { a.checked_sub(b).expect("overflow") }
     manifest.append(dict(name=name, parameters=parameters, expected=str(expected), numeric_output=floating))
 
 n=3000000
-emit('integer_loop', f'''set i to 0
-set total to 0
+emit('integer_loop', f'''assign i to 0
+assign total to 0
 while i < {n} {{
 reassign total to total + i
 reassign i to i + 1
@@ -42,8 +42,8 @@ show total''',
 n=1000000
 x=1.0
 for _ in range(n): x=x*1.0000001+0.0000001
-emit('float_loop', f'''set i to 0
-set x to 1.0
+emit('float_loop', f'''assign i to 0
+assign x to 1.0
 while i < {n} {{
 reassign x to x * 1.0000001 + 0.0000001
 reassign i to i + 1
@@ -55,8 +55,8 @@ show x''',
 
 n=300000
 emit('function_calls', f'''function square_plus(x: int) -> int {{ return x * x + 3 }}
-set i to 0
-set total to 0
+assign i to 0
+assign total to 0
 while i < {n} {{
 reassign total to total + square_plus(i)
 reassign i to i + 1
@@ -79,10 +79,10 @@ show fib({n})''', f'printf("%lld\\n",(long long)fib({n}));', f'println!("{{}}",f
      extra_python='def fib(n):\n    if n<2: return n\n    return fib(n-1)+fib(n-2)\n')
 
 n=500
-emit('nested_loops', f'''set i to 0
-set total to 0
+emit('nested_loops', f'''assign i to 0
+assign total to 0
 while i < {n} {{
-set j to 0
+assign j to 0
 while j < {n} {{
 reassign total to total + i * j
 reassign j to j + 1
@@ -100,8 +100,8 @@ for name,floating in [('array_multiply',True),('array_reduce',False)]:
     ones=['1.0' if floating else '1']*size
     literal='['+','.join(numbers)+']';delta='['+','.join(ones)+']'
     c_type='double' if floating else 'int64_t';rust_type='f64' if floating else 'i64';zero='0.0' if floating else '0'
-    product='set product to a * a\nreassign total to total + sum(product)' if floating else 'reassign total to total + sum(a)'
-    source=f'set a to {literal}\nset delta to {delta}\nset i to 0\nset total to {zero}\nwhile i < {n} {{\n{product}\nreassign a to a + delta\nreassign i to i + 1\n}}\nshow total'
+    product='assign product to a * a\nreassign total to total + sum(product)' if floating else 'reassign total to total + sum(a)'
+    source=f'assign a to {literal}\nassign delta to {delta}\nassign i to 0\nassign total to {zero}\nwhile i < {n} {{\n{product}\nreassign a to a + delta\nreassign i to i + 1\n}}\nshow total'
     if floating:
         c_op='double product[64];for(int j=0;j<64;j++)product[j]=a[j]*a[j];double sum=0.0;for(int j=0;j<64;j++)sum+=product[j];total+=sum;'
         r_op='let mut product=[0.0;64];for j in 0..64{product[j]=a[j]*a[j];}let mut sum=0.0;for value in product{sum+=value;}total+=sum;'
@@ -123,12 +123,12 @@ for name,floating in [('array_multiply',True),('array_reduce',False)]:
 size=256;n=30000
 a='['+','.join(f'{i}.0' for i in range(1,size+1))+']';b='['+','.join(f'{i}.0' for i in range(2,size+2))+']'
 expected=(n//2)*3
-emit('array_copies',f'''set a to {a}
-set b to {b}
-set total to 0.0
-set i to 0
+emit('array_copies',f'''assign a to {a}
+assign b to {b}
+assign total to 0.0
+assign i to 0
 while i < {n} {{
-set temporary to a
+assign temporary to a
 reassign a to b
 reassign b to temporary
 reassign total to total + a[0]

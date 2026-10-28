@@ -1,5 +1,5 @@
-set a to 10
-set b to 20
+assign a to 10
+assign b to 20
 show a + b * 2
 show (a + b) * 2
 show -a + b

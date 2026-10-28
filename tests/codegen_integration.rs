@@ -22,10 +22,11 @@ fn parse_statement(source: &str) -> Stmt {
 #[test]
 fn generates_complete_program_with_shared_printf() {
     let context = Context::create();
-    let statements =
-        Parser::new(tokenize("set x to 10\nset y to x + 20\nshow y\nshow 42\nshow x + y").unwrap())
-            .parse_program()
-            .unwrap();
+    let statements = Parser::new(
+        tokenize("assign x to 10\nassign y to x + 20\nshow y\nshow 42\nshow x + y").unwrap(),
+    )
+    .parse_program()
+    .unwrap();
     let module = generate_program(&context, &statements).expect("Program should generate");
     module.verify().expect("Program should verify");
     let main = module.get_function("main").expect("Main should exist");
@@ -71,7 +72,7 @@ fn generates_empty_program_without_output_runtime() {
 #[test]
 fn phase6_storage_is_allocated_only_in_function_entries() {
     let context = Context::create();
-    let statements = Parser::new(tokenize("function f(n: int) -> int {\nset i to 0\nwhile i < n {\nset a to [1, 2] * [3, 4]\nreassign i to i + 1\n}\nreturn i\n}\nshow f(2)").unwrap()).parse_program().unwrap();
+    let statements = Parser::new(tokenize("function f(n: int) -> int {\nassign i to 0\nwhile i < n {\nassign a to [1, 2] * [3, 4]\nreassign i to i + 1\n}\nreturn i\n}\nshow f(2)").unwrap()).parse_program().unwrap();
     let module = generate_program(&context, &statements).expect("Program should generate");
     for function in module
         .get_functions()
@@ -113,7 +114,7 @@ fn phase6_codegen_rejects_invalid_types_without_panicking() {
 #[test]
 fn program_generation_propagates_declaration_errors() {
     let context = Context::create();
-    let statements = Parser::new(tokenize("set x to 1\nset x to 2").unwrap())
+    let statements = Parser::new(tokenize("assign x to 1\nassign x to 2").unwrap())
         .parse_program()
         .unwrap();
     assert!(
@@ -151,7 +152,7 @@ fn generates_variable_declaration() {
         &context,
         &builder,
         &mut bindings,
-        &parse_statement("set x to 10"),
+        &parse_statement("assign x to 10"),
     )
     .expect("Declaration should generate");
 
@@ -170,7 +171,7 @@ fn resolves_declared_identifier_to_same_llvm_value() {
         &context,
         &builder,
         &mut bindings,
-        &parse_statement("set x to 10"),
+        &parse_statement("assign x to 10"),
     )
     .expect("Declaration should generate");
 
@@ -189,7 +190,7 @@ fn generates_addition_with_previously_declared_variable() {
         &context,
         &builder,
         &mut bindings,
-        &parse_statement("set x to 10"),
+        &parse_statement("assign x to 10"),
     )
     .expect("Declaration should generate");
 
@@ -207,10 +208,10 @@ fn generates_declarations_referencing_earlier_bindings() {
     let mut bindings = HashMap::new();
 
     for source in [
-        "set x to 10",
-        "set y to x + 20",
-        "set z to x + y + 20",
-        "set alias to z",
+        "assign x to 10",
+        "assign y to x + 20",
+        "assign z to x + y + 20",
+        "assign alias to z",
     ] {
         generate_declaration(&context, &builder, &mut bindings, &parse_statement(source))
             .expect("Declaration should generate");
@@ -231,12 +232,12 @@ fn rejects_duplicate_bindings_without_overwriting() {
         &context,
         &builder,
         &mut bindings,
-        &parse_statement("set x to 10"),
+        &parse_statement("assign x to 10"),
     )
     .expect("First declaration should generate");
     let original = bindings.clone();
 
-    for source in ["  set x to 20", "set x to unknown"] {
+    for source in ["  assign x to 20", "assign x to unknown"] {
         let statement = parse_statement(source);
         assert!(
             matches!(generate_declaration(&context, &builder, &mut bindings, &statement),
@@ -257,18 +258,22 @@ fn failed_initializers_do_not_register_bindings() {
         &context,
         &builder,
         &mut bindings,
-        &parse_statement("set prior to 10"),
+        &parse_statement("assign prior to 10"),
     )
     .expect("Earlier declaration should generate");
     let original = bindings.clone();
 
     for (source, name, span) in [
-        ("set x to unknown", "unknown", Span { start: 9, end: 16 }),
-        ("set x to x + 20", "x", Span { start: 9, end: 10 }),
         (
-            "set x to prior + unknown",
+            "assign x to unknown",
             "unknown",
-            Span { start: 17, end: 24 },
+            Span { start: 12, end: 19 },
+        ),
+        ("assign x to x + 20", "x", Span { start: 12, end: 13 }),
+        (
+            "assign x to prior + unknown",
+            "unknown",
+            Span { start: 20, end: 27 },
         ),
     ] {
         assert!(
@@ -283,10 +288,10 @@ fn failed_initializers_do_not_register_bindings() {
             &context,
             &builder,
             &mut bindings,
-            &parse_statement("set x to 9223372036854775808")
+            &parse_statement("assign x to 9223372036854775808")
         ),
         Err(CodegenError::InvalidIntegerLiteral {
-            span: Span { start: 9, end: 28 },
+            span: Span { start: 12, end: 31 },
             ..
         })
     ));
@@ -296,7 +301,7 @@ fn failed_initializers_do_not_register_bindings() {
         &context,
         &builder,
         &mut bindings,
-        &parse_statement("set x to prior"),
+        &parse_statement("assign x to prior"),
     )
     .expect("Failed declarations should not reserve a name");
     verify_binding_function(&module, &builder, bindings["x"]);
@@ -312,7 +317,7 @@ fn binding_environments_are_independent() {
         &context,
         &builder,
         &mut first,
-        &parse_statement("set x to 10"),
+        &parse_statement("assign x to 10"),
     )
     .expect("First environment should accept declaration");
     assert!(
@@ -323,7 +328,7 @@ fn binding_environments_are_independent() {
         &context,
         &builder,
         &mut second,
-        &parse_statement("set x to 20"),
+        &parse_statement("assign x to 20"),
     )
     .expect("Second environment should accept same name");
     assert_eq!(first["x"].get_sign_extended_constant(), Some(10));

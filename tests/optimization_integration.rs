@@ -16,7 +16,7 @@ fn standard_pipelines_verify_and_promote_locals() {
     ] {
         let context = Context::create();
         let statements =
-            Parser::new(tokenize("set x to 10\nreassign x to x + 20\nshow x").unwrap())
+            Parser::new(tokenize("assign x to 10\nreassign x to x + 20\nshow x").unwrap())
                 .parse_program()
                 .unwrap();
         let module = generate_program(&context, &statements).unwrap();
@@ -96,11 +96,11 @@ mod native {
         let cases = [
             ("show 10 + 20 * 2\nshow -7 / 2", Some("50\n-3\n")),
             (
-                "set x to 1\nif true { reassign x to 2 } else { reassign x to 3 }\nshow x",
+                "assign x to 1\nif true { reassign x to 2 } else { reassign x to 3 }\nshow x",
                 Some("2\n"),
             ),
             (
-                "set i to 0\nset total to 0\nwhile i < 3 {\nset j to 0\nwhile j < 2 {\nreassign total to total + i * j\nreassign j to j + 1\n}\nreassign i to i + 1\n}\nshow total",
+                "assign i to 0\nassign total to 0\nwhile i < 3 {\nassign j to 0\nwhile j < 2 {\nreassign total to total + i * j\nreassign j to j + 1\n}\nreassign i to i + 1\n}\nshow total",
                 Some("3\n"),
             ),
             (
@@ -116,7 +116,7 @@ mod native {
                 Some("true\n"),
             ),
             (
-                "set a to [1, 2, 3]\nset b to a\nreassign a to [4, 5, 6]\nshow b[0]\nshow sum(a * b)\nshow len(a)",
+                "assign a to [1, 2, 3]\nassign b to a\nreassign a to [4, 5, 6]\nshow b[0]\nshow sum(a * b)\nshow len(a)",
                 Some("1\n32\n3\n"),
             ),
             (
@@ -128,13 +128,13 @@ mod native {
             ("show 9223372036854775807 + 1", None),
             ("show -9223372036854775808 - 1", None),
             ("show 9223372036854775807 * 2", None),
-            ("set x to -9223372036854775808\nshow -x", None),
+            ("assign x to -9223372036854775808\nshow -x", None),
             ("show -9223372036854775808 / -1", None),
             ("show abs(-9223372036854775808)", None),
-            ("set x to 0\nshow 1 / x", None),
+            ("assign x to 0\nshow 1 / x", None),
             ("show 1.0 / -0.0", None),
             ("show [1, 2][-1]", None),
-            ("set i to 2\nshow [1, 2][i]", None),
+            ("assign i to 2\nshow [1, 2][i]", None),
             ("show sum([9223372036854775807, 1])", None),
             (
                 "show sum([9223372036854775807, 1, 9223372036854775807] * [1, 1, 2])",

@@ -26,7 +26,7 @@ pub fn tokenize(source: &str) -> Result<Vec<Token>, LexError> {
                 }
 
                 match &source[start..end] {
-                    "set" => TokenKind::Set,
+                    "assign" => TokenKind::Set,
                     "to" => TokenKind::To,
                     "show" => TokenKind::Show,
                     "true" => TokenKind::True,
@@ -230,7 +230,7 @@ mod tests {
 
     #[test]
     fn tokenizes_keywords_and_identifiers() {
-        let tokens = tokenize("set total_1 to show").expect("Lexer should succeed");
+        let tokens = tokenize("assign total_1 to show").expect("Lexer should succeed");
 
         let kinds: Vec<TokenKind> = tokens.into_iter().map(|token| token.kind).collect();
 

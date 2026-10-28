@@ -146,11 +146,13 @@ fn infers_scalar_and_array_types() {
 #[test]
 fn validates_scopes_shadowing_and_assignments() {
     assert_eq!(
-        check("set x to 1\nif true {\nset x to 2\nreassign x to 3\n}\nreassign x to 4\nshow x"),
+        check(
+            "assign x to 1\nif true {\nassign x to 2\nreassign x to 3\n}\nreassign x to 4\nshow x"
+        ),
         Ok(())
     );
     assert!(matches!(
-        check("if true { set inside to 1 }\nshow inside"),
+        check("if true { assign inside to 1 }\nshow inside"),
         Err(TypeError::UndefinedVariable { .. })
     ));
     assert!(matches!(
@@ -158,10 +160,10 @@ fn validates_scopes_shadowing_and_assignments() {
         Err(TypeError::UndefinedVariable { .. })
     ));
     assert!(matches!(
-        check("set x to 1\nreassign x to 2.0"),
+        check("assign x to 1\nreassign x to 2.0"),
         Err(TypeError::Mismatch { .. })
     ));
-    assert_eq!(check("set x to 1.0\nreassign x to 2"), Ok(()));
+    assert_eq!(check("assign x to 1.0\nreassign x to 2"), Ok(()));
 }
 
 #[test]
@@ -181,7 +183,7 @@ fn validates_forward_recursive_and_typed_function_calls() {
         "function f(x: int, x: int) -> int { return x }",
         "return 1",
         "function f() -> int { return 1 }\nfunction f() -> int { return 2 }",
-        "set x to 1\nfunction f() -> int { return x }",
+        "assign x to 1\nfunction f() -> int { return x }",
         "function sqrt(x: float) -> float { return x }",
     ] {
         assert!(check(source).is_err(), "{source}");
@@ -195,20 +197,20 @@ fn rejects_invalid_operands_conditions_and_arrays() {
         "if 1 { show 1 }",
         "while 1.0 { show 1 }",
         "show -true",
-        "set a to []",
-        "set a to [1, 2.0]",
-        "set a to [true, false]",
-        "set a to [[1], [2]]",
+        "assign a to []",
+        "assign a to [1, 2.0]",
+        "assign a to [true, false]",
+        "assign a to [[1], [2]]",
         "show [1][0.0]",
         "show 1[0]",
         "show [1]",
-        "set a to [1, 2] + [1]",
-        "set a to [1] * [1.0]",
+        "assign a to [1, 2] + [1]",
+        "assign a to [1] * [1.0]",
         "show sqrt(1)",
     ] {
         assert!(check(source).is_err(), "{source}");
     }
-    let oversized = format!("set a to [{}]", vec!["1"; 257].join(","));
+    let oversized = format!("assign a to [{}]", vec!["1"; 257].join(","));
     assert!(matches!(
         check(&oversized),
         Err(TypeError::InvalidArray { .. })

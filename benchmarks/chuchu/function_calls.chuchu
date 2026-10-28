@@ -1,6 +1,6 @@
 function square_plus(x: int) -> int { return x * x + 3 }
-set i to 0
-set total to 0
+assign i to 0
+assign total to 0
 while i < 300000 {
 reassign total to total + square_plus(i)
 reassign i to i + 1

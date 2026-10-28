@@ -432,13 +432,13 @@ mod tests {
     #[test]
     fn phase6_assignment_diagnostic_preserves_rhs_span() {
         let mut checker = TypeChecker::new(SymbolTable::new());
-        let statements = parse_program("set x to 1\nreassign x to true");
+        let statements = parse_program("assign x to 1\nreassign x to true");
         assert_eq!(
             checker.check_program(&statements),
             Err(TypeError::Mismatch {
                 expected: Type::Int,
                 actual: Type::Bool,
-                span: Span { start: 25, end: 29 },
+                span: Span { start: 28, end: 32 },
             })
         );
     }
@@ -446,7 +446,8 @@ mod tests {
     #[test]
     fn phase6_failing_block_restores_symbol_scope() {
         let mut checker = TypeChecker::new(SymbolTable::new());
-        let statements = parse_program("set x to 1\nif true {\nset x to 2.0\nshow missing\n}");
+        let statements =
+            parse_program("assign x to 1\nif true {\nassign x to 2.0\nshow missing\n}");
         assert!(checker.check_program(&statements).is_err());
         assert_eq!(checker.symbols.lookup("x"), Some(Type::Int));
     }
@@ -487,7 +488,7 @@ mod tests {
 
     #[test]
     fn checks_valid_program() {
-        let statements = parse_program("set x to 10\nset y to x + 20\nshow y");
+        let statements = parse_program("assign x to 10\nassign y to x + 20\nshow y");
         let mut checker = TypeChecker::new(SymbolTable::new());
 
         assert_eq!(checker.check_program(&statements), Ok(()));
@@ -514,7 +515,7 @@ mod tests {
 
     #[test]
     fn checks_program_declaration_using_previous_variable() {
-        let statements = parse_program("set x to 10\nset y to x\nset z to y + x");
+        let statements = parse_program("assign x to 10\nassign y to x\nassign z to y + x");
         let mut checker = TypeChecker::new(SymbolTable::new());
 
         assert_eq!(checker.check_program(&statements), Ok(()));
@@ -525,28 +526,28 @@ mod tests {
 
     #[test]
     fn rejects_program_with_undefined_variable() {
-        let statements = parse_program("set x to 10\nshow unknown");
+        let statements = parse_program("assign x to 10\nshow unknown");
         let mut checker = TypeChecker::new(SymbolTable::new());
 
         assert_eq!(
             checker.check_program(&statements),
             Err(TypeError::UndefinedVariable {
                 name: "unknown".to_owned(),
-                span: Span { start: 17, end: 24 },
+                span: Span { start: 20, end: 27 },
             })
         );
     }
 
     #[test]
     fn rejects_program_with_duplicate_declaration() {
-        let statements = parse_program("set x to 10\nset x to 20\nset later to 30");
+        let statements = parse_program("assign x to 10\nassign x to 20\nassign later to 30");
         let mut checker = TypeChecker::new(SymbolTable::new());
 
         assert_eq!(
             checker.check_program(&statements),
             Err(TypeError::DuplicateDeclaration {
                 name: "x".to_owned(),
-                span: Span { start: 12, end: 23 },
+                span: Span { start: 15, end: 29 },
             })
         );
         assert_eq!(checker.symbols.lookup("x"), Some(Type::Int));
@@ -555,7 +556,7 @@ mod tests {
 
     #[test]
     fn rejects_program_reference_before_declaration() {
-        let statements = parse_program("show x\nset x to 10");
+        let statements = parse_program("show x\nassign x to 10");
         let mut checker = TypeChecker::new(SymbolTable::new());
 
         assert_eq!(
@@ -571,14 +572,14 @@ mod tests {
     #[test]
     fn program_stops_at_first_error_and_keeps_previous_declarations() {
         let statements =
-            parse_program("set x to 10\nset y to unknown\nset later to 20\nshow other");
+            parse_program("assign x to 10\nassign y to unknown\nassign later to 20\nshow other");
         let mut checker = TypeChecker::new(SymbolTable::new());
 
         assert_eq!(
             checker.check_program(&statements),
             Err(TypeError::UndefinedVariable {
                 name: "unknown".to_owned(),
-                span: Span { start: 21, end: 28 },
+                span: Span { start: 27, end: 34 },
             })
         );
         assert_eq!(checker.symbols.lookup("x"), Some(Type::Int));
@@ -591,7 +592,7 @@ mod tests {
         let mut checker = TypeChecker::new(SymbolTable::new());
 
         assert_eq!(
-            checker.check_statement(&parse_statement("set x to 10")),
+            checker.check_statement(&parse_statement("assign x to 10")),
             Ok(())
         );
         assert_eq!(checker.symbols.lookup("x"), Some(Type::Int));
@@ -605,11 +606,11 @@ mod tests {
     fn checks_declaration_using_previously_declared_variable() {
         let mut checker = TypeChecker::new(SymbolTable::new());
         checker
-            .check_statement(&parse_statement("set x to 10"))
+            .check_statement(&parse_statement("assign x to 10"))
             .expect("First declaration should succeed");
 
         assert_eq!(
-            checker.check_statement(&parse_statement("set y to x + 20")),
+            checker.check_statement(&parse_statement("assign y to x + 20")),
             Ok(())
         );
         assert_eq!(checker.symbols.lookup("x"), Some(Type::Int));
@@ -620,7 +621,7 @@ mod tests {
     fn checks_show_without_changing_symbols() {
         let mut checker = TypeChecker::new(SymbolTable::new());
         checker
-            .check_statement(&parse_statement("set x to 10"))
+            .check_statement(&parse_statement("assign x to 10"))
             .expect("Declaration should succeed");
 
         for source in ["show 42", "show x", "show x + 20"] {
@@ -630,10 +631,10 @@ mod tests {
         // Output does not create a declaration or replace the existing one.
         assert_eq!(checker.symbols.lookup("unknown"), None);
         assert_eq!(
-            checker.check_statement(&parse_statement("set x to 20")),
+            checker.check_statement(&parse_statement("assign x to 20")),
             Err(TypeError::DuplicateDeclaration {
                 name: "x".to_owned(),
-                span: Span { start: 0, end: 11 },
+                span: Span { start: 0, end: 14 },
             })
         );
     }
@@ -642,14 +643,14 @@ mod tests {
     fn rejects_duplicate_declaration_with_statement_span() {
         let mut checker = TypeChecker::new(SymbolTable::new());
         checker
-            .check_statement(&parse_statement("set x to 10"))
+            .check_statement(&parse_statement("assign x to 10"))
             .expect("First declaration should succeed");
 
         assert_eq!(
-            checker.check_statement(&parse_statement("  set x to 20")),
+            checker.check_statement(&parse_statement("  assign x to 20")),
             Err(TypeError::DuplicateDeclaration {
                 name: "x".to_owned(),
-                span: Span { start: 2, end: 13 },
+                span: Span { start: 2, end: 16 },
             })
         );
         assert_eq!(checker.symbols.lookup("x"), Some(Type::Int));
@@ -675,12 +676,12 @@ mod tests {
 
         for (source, name, undefined, span) in [
             (
-                "set x to unknown + 10",
+                "assign x to unknown + 10",
                 "x",
                 "unknown",
-                Span { start: 9, end: 16 },
+                Span { start: 12, end: 19 },
             ),
-            ("set y to y + 10", "y", "y", Span { start: 9, end: 10 }),
+            ("assign y to y + 10", "y", "y", Span { start: 12, end: 13 }),
         ] {
             assert_eq!(
                 checker.check_statement(&parse_statement(source)),
@@ -693,7 +694,7 @@ mod tests {
         }
 
         assert_eq!(
-            checker.check_statement(&parse_statement("set x to 10")),
+            checker.check_statement(&parse_statement("assign x to 10")),
             Ok(())
         );
         assert_eq!(checker.symbols.lookup("x"), Some(Type::Int));

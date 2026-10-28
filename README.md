@@ -2,6 +2,16 @@
 
 Chuchu is a high-performance, statically typed programming language with automatic type inference, designed for simplicity and fast numerical computation, built in Rust.
 
+Declare variables with `assign` and update them with `reassign`:
+
+```chuchu
+assign x to 5
+reassign x to 6
+show x
+```
+
+The previous `set x to 5` declaration syntax is no longer accepted.
+
 ## LLVM setup on macOS
 
 Cheeku uses LLVM 23.1 through Inkwell, preferring dynamic linking. With LLVM
