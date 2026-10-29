@@ -1,7 +1,7 @@
 # Phase 8 verification report
 
-**PHASE 8: PARTIALLY COMPLETE** — implementation is present; native validation
-must pass on every required target before this status can become complete.
+**PHASE 8: COMPLETE** — all four required native targets pass hosted CI
+([run](https://github.com/chuchu-lang/chuchu-core/actions/runs/40815235497) at `5bbad2c`). No release has been published.
 
 ## Implementation
 
@@ -16,18 +16,18 @@ behavior matrix. Additional tests cover object format, runtime ABI, replacements
 missing linkers, extensionless outputs, invalid directories, and Windows file
 locking. No language feature or optimization default was removed.
 
-## Evidence (updated as verification completes)
+## Evidence
 
-| Host | Build | Unit tests | Integration/native execution | Hosted CI |
-|---|---|---|---|---|
-| macOS ARM64 | PASS | PASS | PASS | NOT VERIFIED |
-| macOS Intel | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
-| Linux x64 GNU | PASS | PASS | PASS | PASS |
-| Windows x64 MSVC | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| Host | Local | Hosted CI |
+|---|---|---|
+| macOS ARM64 | Build, tests, Clippy PASS (Homebrew LLVM 23.1.4) | [PASS](https://github.com/chuchu-lang/chuchu-core/actions/runs/40815235497/job/123256165686) |
+| macOS Intel | not run locally | [PASS](https://github.com/chuchu-lang/chuchu-core/actions/runs/40815235497/job/123256165911) |
+| Linux x64 GNU | not run locally | [PASS](https://github.com/chuchu-lang/chuchu-core/actions/runs/40815235497/job/123256165941) |
+| Windows x64 MSVC | not run locally | [PASS](https://github.com/chuchu-lang/chuchu-core/actions/runs/40815235497/job/123256166046) |
 
-macOS uses installed LLVM 23.1.4 and Rust 1.99.1. Source changes are validated by
-build, full tests, warnings-denied Clippy, formatting, and native release smoke
-programs. Python benchmark portability/regression checks cover six tests.
+Each hosted job runs formatting, build, tests, warnings-denied Clippy, release
+build, Python regression tests, native release smoke, benchmark smoke and
+packaging with Rust 1.99.1 and LLVM 23.1.4.
 
 Linux hosted evidence: [native job at 4556aec](https://github.com/chuchu-lang/chuchu-core/actions/runs/40799074277/job/123202789214):
 138 Rust tests, debug/release builds, formatting, warnings-denied Clippy, six
@@ -56,7 +56,8 @@ for exact platform setup and execution commands.
 
 | File | Change |
 |---|---|
-| `Cargo.toml` | Declare Rust 1.88 minimum; existing LLVM/Inkwell policy retained. |
+| `Cargo.toml` | Declare Rust 1.88 minimum; disable Inkwell `target-all` and enable only the host backend per architecture. |
+| `build.rs` | Embed the macOS LLVM `lib` directory as an rpath instead of using `DYLD_LIBRARY_PATH`. |
 | `src/native.rs` | Platform linker drivers, libm/MSVC arguments, staging names and publication policy. |
 | `src/main.rs` | Platform default output and CLI regression expectation. |
 | `src/optimization.rs` | Windows x64 MSVC guard and native COFF relocation policy. |
@@ -67,8 +68,9 @@ for exact platform setup and execution commands.
 | `tests/optimization_integration.rs` | Run exact O0–O3 semantics matrix and compiler artifact checks on every OS. |
 | `benchmarks/run.py` | Portable tool discovery, metadata, startup controls, suffixes and unavailable memory. |
 | `benchmarks/test_runner.py` | Six benchmark portability and correctness regression tests. |
-| `.github/scripts/provision-llvm.py` | Checksum-pinned SDK/source provisioning and platform loader configuration. |
-| `.github/scripts/test_provision.py` | Regression test preventing SDK libc++ from overriding the macOS system runtime. |
+| `.github/scripts/provision-llvm.py` | Checksum-pinned SDK/source provisioning; macOS builds LLVM from source as a dylib. |
+| `.github/scripts/test_provision.py` | Regression tests: no global macOS loader path, shared LLVM required on macOS, one backend per source build, Inkwell feature policy. |
+| `tests/parser_integration.rs` | LF-normalized fixture offsets plus CRLF structure, span, blank-line and lexer-error regression tests. |
 | `.github/scripts/smoke.py` | Execute three representative release examples at all four optimization levels. |
 | `.github/scripts/package-release.py` | Host-checked native archive labels, license, examples and dependency requirements. |
 | `.github/workflows/cross-platform.yml` | Four native target jobs on pushes and PRs. |
@@ -96,15 +98,19 @@ from the completed `assign` migration at `3fe3d90`.
 - Windows requires MSVC/SDK libraries and runtime; Unix distributions require
   matching LLVM shared libraries and system runtime dependencies.
 - Linux musl, Windows ARM64/MinGW, 32-bit hosts and cross-OS compilation are not
-  initial targets. Presence of unexecuted CI files is not a platform test pass.
+  initial targets.
 - macOS uses an LLVM source build (X86 on Intel, AArch64 on Apple Silicon): the
   release has no Intel SDK, and its ARM64 SDK has only bitcode static archives.
 - `inkwell` default features are disabled; only the host LLVM backend feature
   (`target-x86` / `target-aarch64`) is enabled, matching the single-backend SDKs.
-- SDK cache keys: Linux, macOS Intel and Windows stay pinned to their existing
-  recipe ids (caches stay valid); macOS ARM64 uses a new `source-dylib-<hash>` key.
+- SDK cache keys come from a recipe-id step in `native-build.yml`. Linux, macOS
+  Intel and Windows are pinned to their original ids so script edits do not force
+  their LLVM rebuilds; macOS ARM64 keys on `source-dylib-<script hash>`. Bump a
+  pinned id only when that platform's SDK contents change, and never reuse a cache
+  built with a different recipe.
+- Windows checkouts may use CRLF; see [line endings](platform-support.md#line-endings).
 - Saved Phase 7 measurements remain historical. New portable benchmark output
   records actual host/tool versions; no cross-hardware speed claim is made.
 
 Recommended branches and PR order are in [collaboration](phase8-collaboration.md).
-No release should be published until every required native job passes.
+Publish a release only from a tagged revision whose four native jobs pass.

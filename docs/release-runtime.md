@@ -24,8 +24,8 @@ for native program linking even when Cheeku itself starts successfully.
 Build outputs are packaged only after the matching native tests and release
 smoke tests succeed. Tag workflow `release.yml` creates a **draft** only when all
 four target jobs succeed; review platform evidence before publishing that draft.
-No release is published merely by adding workflow files, and no Windows/Intel
-archive is claimed verified until its actual target job passes.
+No release is published merely by adding workflow files. Check that the tagged
+revision's four target jobs passed before publishing a draft.
 
 Build locally: `cargo build --locked --release`, run the tests, then
 `python .github/scripts/package-release.py --target <your rustc host triple>`.

@@ -1,7 +1,7 @@
 # Build on macOS
 
-Apple Silicon is locally validated. Intel uses the same implementation but still
-requires its native CI job to pass. Use a Rust toolchain matching your hardware:
+Apple Silicon is locally validated and both macOS targets pass hosted native CI.
+Use a Rust toolchain matching your hardware:
 `aarch64-apple-darwin` or `x86_64-apple-darwin`. Rust 1.88+ is required; CI pins
 1.99.1. Install Rust through [rustup](https://rustup.rs/).
 

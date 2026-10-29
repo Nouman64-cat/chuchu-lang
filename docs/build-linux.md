@@ -1,9 +1,9 @@
 # Build on Linux x64 GNU
 
 Initial target: `x86_64-unknown-linux-gnu`, with Rust 1.88+ (CI pins 1.99.1),
-LLVM 23.1.x, Clang, a GNU linker, and C runtime development files. Linux execution
-results are recorded in the Phase 8 report; the existence of this guide alone
-does not assert validation on every distribution.
+LLVM 23.1.x, Clang, a GNU linker, and C runtime development files. Hosted CI validates
+Ubuntu x64; the existence of this guide alone does not assert validation on every
+distribution. Results are recorded in the Phase 8 report.
 
 On Ubuntu, install prerequisites:
 

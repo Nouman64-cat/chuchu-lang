@@ -1,7 +1,8 @@
 # Build on Windows x64 MSVC
 
-**Implementation and CI configuration are provided; Windows execution is not yet
-locally verified.** Only `x86_64-pc-windows-msvc` is in the initial scope.
+**Windows native CI passes** ([run](https://github.com/chuchu-lang/chuchu-core/actions/runs/40815235497)); these steps have not been run on a
+local Windows machine by the maintainers. Only `x86_64-pc-windows-msvc` is in the
+initial scope.
 
 Install:
 

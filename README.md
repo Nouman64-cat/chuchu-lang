@@ -19,9 +19,9 @@ and LLVM **23.1.x** are required; CI pins Rust 1.99.1 and the full LLVM 23.1.4 S
 The crate is `chuchu`, and the compiler executable is `cheeku` (`cheeku.exe` on
 Windows). There is no cross-OS `--target` option.
 
-- [macOS setup](docs/build-macos.md): Apple Silicon locally validated; Intel CI provided.
+- [macOS setup](docs/build-macos.md): Apple Silicon and Intel; LLVM is built from verified source as a shared library.
 - [Linux x64 GNU setup](docs/build-linux.md): Clang/ELF and libm; see the validation report.
-- [Windows x64 MSVC setup](docs/build-windows.md): clang-cl, full LLVM SDK, VS Build Tools and SDK; native CI validation required.
+- [Windows x64 MSVC setup](docs/build-windows.md): clang-cl, source-built static LLVM, VS Build Tools and SDK.
 - [Platform policy and current evidence](docs/platform-support.md).
 - [Phase 8 verification report](docs/phase8-verification.md).
 
@@ -60,14 +60,16 @@ before claiming compatibility.
 
 `.github/workflows/cross-platform.yml` builds/tests macOS ARM64, macOS Intel,
 Linux x64 GNU, and Windows x64 MSVC. SDK downloads are pinned and SHA-256 checked;
-Intel macOS builds the same verified LLVM source release. Every job runs native
-programs and packages only after its tests pass. The tag-triggered release workflow
+Both macOS targets and Windows build LLVM from the same verified source release
+(the official ARM64 macOS SDK ships only bitcode archives that Apple's linker
+rejects); built SDKs are cached per platform. Every job runs native programs and
+packages only after its tests pass. The tag-triggered release workflow
 requires all four jobs and creates a draft, not an unreviewed public release.
 
 Archives require external toolchains/runtimes; see
 [release requirements](docs/release-runtime.md). [Three-developer workflow](docs/phase8-collaboration.md)
-describes ownership and required-check recommendations. No hosted CI pass is
-implied by the presence of these workflow files.
+describes ownership and required-check recommendations. All four targets pass
+[hosted native CI](https://github.com/chuchu-lang/chuchu-core/actions/runs/40815235497); no release has been published yet.
 
 ## Optimization and performance
 
