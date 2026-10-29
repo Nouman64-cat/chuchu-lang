@@ -72,7 +72,8 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: [{ url: "/chuchu-logo-3.svg", type: "image/svg+xml" }],
+    // Use the square PNG for search results; the website keeps its vector logo.
+    icon: [{ url: "/apple-icon", type: "image/png", sizes: "180x180" }],
     // Served by the app/apple-icon.tsx route handler.
     apple: [{ url: "/apple-icon", type: "image/png", sizes: "180x180" }],
   },
