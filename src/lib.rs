@@ -1,6 +1,7 @@
 pub mod ast;
 pub mod codegen;
 pub mod compiler;
+pub mod diagnostic;
 pub mod lexer;
 pub mod native;
 pub mod optimization;

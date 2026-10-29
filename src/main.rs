@@ -15,6 +15,7 @@ enum CliError {
     Compile {
         input: PathBuf,
         source: chuchu::compiler::CompileError,
+        text: Option<String>,
     },
 }
 impl fmt::Display for CliError {
@@ -23,7 +24,17 @@ impl fmt::Display for CliError {
             Self::Usage => write!(f, "{USAGE}"),
             Self::Argument(message) => write!(f, "{message}\n{USAGE}"),
             Self::Optimization(error) => write!(f, "{error}"),
-            Self::Compile { input, source } => write!(f, "{}: {source}", input.display()),
+            Self::Compile {
+                input,
+                source,
+                text,
+            } => {
+                if let Some(text) = text {
+                    f.write_str(&chuchu::diagnostic::render(source, input, text))
+                } else {
+                    write!(f, "{}: {source}", input.display())
+                }
+            }
         }
     }
 }
@@ -119,6 +130,7 @@ fn run() -> Result<(), CliError> {
         &invocation.options,
     )
     .map_err(|source| CliError::Compile {
+        text: std::fs::read_to_string(&invocation.input).ok(),
         input: invocation.input,
         source,
     })?;
