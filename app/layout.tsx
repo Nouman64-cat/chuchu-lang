@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: "Chuchu",
   description: "The Chuchu programming language.",
   icons: {
-    icon: "/chuchu-logo-2.svg",
+    icon: "/chuchu-logo-3.svg",
   },
 };
 

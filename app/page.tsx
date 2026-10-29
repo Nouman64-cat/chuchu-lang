@@ -1,69 +1,140 @@
 import Image from "next/image";
+import Link from "next/link";
+
+const docsUrl = "https://docs.chuchu-lang.org";
+const sourceUrl = "https://github.com/chuchu-lang/chuchu-core";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="h-10 w-10 rounded-full bg-zinc-900 p-1"
-          src="/chuchu-logo-2.svg"
-          alt="Chuchu logo"
-          width={40}
-          height={40}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
+    <main className="site-shell">
+      <header className="site-header page-width">
+        <Link className="brand" href="/" aria-label="Chuchu home">
+          <span className="brand-mark">
+            <Image
+              src="/chuchu-logo-3.svg"
+              alt=""
+              width={34}
+              height={34}
+              priority
+            />
+          </span>
+          <span className="brand-name">chuchu</span>
+        </Link>
+        <nav className="site-nav" aria-label="Main navigation">
+          <a href={docsUrl}>Documentation</a>
+          <a href={sourceUrl} target="_blank" rel="noreferrer">
+            GitHub
+          </a>
+          <a className="nav-cta" href={`${docsUrl}/docs/getting-started/installation/`}>
+            Get started <span aria-hidden="true">-&gt;</span>
+          </a>
+        </nav>
+      </header>
+
+      <section className="hero page-width" aria-labelledby="hero-title">
+        <div className="hero-copy">
+          <p className="eyebrow">
+            <span className="status-dot" aria-hidden="true" />
+            A statically typed language built in Rust
+          </p>
+          <h1 id="hero-title">
+            Simple syntax.
+            <br />
+            <span>Native possibilities.</span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
+          <p className="hero-description">
+            Meet Chuchu: a small, evolving language with inferred local types
+            and a compiler that turns your code into native executables.
+          </p>
+          <div className="hero-actions">
+            <a className="button button-primary" href={docsUrl}>
+              Explore the docs <span aria-hidden="true">-&gt;</span>
+            </a>
             <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              className="button button-secondary"
+              href={sourceUrl}
+              target="_blank"
+              rel="noreferrer"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+              View source
+            </a>
+          </div>
+          <p className="hero-note">
+            Early development <span aria-hidden="true">&middot;</span> Validated
+            on macOS with Apple Silicon
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="code-card" aria-label="Chuchu code example">
+          <div className="code-card-header">
+            <div className="window-dots" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </div>
+            <span>hello.chuchu</span>
+            <span className="code-language">CHUCHU</span>
+          </div>
+          <pre>
+            <code>
+              <span className="code-muted">01 </span>
+              <span className="code-keyword">assign</span> x{" "}
+              <span className="code-keyword">to</span> 5{"\n"}
+              <span className="code-muted">02 </span>
+              <span className="code-keyword">reassign</span> x{" "}
+              <span className="code-keyword">to</span> 6{"\n"}
+              <span className="code-muted">03 </span>
+              <span className="code-keyword">show</span> x
+            </code>
+          </pre>
+          <div className="code-output">
+            <span>OUTPUT</span>
+            <code>6</code>
+          </div>
+          <div className="code-card-caption">
+            <span>Readable from the first line.</span>
+            <span className="caption-dot" aria-hidden="true" />
+          </div>
         </div>
-      </main>
-    </div>
+      </section>
+
+      <section className="features page-width" aria-label="Language highlights">
+        <article className="feature">
+          <span className="feature-number">01</span>
+          <h2>Write naturally</h2>
+          <p>
+            Clear statements and inferred local types keep the focus on what
+            your program does.
+          </p>
+        </article>
+        <article className="feature">
+          <span className="feature-number">02</span>
+          <h2>Compile to native</h2>
+          <p>
+            Cheeku, the Chuchu compiler, uses LLVM to build host-native
+            executables.
+          </p>
+        </article>
+        <article className="feature">
+          <span className="feature-number">03</span>
+          <h2>Build with confidence</h2>
+          <p>
+            Static type checking and checked numerical operations help catch
+            mistakes early.
+          </p>
+        </article>
+      </section>
+
+      <footer className="site-footer page-width">
+        <Link className="footer-brand" href="/" aria-label="Chuchu home">
+          <span className="footer-mark" aria-hidden="true" />
+          Chuchu
+        </Link>
+        <span>Simple syntax. Native possibilities.</span>
+        <a href={sourceUrl} target="_blank" rel="noreferrer">
+          Open source on GitHub
+        </a>
+      </footer>
+    </main>
   );
 }
