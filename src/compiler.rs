@@ -54,7 +54,6 @@ impl fmt::Display for CompileError {
                     ParseError::ExpectedExpression { span } => ("expression", span),
                     ParseError::ExpectedStatement { span } => ("statement", span),
                     ParseError::ExpectedIdentifier { span } => ("identifier", span),
-                    ParseError::ExpectedTo { span } => ("'to' keyword", span),
                     ParseError::ExpectedStatementSeparator { span } => {
                         ("newline between statements", span)
                     }

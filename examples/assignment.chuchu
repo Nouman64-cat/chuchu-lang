@@ -1,0 +1,7 @@
+assign x 50
+assign y 70
+
+show(x + y)
+
+reassign x 100
+show(x + y)

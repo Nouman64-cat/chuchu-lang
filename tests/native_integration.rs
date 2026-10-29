@@ -147,7 +147,7 @@ fn rejects_invalid_sources_without_creating_executables() {
         ("show unknown", "Undefined variable"),
         ("assign x to 1\nassign x to 2", "Duplicate declaration"),
         ("show @", "Invalid source character"),
-        ("assign x 10", "Expected 'to'"),
+        ("assign x", "Expected expression"),
         ("show", "Expected expression"),
         ("show 1 show 2", "Expected newline"),
         ("show 9223372036854775808", "out-of-range"),

@@ -13,7 +13,7 @@ def main():
     args = parser.parse_args()
     compiler = args.compiler.resolve()
     root = Path(__file__).resolve().parents[2]
-    expected = {'main': '35\n', 'numerical': '32\n3\n7\n',
+    expected = {'main': '35\n', 'assignment': '35\n50\n', 'numerical': '32\n3\n7\n',
                 'syntax_smoke': '25\n100\n4.5\ntrue\n0\n1\n2\n'}
     with tempfile.TemporaryDirectory(prefix='cheeku smoke ') as directory:
         for name, output in expected.items():
@@ -23,7 +23,7 @@ def main():
                 result = subprocess.run([executable], capture_output=True, text=True, check=True)
                 if result.stdout != output or result.stderr:
                     raise RuntimeError(f'{name} {level}: {result.stdout!r} / {result.stderr!r}')
-    print('PASS: 3 examples at O0/O1/O2/O3, 12 native executions')
+    print('PASS: 4 examples at O0/O1/O2/O3, 16 native executions')
 
 
 if __name__ == '__main__':

@@ -10,18 +10,18 @@ function is_positive(x: int) -> bool {
     return x > 0
 }
 
-assign number to 5
+assign number 5
 show square(number)
 
-reassign number to 10
+reassign number 10
 show square(number)
 
 show half(9.0)
 show is_positive(number)
 
-assign counter to 0
+assign counter 0
 
 while counter < 3 {
     show counter
-    reassign counter to counter + 1
+    reassign counter counter + 1
 }

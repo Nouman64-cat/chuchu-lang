@@ -80,6 +80,27 @@ fn arithmetic_precedence_and_negation() {
     );
 }
 #[test]
+fn assignment_without_to() {
+    succeeds(
+        "assign x 15\nassign y 20\nshow(x + y)\nreassign x 30\nshow(x + y)",
+        "35\n50\n",
+    );
+}
+#[test]
+fn assignment_without_to_accepts_every_value_kind() {
+    succeeds(
+        "function square(n: int) -> int { return n * n }\nassign i 7\nassign f 2.5\nassign e (i + 3) * 2\nassign c square(4)\nassign a [10, 20, 30]\nassign g f * 2\nshow i\nshow f\nshow e\nshow c\nshow a[1] + len(a)\nshow g\nreassign c square(5)\nreassign f 0.5\nshow c\nshow f",
+        "7\n2.5\n20\n16\n23\n5\n25\n0.5\n",
+    );
+}
+#[test]
+fn legacy_to_assignment_matches_new_syntax() {
+    succeeds(
+        "assign x to 15\nassign y 20\nreassign x to 30\nreassign y 1\nshow x + y",
+        "31\n",
+    );
+}
+#[test]
 fn signed_literal_boundaries() {
     succeeds(
         "show -9223372036854775808\nshow -0009223372036854775808\nshow 9223372036854775807",

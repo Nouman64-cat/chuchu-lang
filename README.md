@@ -5,10 +5,12 @@ Chuchu is a high-performance, statically typed programming language with automat
 Declare variables with `assign` and update them with `reassign`:
 
 ```chuchu
-assign x to 5
-reassign x to 6
+assign x 5
+reassign x 6
 show x
 ```
+
+The older `assign x to 5` / `reassign x to 6` form is still accepted.
 
 ## Native build and platform status
 

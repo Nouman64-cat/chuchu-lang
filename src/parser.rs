@@ -7,7 +7,6 @@ pub enum ParseError {
     ExpectedExpression { span: Span },
     ExpectedStatement { span: Span },
     ExpectedIdentifier { span: Span },
-    ExpectedTo { span: Span },
     ExpectedStatementSeparator { span: Span },
     ExpectedToken { expected: &'static str, span: Span },
     UnexpectedEnd,
@@ -49,6 +48,12 @@ impl Parser {
         }
         self.advance();
         Ok(token)
+    }
+    /// Consumes the legacy `to` separator of `assign x to 1`, which is now optional.
+    fn skip_legacy_to(&mut self) {
+        if self.at(&TokenKind::To) {
+            self.advance();
+        }
     }
     fn newlines(&mut self) -> Result<(), ParseError> {
         while self.at(&TokenKind::Newline) {
@@ -125,11 +130,7 @@ impl Parser {
             TokenKind::Set => {
                 self.advance();
                 let (name, _) = self.name()?;
-                let token = self.token()?;
-                if token.kind != TokenKind::To {
-                    return Err(ParseError::ExpectedTo { span: token.span });
-                }
-                self.advance();
+                self.skip_legacy_to();
                 let value = self.parse_expression()?;
                 let end = value.span.end;
                 (StmtKind::Set { name, value }, end)
@@ -137,11 +138,7 @@ impl Parser {
             TokenKind::Reassign => {
                 self.advance();
                 let (name, _) = self.name()?;
-                let token = self.token()?;
-                if token.kind != TokenKind::To {
-                    return Err(ParseError::ExpectedTo { span: token.span });
-                }
-                self.advance();
+                self.skip_legacy_to();
                 let value = self.parse_expression()?;
                 let end = value.span.end;
                 (StmtKind::Assign { name, value }, end)
@@ -627,13 +624,39 @@ mod tests {
     }
 
     #[test]
-    fn rejects_variable_declaration_without_to() {
+    fn parses_declaration_and_reassignment_without_to() {
+        for (source, name, value) in [
+            ("assign x 10", "x", ExprKind::Integer("10".to_owned())),
+            ("assign x 1.5", "x", ExprKind::Float("1.5".to_owned())),
+            ("assign x to 10", "x", ExprKind::Integer("10".to_owned())),
+        ] {
+            let mut parser = Parser::new(tokenize(source).unwrap());
+            let statement = parser.parse_statement().expect("declaration should parse");
+            let StmtKind::Set {
+                name: parsed,
+                value: expr,
+            } = statement.kind
+            else {
+                panic!("expected declaration for {source:?}");
+            };
+            assert_eq!((parsed.as_str(), expr.kind), (name, value));
+        }
+        for source in ["reassign x 30", "reassign x to 30"] {
+            let mut parser = Parser::new(tokenize(source).unwrap());
+            let statement = parser.parse_statement().expect("reassignment should parse");
+            let StmtKind::Assign { name, value } = statement.kind else {
+                panic!("expected reassignment for {source:?}");
+            };
+            assert_eq!(
+                (name.as_str(), value.kind),
+                ("x", ExprKind::Integer("30".to_owned()))
+            );
+        }
+    }
+
+    #[test]
+    fn rejects_variable_declaration_without_initializer() {
         for (source, span, kind) in [
-            (
-                "assign x 10",
-                Span { start: 9, end: 11 },
-                TokenKind::Integer("10".to_owned()),
-            ),
             (
                 "assign x show 10",
                 Span { start: 9, end: 13 },
@@ -646,7 +669,7 @@ mod tests {
 
             assert_eq!(
                 parser.parse_statement(),
-                Err(ParseError::ExpectedTo { span })
+                Err(ParseError::ExpectedExpression { span })
             );
             assert_eq!(parser.current().map(|token| &token.kind), Some(&kind));
         }
