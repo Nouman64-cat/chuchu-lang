@@ -3,7 +3,7 @@
 Initial target: `x86_64-unknown-linux-gnu`, with Rust 1.88+ (CI pins 1.99.1),
 LLVM 23.1.x, Clang, a GNU linker, and C runtime development files. Hosted CI validates
 Ubuntu x64; the existence of this guide alone does not assert validation on every
-distribution. Results are recorded in the Phase 8 report.
+distribution. See [platform support](platform-support.md) for validation evidence.
 
 On Ubuntu, install prerequisites:
 
@@ -51,8 +51,8 @@ LLVM source build. musl is not an initial supported configuration.
 From the compiler repository:
 
 ```sh
-docker build --platform linux/amd64 -t chuchu-phase8-linux - < .github/docker/linux.Dockerfile
-docker run --rm --platform linux/amd64 -v "$PWD:/workspace:ro" -e CARGO_TARGET_DIR=/tmp/chuchu-target chuchu-phase8-linux cargo test --locked
+docker build --platform linux/amd64 -t chuchu-linux-dev - < .github/docker/linux.Dockerfile
+docker run --rm --platform linux/amd64 -v "$PWD:/workspace:ro" -e CARGO_TARGET_DIR=/tmp/chuchu-target chuchu-linux-dev cargo test --locked
 ```
 
 This executes x64 Linux binaries under Docker's emulation on an ARM Mac. It

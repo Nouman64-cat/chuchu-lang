@@ -10,8 +10,6 @@ reassign x to 6
 show x
 ```
 
-The previous `set x to 5` declaration syntax is no longer accepted.
-
 ## Native build and platform status
 
 One shared Rust/LLVM compiler targets its own host operating system. Rust 1.88+
@@ -20,10 +18,9 @@ The crate is `chuchu`, and the compiler executable is `cheeku` (`cheeku.exe` on
 Windows). There is no cross-OS `--target` option.
 
 - [macOS setup](docs/build-macos.md): Apple Silicon and Intel; LLVM is built from verified source as a shared library.
-- [Linux x64 GNU setup](docs/build-linux.md): Clang/ELF and libm; see the validation report.
+- [Linux x64 GNU setup](docs/build-linux.md): Clang/ELF and libm.
 - [Windows x64 MSVC setup](docs/build-windows.md): clang-cl, source-built static LLVM, VS Build Tools and SDK.
 - [Platform policy and current evidence](docs/platform-support.md).
-- [Phase 8 verification report](docs/phase8-verification.md).
 
 On macOS with matching Homebrew LLVM:
 
@@ -67,8 +64,8 @@ packages only after its tests pass. The tag-triggered release workflow
 requires all four jobs and creates a draft, not an unreviewed public release.
 
 Archives require external toolchains/runtimes; see
-[release requirements](docs/release-runtime.md). [Three-developer workflow](docs/phase8-collaboration.md)
-describes ownership and required-check recommendations. All four targets pass
+[release requirements](docs/release-runtime.md). [Contributing](CONTRIBUTING.md)
+describes the development workflow and required checks. All four targets pass
 [hosted native CI](https://github.com/chuchu-lang/chuchu-core/actions/runs/40815235497); no release has been published yet.
 
 ## Optimization and performance
@@ -94,4 +91,4 @@ scalar machine code.
 See [optimization/API details](docs/optimization.md),
 [measurement methodology](docs/performance.md), the
 [benchmark runner](benchmarks/README.md), and the
-[Phase 7 results and limitations](docs/phase7-performance-report.md).
+[benchmark results and limitations](docs/benchmark-results.md).

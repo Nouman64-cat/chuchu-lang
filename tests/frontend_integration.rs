@@ -16,7 +16,7 @@ fn check(source: &str) -> Result<(), TypeError> {
 }
 
 #[test]
-fn lexes_phase6_tokens_with_utf8_error_spans() {
+fn lexes_tokens_with_utf8_error_spans() {
     let source = "- * / ( ) [ ] , : -> = == != < <= > >= true false if else while function reassign return 1.25 2e-3";
     let tokens = tokenize(source).unwrap();
     assert_eq!(tokens[0].kind, TokenKind::Minus);

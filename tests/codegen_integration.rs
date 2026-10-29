@@ -70,7 +70,7 @@ fn generates_empty_program_without_output_runtime() {
 }
 
 #[test]
-fn phase6_storage_is_allocated_only_in_function_entries() {
+fn storage_is_allocated_only_in_function_entries() {
     let context = Context::create();
     let statements = Parser::new(tokenize("function f(n: int) -> int {\nassign i to 0\nwhile i < n {\nassign a to [1, 2] * [3, 4]\nreassign i to i + 1\n}\nreturn i\n}\nshow f(2)").unwrap()).parse_program().unwrap();
     let module = generate_program(&context, &statements).expect("Program should generate");
@@ -96,7 +96,7 @@ fn phase6_storage_is_allocated_only_in_function_entries() {
 }
 
 #[test]
-fn phase6_codegen_rejects_invalid_types_without_panicking() {
+fn codegen_rejects_invalid_types_without_panicking() {
     let context = Context::create();
     for source in [
         "show true + 1",

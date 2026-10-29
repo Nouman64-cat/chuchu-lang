@@ -161,7 +161,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn phase6_operators_and_float_exponents_have_exact_spans() {
+    fn operators_and_float_exponents_have_exact_spans() {
         let tokens = tokenize("-1.5e-2<=0").unwrap();
         assert_eq!(
             tokens[0],
@@ -187,7 +187,7 @@ mod tests {
     }
 
     #[test]
-    fn phase6_keywords_require_identifier_boundaries() {
+    fn keywords_require_identifier_boundaries() {
         let tokens = tokenize("while1 if_value return_value function_name reassignment").unwrap();
         assert!(
             tokens[..5]

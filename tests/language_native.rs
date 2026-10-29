@@ -13,7 +13,7 @@ impl Case {
     fn new() -> Self {
         for _ in 0..100 {
             let path = std::env::temp_dir().join(format!(
-                "cheeku phase6 {} {}",
+                "cheeku language {} {}",
                 std::process::id(),
                 NEXT.fetch_add(1, Ordering::Relaxed)
             ));
@@ -229,7 +229,7 @@ fn runtime_bounds_checks_cover_negative_and_upper_indices() {
     }
 }
 #[test]
-fn invalid_phase6_programs_preserve_existing_executable() {
+fn invalid_programs_preserve_existing_executable() {
     let case = Case::new();
     let executable = case.directory.join(executable_name("main"));
     fs::write(&executable, b"previous executable").unwrap();

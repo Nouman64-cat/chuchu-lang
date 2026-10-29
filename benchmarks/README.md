@@ -5,9 +5,11 @@ and historical profiling sources retain the syntax and source hashes from their
 original runs; regenerate measurements before comparing with the current sources.
 
 The runner requires Python's standard library, a release Cheeku compiler and the
-same macOS Apple Silicon LLVM/Clang setup as the compiler. Rust and C references
-run when `rustc` and `clang` are present; missing tools are recorded as skips.
-Python references use the interpreter running the harness.
+[host platform's LLVM/Clang setup](../docs/platform-support.md). Rust and C
+references run when `rustc` and `clang` are present; missing tools are recorded as
+skips. Python references use the interpreter running the harness.
+
+For example, on macOS with Homebrew LLVM:
 
 ```sh
 export LLVM_SYS_231_PREFIX="$(brew --prefix llvm)"
@@ -66,8 +68,8 @@ randomized rounds with seed 7. `--workloads integer_loop,array_multiply`,
 `--no-simd-probe` select subsets. `--cheeku` selects another release compiler.
 
 ```sh
-python3 benchmarks/run.py --output benchmarks/results/new.json --baseline benchmarks/results/phase7-full.json
-python3 benchmarks/compare.py benchmarks/results/phase7-full.json benchmarks/results/new.json --threshold 10 --noise-limit 0.15 --output benchmarks/results/comparison.json
+python3 benchmarks/run.py --output benchmarks/results/new.json --baseline benchmarks/results/macos-arm64-full.json
+python3 benchmarks/compare.py benchmarks/results/macos-arm64-full.json benchmarks/results/new.json --threshold 10 --noise-limit 0.15 --output benchmarks/results/comparison.json
 python3 -m unittest discover -s benchmarks -p test_runner.py
 ```
 
@@ -90,10 +92,10 @@ null means unavailable. See [measurement details](../docs/performance.md).
 - `results/preoptimization-baseline.json`: actual original compiler measurements;
   different workload size and warm-process methodology, not an apples-to-apples
   full-suite baseline. Its harness is saved as `baseline_profile.rs.txt`.
-- `results/phase7-full.json` / `.md`: full measured suite, all raw execution and
+- `results/macos-arm64-full.json` / `.md`: full measured suite, all raw execution and
   compilation samples, stage times, hashes, sizes, memory and IR evidence.
-- `results/phase7-repeat.json` / `.md` / `.regressions.json`: actual repeat of three
+- `results/macos-arm64-repeat.json` / `.md` / `.regressions.json`: actual repeat of three
   workloads at O0/O2/O3, including the vectorization probe.
-- [Phase 7 report](../docs/phase7-performance-report.md): findings and limitations.
+- [benchmark analysis](../docs/benchmark-results.md): findings and limitations.
 
 No generated executables are stored outside ignored `target` directories.

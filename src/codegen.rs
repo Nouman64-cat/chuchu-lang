@@ -121,7 +121,7 @@ impl std::error::Error for CodegenError {
     }
 }
 
-/// Compatibility utility for Phase 5 integer literals, SSA references, and raw LLVM additions.
+/// Low-level utility for integer literals, SSA references, and raw LLVM additions.
 /// Source-language checked arithmetic and typed storage are implemented by `generate_program`.
 /// Bindings must belong to the same LLVM context and current function as the builder.
 /// Additions require the builder to be positioned in an unterminated function block.

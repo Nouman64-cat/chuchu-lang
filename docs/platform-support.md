@@ -61,7 +61,7 @@ never delete the previous executable. Rust `fs::rename` replaces an existing
 output on supported Unix/Windows systems without first removing it. A locked
 Windows file can reject replacement; the error is returned and the old file is
 retained. No universal filesystem atomicity or crash durability is promised.
-Diagnostic IR/assembly files remain separately written, as in Phase 7.
+Diagnostic IR/assembly files are written separately from the executable.
 
 Setup: [macOS](build-macos.md), [Linux](build-linux.md), [Windows](build-windows.md).
 Distribution dependencies: [release runtime requirements](release-runtime.md).

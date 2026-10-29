@@ -73,4 +73,4 @@ levels. The low-level native APIs accept caller-managed artifact paths; use the
 compiler APIs for source/artifact collision validation.
 
 See [performance methodology](performance.md) and the
-[measured Phase 7 report](phase7-performance-report.md).
+[benchmark analysis](benchmark-results.md).

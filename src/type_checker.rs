@@ -430,7 +430,7 @@ mod tests {
     use crate::parser::Parser;
 
     #[test]
-    fn phase6_assignment_diagnostic_preserves_rhs_span() {
+    fn assignment_diagnostic_preserves_rhs_span() {
         let mut checker = TypeChecker::new(SymbolTable::new());
         let statements = parse_program("assign x to 1\nreassign x to true");
         assert_eq!(
@@ -444,7 +444,7 @@ mod tests {
     }
 
     #[test]
-    fn phase6_failing_block_restores_symbol_scope() {
+    fn failing_block_restores_symbol_scope() {
         let mut checker = TypeChecker::new(SymbolTable::new());
         let statements =
             parse_program("assign x to 1\nif true {\nassign x to 2.0\nshow missing\n}");
@@ -453,7 +453,7 @@ mod tests {
     }
 
     #[test]
-    fn phase6_function_signature_rejects_wrong_return_type() {
+    fn function_signature_rejects_wrong_return_type() {
         let mut checker = TypeChecker::new(SymbolTable::new());
         assert!(matches!(
             checker.check_program(&parse_program("function f() -> bool { return 1 }")),

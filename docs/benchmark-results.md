@@ -1,69 +1,9 @@
-# Phase 7 performance engineering report
+# Benchmark results and analysis
 
-## Scope and implementation
-
-Phase 7 adds LLVM optimization and measured performance tooling to the existing
-native compiler. No syntax, type system, AST, production lowering, runtime
-arithmetic or array semantics changed. No Phase 8 features, GPU execution,
-automatic parallelism, JIT, dependencies, commits, pushes or releases were added.
-
-A small `BuildOptions` configuration flows from the CLI through compiler and
-native APIs. Compatibility wrappers preserve existing signatures. O0 skips
-optional IR passes; O1/O2/O3 use LLVM 23's standard new-pass-manager pipelines
-`default<O1>`, `default<O2>`, `default<O3>` with corresponding target-machine
-levels. Default is O2 and generic host-architecture CPU; explicit `--cpu native`
-opts into host CPU features. Triple/data layout precede optimization. Modules are
-verified after lowering, around optimization, after each pass and before emission.
-Pass/target errors propagate without silently changing optimization policy.
-
-`--time-compilation` reports real stage intervals on stderr. `--emit-ir` and
-`--emit-assembly` expose optimized artifacts. Unknown/repeated flags fail;
-`-o` and optimization flags work in either order after the source. Output paths
-with spaces are supported. Source/artifact collisions are rejected. Existing
-staged linking, temporary cleanup and executable preservation on failure remain.
-
-### Work completed by stage
-
-| Stage | Result |
-|---|---|
-| 7.1 audit | Inspected native/compiler/CLI and typed/runtime/array lowering; preserved local example change; captured original compiler baseline |
-| 7.2 pipelines | O0–O3, target-aware passes, default O2, compatible APIs, structured errors |
-| 7.3 scalar/functions | Verified local promotion, fewer loads/stores, simplification and inlining through standard LLVM pipelines |
-| 7.4 memory/arrays | Measured temporary elimination and copy reduction; retained array cap 256 and checked evaluation order |
-| 7.5 loops/SIMD | Inspected reachable loops/recursion and actual vector IR/ARM64 assembly; no isolated SIMD speedup claim |
-| 7.6 compiler throughput | Independent timings, increasing input sizes; no speculative frontend rewrite where link/LLVM dominated |
-| 7.7 benchmarks | Eight workloads, four Chuchu levels, optimized Rust/C, Python; real full run with checksums |
-| 7.8 correctness | 22 native programs × four levels, exact stdout/stderr/status equivalence; all existing tests retained |
-| 7.9 regressions | Machine-readable, noise-aware comparator; actual independent subset rerun |
-| 7.10 documentation | Usage, APIs, methodology, raw results and this report |
-
-## Audit and baseline integrity
-
-The starting revision was `1eb8ea32729724de9997a3012ffece98484bd720`.
-Initial Git status was clean. During the audit `examples/main.chuchu` acquired
-`reassign x to 15`; that local edit was preserved. The initial `cargo test`
-therefore exposed a stale parser fixture, so the initial suite cannot be reported
-as green. Lexer/parser/native assertions were updated to verify the complete
-current example, including exact assignment and expression spans. Assertions
-were not removed or weakened. The latest local example produces **35**, despite
-the assignment text's historical expectation of 30.
-
-Before editing compiler source, the original release binary, library, IR and
-object were retained in ignored `target/phase7-audit`. Recorded measurements and
-the harness are in
-[`preoptimization-baseline.json`](../benchmarks/results/preoptimization-baseline.json)
-and [`baseline_profile.rs.txt`](../benchmarks/results/baseline_profile.rs.txt).
-That genuine historical sample is a 200,000-iteration sum, five in-process
-compilations and nine process executions. Its runtime median was 3.705 ms,
-executable 33,520 bytes and RSS 1,392,640 bytes. Warm object emission including
-target setup was about 0.74–0.85 ms; linking about 34–36 ms. The first cold LLVM
-sample was much slower (IR 7.24 ms, object/target 35.32 ms). Original target policy
-used host CPU features. There was no optional IR optimizer, so its optimizer time
-is null, not an invented zero-stage measurement.
-
-This is **not** directly comparable with the new full suite: workload size, CPU
-policy, warm-process and stage definitions differ. Controlled new O0 comparisons
-below hold those choices fixed and are the main performance evidence.
+These historical measurements describe the compiler and workload revisions
+recorded below. Saved results retain their original samples, source hashes and
+toolchain metadata. They are not measurements of every subsequent compiler
+revision; use the [benchmark runner](../benchmarks/README.md) for fresh results.
 
 ## Environment and reproducibility
 
@@ -71,13 +11,13 @@ Measured on Apple M2 Pro, 12 logical cores, 16 GiB RAM, ARM64;
 macOS 26.6.2 (25G83). LLVM 23.1.4, Inkwell 0.11.0;
 `rustc 1.99.1 (58cf8f9c3 2026-10-13)`; Apple Clang 21.0.0 (clang-2100.3.34.2);
 Python 3.14.6. Measurements began at `2026-10-28T14:35:47.036580+00:00`.
-Compiler SHA-256: `079cbdfa1e12f9c7f781e6f9207860232613118a8858e714147202f04546636a`. The final release rebuild has the
-same hash as the measured binary.
+Compiler SHA-256: `079cbdfa1e12f9c7f781e6f9207860232613118a8858e714147202f04546636a`. This hash identifies the
+measured binary.
 
 ```sh
 export LLVM_SYS_231_PREFIX="$(brew --prefix llvm)"
 cargo build --release
-python3 benchmarks/run.py --cheeku ./target/release/cheeku --output benchmarks/results/phase7-full.json
+python3 benchmarks/run.py --cheeku ./target/release/cheeku --output benchmarks/results/macos-arm64-full.json
 ```
 
 The full run completed: 57 workload/variant entries, seven execution samples
@@ -89,9 +29,9 @@ The vectorization probe is the extra 57th variant. Compilation wall times includ
 CLI startup and linking; execution includes native/interpreter startup and final
 output capture. Full parameters, raw samples, compiler stages, flags, hashes,
 inspection paths and memory observations are in
-[`phase7-full.json`](../benchmarks/results/phase7-full.json).
+[`macos-arm64-full.json`](../benchmarks/results/macos-arm64-full.json).
 The complete per-variant table including IQR, compile time, size and RSS is in
-[`phase7-full.md`](../benchmarks/results/phase7-full.md).
+[`macos-arm64-full.md`](../benchmarks/results/macos-arm64-full.md).
 
 References use identical algorithms/inputs; Rust `-O -C target-cpu=generic`, C
 `-O2 -ffp-contract=off`, Python standard lists and integers. C/Rust integer helpers
@@ -265,10 +205,10 @@ LLVM already gives measurable allocation and arithmetic improvements.
 An actual second run, same compiler hash and source/tool/target policy, executed:
 
 ```sh
-python3 benchmarks/run.py --cheeku ./target/release/cheeku --workloads integer_loop,float_loop,array_multiply --levels O0,O2,O3 --languages chuchu --repetitions 7 --compile-repetitions 3 --no-throughput --output benchmarks/results/phase7-repeat.json --baseline benchmarks/results/phase7-full.json
+python3 benchmarks/run.py --cheeku ./target/release/cheeku --workloads integer_loop,float_loop,array_multiply --levels O0,O2,O3 --languages chuchu --repetitions 7 --compile-repetitions 3 --no-throughput --output benchmarks/results/macos-arm64-repeat.json --baseline benchmarks/results/macos-arm64-full.json
 ```
 
-[`phase7-repeat.regressions.json`](../benchmarks/results/phase7-repeat.regressions.json)
+[`macos-arm64-repeat.regressions.json`](../benchmarks/results/macos-arm64-repeat.regressions.json)
 uses a 10% threshold and IQR/median noise limit 15%. Results:
 
 | Workload/variant | Baseline ms | Repeat ms | Change | Classification |
@@ -292,52 +232,11 @@ not hidden by the runtime-only regression classifier. No general absence of
 regressions beyond these workloads/this host is claimed. Comparator thresholds
 are configurable and ordinary correctness tests have no timing gates.
 
-## Correctness and final validation
-
-All commands completed successfully on this macOS Apple Silicon installation:
-
-```sh
-cargo fmt --all
-cargo fmt --all -- --check
-cargo test
-cargo clippy --all-targets -- -D warnings
-cargo build --release
-python3 -m unittest discover -s benchmarks -p test_runner.py
-```
-
-**132 Rust tests passed**, zero failures/ignored: 53 library unit tests, four CLI
-unit tests and 75 integration tests. The Python comparator suite passed three
-tests covering regression direction, noise/overlap and metadata mismatch.
-Formatting, warnings-denied Clippy and the release build passed. Inkwell and
-Homebrew LLVM dynamic discovery worked; no new linking workaround was needed.
-
-The native matrix compiles and runs **22 cases × O0/O1/O2/O3 = 88 executions**,
-comparing exact stdout, stderr and exit code against O0. Cases include arithmetic
-precedence, reassignment/branches, nested loops, nested calls, recursion and
-mutual recursion, arrays/copies/indexing/element-wise products/reductions, float
-rounding, signed zero, NaN comparison/minimum, i64 minimum, empty input, signed
-add/sub/mul/neg/abs/sum overflow, MIN/-1 division, integer/float division by zero,
-and both array bounds. Error cases must exit 1 and report runtime diagnostics;
-O3 preserves those guards. Checked product/reduction evaluation order is exercised.
-Other integration tests cover invalid modules/errors, actual pass execution,
-artifact protection, CLI diagnostics and output paths containing spaces. Existing
-Phase 1–6 frontend/codegen/native coverage remains enabled.
-
-Release examples were compiled into `target/phase7-manual` and executed:
-
-- `main.chuchu` at O0/O1/O2/O3: `35\n` each, empty stderr, success.
-- `syntax_smoke.chuchu` at O3: `25, 100, 4.5, true, 0, 1, 2` on separate lines.
-- `numerical.chuchu` at O3: `32, 3, 7` on separate lines.
-
-The expected 35 follows the preserved local reassignment; it is not a compiler
-behavior change. Native test and final command logs remain in ignored `target`;
-the permanent tests, benchmark JSON and report provide reproducible evidence.
-
 ## Remaining limitations and future work
 
-- Validated on one macOS ARM64 host only. No Linux/Windows portability or hosted
-  CI claim; no existing workflow was present and no untested LLVM-23 bootstrap
-  workflow was added.
+- These measurements cover one macOS ARM64 host. Compiler correctness on
+  other platforms is tracked separately in [platform support](platform-support.md);
+  these timings do not establish cross-platform performance.
 - Several native times are near process startup, with material variation. Static
   inputs and inlining/dead elements prevent broad dynamic throughput claims.
   No genuinely DRAM-sized array workload is possible under the current 256 limit.
@@ -351,74 +250,3 @@ the permanent tests, benchmark JSON and report provide reproducible evidence.
   repeated runs on a dedicated host, profile LLVM pass/verification costs, and
   study linker startup and richer compiler inputs. None requires changing syntax
   or removing checks; none is presented as implemented here.
-
-## Modified and created files
-
-The local edit to `examples/main.chuchu` was preserved, not authored as a Phase 7
-change. The following implementation, fixture, documentation and evidence files
-were modified or created (all paths relative to repository root):
-
-- `.gitignore`
-- `README.md`
-- `benchmarks/README.md`
-- `benchmarks/chuchu/array_copies.chuchu`
-- `benchmarks/chuchu/array_multiply.chuchu`
-- `benchmarks/chuchu/array_reduce.chuchu`
-- `benchmarks/chuchu/float_loop.chuchu`
-- `benchmarks/chuchu/function_calls.chuchu`
-- `benchmarks/chuchu/integer_loop.chuchu`
-- `benchmarks/chuchu/nested_loops.chuchu`
-- `benchmarks/chuchu/recursion.chuchu`
-- `benchmarks/compare.py`
-- `benchmarks/generate.py`
-- `benchmarks/manifest.json`
-- `benchmarks/reference/c/array_copies.c`
-- `benchmarks/reference/c/array_multiply.c`
-- `benchmarks/reference/c/array_reduce.c`
-- `benchmarks/reference/c/float_loop.c`
-- `benchmarks/reference/c/function_calls.c`
-- `benchmarks/reference/c/integer_loop.c`
-- `benchmarks/reference/c/nested_loops.c`
-- `benchmarks/reference/c/recursion.c`
-- `benchmarks/reference/python/array_copies.py`
-- `benchmarks/reference/python/array_multiply.py`
-- `benchmarks/reference/python/array_reduce.py`
-- `benchmarks/reference/python/float_loop.py`
-- `benchmarks/reference/python/function_calls.py`
-- `benchmarks/reference/python/integer_loop.py`
-- `benchmarks/reference/python/nested_loops.py`
-- `benchmarks/reference/python/recursion.py`
-- `benchmarks/reference/rust/array_copies.rs`
-- `benchmarks/reference/rust/array_multiply.rs`
-- `benchmarks/reference/rust/array_reduce.rs`
-- `benchmarks/reference/rust/float_loop.rs`
-- `benchmarks/reference/rust/function_calls.rs`
-- `benchmarks/reference/rust/integer_loop.rs`
-- `benchmarks/reference/rust/nested_loops.rs`
-- `benchmarks/reference/rust/recursion.rs`
-- `benchmarks/results/baseline_profile.rs.txt`
-- `benchmarks/results/phase7-full.json`
-- `benchmarks/results/phase7-full.md`
-- `benchmarks/results/phase7-repeat.json`
-- `benchmarks/results/phase7-repeat.md`
-- `benchmarks/results/phase7-repeat.regressions.json`
-- `benchmarks/results/preoptimization-baseline.json`
-- `benchmarks/run.py`
-- `benchmarks/test_runner.py`
-- `docs/optimization.md`
-- `docs/performance.md`
-- `docs/phase7-performance-report.md`
-- `src/compiler.rs`
-- `src/lib.rs`
-- `src/main.rs`
-- `src/native.rs`
-- `src/optimization.rs`
-- `tests/lexer_integration.rs`
-- `tests/native_integration.rs`
-- `tests/optimization_integration.rs`
-- `tests/parser_integration.rs`
-
-No Cargo dependency changes were required. Benchmark binaries, IR/assembly
-artifacts and validation logs remain under ignored `target` directories; saved
-JSON/Markdown evidence is intentionally included for review. No Git commit,
-push, release or Phase 8 work was performed.

@@ -3,7 +3,7 @@
 Use a release compiler and measure compilation separately from executable
 execution. Build instructions and one-command full benchmarks are in
 [benchmarks/README.md](../benchmarks/README.md). The
-[Phase 7 report](phase7-performance-report.md) records actual results and limits.
+[benchmark analysis](benchmark-results.md) records actual results and limits.
 
 ## Compilation timings
 
@@ -77,8 +77,7 @@ quartile intervals is a possible regression. Both limits are configurable.
 This is a heuristic screening tool, not a significance test. It reports by default;
 `--fail-on-regression` is reserved for controlled dedicated machines.
 
-Ordinary `cargo test` runs correctness, not timing thresholds. No GitHub Actions
-configuration existed, and no unvalidated LLVM-23/macOS bootstrap workflow was
-added. Local validation and the O0–O3 native matrix are automated; hosted CI remains
-unvalidated. Run benchmarks on an idle machine, preserve raw results and repeat
-possible regressions before attributing them to code changes.
+Ordinary `cargo test` and the cross-platform CI jobs check correctness rather
+than timing thresholds. Run benchmarks on an idle machine, preserve raw results
+and repeat possible regressions before attributing them to code changes. See
+[platform support](platform-support.md) for native validation evidence.

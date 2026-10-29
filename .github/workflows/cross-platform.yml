@@ -1,7 +1,6 @@
 name: Cross-platform native compiler
 on:
   push:
-    branches: [main, 'phase8/**']
   pull_request:
   workflow_dispatch:
 permissions:
