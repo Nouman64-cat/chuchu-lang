@@ -83,14 +83,12 @@ export default function HowItWorks() {
     setSelected(index);
   };
 
-  const stage = STAGES[selected];
-
   return (
     <>
       <div className="track" aria-hidden="true">
         <div
           className="fill"
-          style={{ width: `${((selected + 1) / STAGES.length) * 100}%` }}
+          style={{ transform: `scaleX(${(selected + 1) / STAGES.length})` }}
         />
       </div>
       <div className="steps">
@@ -108,29 +106,44 @@ export default function HowItWorks() {
         ))}
       </div>
 
-      {/* Keyed by stage so the panel remounts and replays its entrance. */}
-      <div key={selected} className="panel">
-        <div className="glass panel-info">
-          <p className="panel-step">
-            STEP {selected + 1} OF {STAGES.length}
-          </p>
-          <h3 className="panel-title">{stage.name}</h3>
-          <p className="panel-desc">{stage.description}</p>
-          <div className="panel-why">
-            <p className="panel-why-label">WHY IT MATTERS</p>
-            <p className="panel-why-text">{stage.why}</p>
-          </div>
-        </div>
-        <div className="panel-code">
-          <div className="panel-io">
-            <p className="panel-io-label">INPUT</p>
-            <pre>{stage.input}</pre>
-          </div>
-          <div className="panel-io">
-            <p className="panel-io-label">OUTPUT</p>
-            <pre className="reveal">{stage.output}</pre>
-          </div>
-        </div>
+      {/* Every stage shares one grid cell, so the area is always as tall as
+          the tallest stage and nothing below it moves on autoplay. Only the
+          selected one is visible; its key changes on selection so it
+          remounts and replays its entrance. */}
+      <div className="panels">
+        {STAGES.map((s, i) => {
+          const on = i === selected;
+          return (
+            <div
+              key={on ? `${i}-on` : i}
+              className={on ? "panel" : "panel panel-off"}
+              aria-hidden={on ? undefined : true}
+              inert={!on}
+            >
+              <div className="glass panel-info">
+                <p className="panel-step">
+                  STEP {i + 1} OF {STAGES.length}
+                </p>
+                <h3 className="panel-title">{s.name}</h3>
+                <p className="panel-desc">{s.description}</p>
+                <div className="panel-why">
+                  <p className="panel-why-label">WHY IT MATTERS</p>
+                  <p className="panel-why-text">{s.why}</p>
+                </div>
+              </div>
+              <div className="panel-code">
+                <div className="panel-io">
+                  <p className="panel-io-label">INPUT</p>
+                  <pre>{s.input}</pre>
+                </div>
+                <div className="panel-io">
+                  <p className="panel-io-label">OUTPUT</p>
+                  <pre className="reveal">{s.output}</pre>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </>
   );

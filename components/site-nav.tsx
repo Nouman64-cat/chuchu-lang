@@ -24,58 +24,47 @@ export default function SiteNav({ current }: SiteNavProps) {
     { label: "GitHub", href: site.links.source, external: true },
   ];
   return (
-    <div className="navwrap">
-      <nav className="glass navpill" aria-label="Main navigation">
-        <Link className="brand" href="/" aria-label="Chuchu home">
-          <Image
-            className="brand-logo"
-            src="/chuchu-logo-3.svg"
-            alt=""
-            width={50}
-            height={Math.round(50 * LOGO_RATIO)}
-            loading="eager"
-          />
-          <span className="brand-name">chuchu</span>
+    <MobileNav items={mobileItems} installHref={site.links.install}>
+      <Link className="brand" href="/" aria-label="Chuchu home">
+        <Image
+          className="brand-logo"
+          src="/chuchu-logo-3.svg"
+          alt=""
+          width={50}
+          height={Math.round(50 * LOGO_RATIO)}
+          loading="eager"
+        />
+        <span className="brand-name">chuchu</span>
+      </Link>
+      <div className="navlinks">
+        <Link
+          className="navlink"
+          href="/about"
+          aria-current={current === "about" ? "page" : undefined}
+        >
+          About
         </Link>
-        <div className="navlinks">
-          <Link
-            className="navlink"
-            href="/about"
-            aria-current={current === "about" ? "page" : undefined}
-          >
-            About
-          </Link>
-          <a className="navlink" href={site.links.docs}>
-            Documentation
-          </a>
-          <Link
-            className="navlink"
-            href="/community"
-            aria-current={current === "community" ? "page" : undefined}
-          >
-            Community
-          </Link>
-          <Link
-            className="navlink"
-            href="/downloads"
-            aria-current={current === "downloads" ? "page" : undefined}
-          >
-            Downloads
-          </Link>
-          <a className="navlink" href={site.links.source}>
-            GitHub
-          </a>
-        </div>
-        <div className="navend">
-          <a className="btn btn-primary btn-nav" href={site.links.install}>
-            Get started{" "}
-            <span className="arr" aria-hidden="true">
-              &rarr;
-            </span>
-          </a>
-          <MobileNav items={mobileItems} />
-        </div>
-      </nav>
-    </div>
+        <a className="navlink" href={site.links.docs}>
+          Documentation
+        </a>
+        <Link
+          className="navlink"
+          href="/community"
+          aria-current={current === "community" ? "page" : undefined}
+        >
+          Community
+        </Link>
+        <Link
+          className="navlink"
+          href="/downloads"
+          aria-current={current === "downloads" ? "page" : undefined}
+        >
+          Downloads
+        </Link>
+        <a className="navlink" href={site.links.source}>
+          GitHub
+        </a>
+      </div>
+    </MobileNav>
   );
 }

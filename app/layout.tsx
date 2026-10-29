@@ -81,6 +81,11 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  // Lets the page draw under notches; the nav and footer pad with
+  // env(safe-area-inset-*) so nothing ends up behind them.
+  viewportFit: "cover",
   themeColor: "#10B23F",
   colorScheme: "light",
 };

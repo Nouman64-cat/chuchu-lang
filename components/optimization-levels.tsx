@@ -44,7 +44,19 @@ export default function OptimizationLevels() {
           </button>
         ))}
       </div>
-      <p className="opt-text">{LEVELS[level].text}</p>
+      {/* All texts share one grid cell so the card keeps the height of the
+          longest one and does not jump when the level changes. */}
+      <div className="opt-texts">
+        {LEVELS.map((l, i) => (
+          <p
+            key={l.key}
+            className={i === level ? "opt-text" : "opt-text opt-text-off"}
+            aria-hidden={i === level ? undefined : true}
+          >
+            {l.text}
+          </p>
+        ))}
+      </div>
     </>
   );
 }
