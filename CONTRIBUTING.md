@@ -6,6 +6,9 @@ semantics and runtime safety checks when making portability changes.
 
 ## Development setup
 
+Start with the [setup guide](setup.md) to install prerequisites, build the
+compiler, and run an example on your operating system.
+
 Follow the [macOS](docs/build-macos.md), [Linux](docs/build-linux.md), or
 [Windows](docs/build-windows.md) guide for Rust, LLVM and linker prerequisites.
 The [platform support guide](docs/platform-support.md) describes the supported

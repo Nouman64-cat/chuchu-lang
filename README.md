@@ -12,6 +12,8 @@ show x
 
 ## Native build and platform status
 
+New contributors should start with the [setup guide](setup.md).
+
 One shared Rust/LLVM compiler targets its own host operating system. Rust 1.88+
 and LLVM **23.1.x** are required; CI pins Rust 1.99.1 and the full LLVM 23.1.4 SDK.
 The crate is `chuchu`, and the compiler executable is `cheeku` (`cheeku.exe` on
