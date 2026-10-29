@@ -2,6 +2,10 @@ import type { CSSProperties } from "react";
 import Image from "next/image";
 import HowItWorks from "@/components/how-it-works";
 import OptimizationLevels from "@/components/optimization-levels";
+import SiteFooter from "@/components/site-footer";
+import SiteNav from "@/components/site-nav";
+import { JsonLd } from "@/lib/json-ld";
+import { projectStructuredData } from "@/lib/structured-data";
 
 const docsUrl = "https://docs.chuchu-lang.org";
 const installUrl = `${docsUrl}/docs/getting-started/installation/`;
@@ -53,6 +57,8 @@ const INFERRED: { name: string; value: string; type: string; chip: string }[] = 
 export default function Home() {
   return (
     <div id="top" className="v2">
+      <JsonLd data={projectStructuredData()} />
+
       {/* AMBIENT LAYER */}
       <div className="ambient" aria-hidden="true">
         <div className="gridpaper" />
@@ -77,41 +83,7 @@ export default function Home() {
       </div>
 
       {/* NAV */}
-      <div className="navwrap">
-        <nav className="glass navpill" aria-label="Main navigation">
-          <a className="brand" href="#top" aria-label="Chuchu home">
-            <Image
-              className="brand-logo"
-              src="/chuchu-logo-3.svg"
-              alt=""
-              width={50}
-              height={Math.round(50 * LOGO_RATIO)}
-              loading="eager"
-            />
-            <span className="brand-name">chuchu</span>
-          </a>
-          <div className="navlinks">
-            <a className="navlink" href="#how-it-works">
-              How it works
-            </a>
-            <a className="navlink" href="#features">
-              Features
-            </a>
-            <a className="navlink" href={docsUrl}>
-              Documentation
-            </a>
-            <a className="navlink" href={sourceUrl}>
-              GitHub
-            </a>
-          </div>
-          <a className="btn btn-primary btn-nav" href={installUrl}>
-            Get started{" "}
-            <span className="arr" aria-hidden="true">
-              &rarr;
-            </span>
-          </a>
-        </nav>
-      </div>
+      <SiteNav current="home" />
 
       {/* HERO */}
       <section className="wrap hero" aria-labelledby="hero-title">
@@ -145,7 +117,7 @@ export default function Home() {
             </span>
           </h1>
           <p className="rise hero-text" style={{ "--d": ".28s" } as Vars}>
-            Chuchu is a small, statically typed language with inferred types.
+            Chuchu is a high-performance, statically typed language with inferred types.
             Its compiler, Cheeku, turns your code into fast native programs
             through LLVM.
           </p>
@@ -327,7 +299,7 @@ export default function Home() {
             02 &middot; WHY CHUCHU
           </p>
           <h2 id="feat-title" className="h2 features-title">
-            Small language. Serious foundations.
+            High-performance language. Serious foundations.
           </h2>
 
           <div className="bento">
@@ -462,30 +434,7 @@ export default function Home() {
       </section>
 
       {/* FOOTER */}
-      <div className="wrap">
-        <footer className="footer">
-          <a className="footer-brand" href="#top" aria-label="Chuchu home">
-            <Image
-              className="footer-logo"
-              src="/chuchu-logo-3.svg"
-              alt=""
-              width={40}
-              height={Math.round(40 * LOGO_RATIO)}
-              loading="eager"
-            />
-            chuchu
-          </a>
-          <span>Simple syntax. Native possibilities.</span>
-          <nav className="footer-nav" aria-label="Footer navigation">
-            <a className="navlink" href={docsUrl}>
-              Documentation
-            </a>
-            <a className="navlink" href={sourceUrl}>
-              GitHub
-            </a>
-          </nav>
-        </footer>
-      </div>
+      <SiteFooter />
     </div>
   );
 }
