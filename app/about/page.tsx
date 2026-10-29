@@ -131,6 +131,13 @@ const LIMITS = [
   "Host-native only — there is no cross-OS target flag",
 ];
 
+const TEAM = [
+  { name: "Nouman Ejaz", initials: "NE", color: "#10B23F" },
+  { name: "Abdul Sammad", initials: "AS", color: "#FAD705" },
+  { name: "Arslan Amjad", initials: "AA", color: "#FD8AB9" },
+  { name: "Ammar Baig", initials: "AB", color: "#A7B8FF" },
+];
+
 export default function AboutPage() {
   return (
     <div id="top" className="v2">
@@ -417,11 +424,40 @@ export default function AboutPage() {
         </p>
       </section>
 
+      {/* TEAM */}
+      <section className="wrap about-section" aria-labelledby="team-title">
+        <p className="eyebrow">
+          <b />
+          06 &middot; THE TEAM
+        </p>
+        <h2 id="team-title" className="h2 about-h2">
+          The minds behind Chuchu
+        </h2>
+        <p className="lede">
+          Meet the people building the Chuchu programming language.
+        </p>
+
+        <ul className="about-team" role="list">
+          {TEAM.map((member) => (
+            <li key={member.name} className="glass card about-team-card">
+              <span
+                className="about-team-initials"
+                style={{ backgroundColor: member.color }}
+                aria-hidden="true"
+              >
+                {member.initials}
+              </span>
+              <h3 className="about-team-name">{member.name}</h3>
+            </li>
+          ))}
+        </ul>
+      </section>
+
       {/* OPEN SOURCE */}
       <section className="wrap about-section" aria-labelledby="open-title">
         <p className="eyebrow">
           <b />
-          06 &middot; OPEN SOURCE
+          07 &middot; OPEN SOURCE
         </p>
         <h2 id="open-title" className="h2 about-h2">
           Built in the open
