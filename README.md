@@ -32,7 +32,9 @@ data can never drift apart.
 - `app/apple-icon.tsx` — generated apple touch icon
 
 Set `NEXT_PUBLIC_SITE_URL` to override the production origin (defaults to
-`https://chuchu-lang.org`).
+`https://www.chuchu-lang.org`). Production apex-domain overrides are normalized
+to `https://www.chuchu-lang.org` to match the hosting redirect. Sitemap entries,
+robots.txt, canonical links and structured data all use this same origin.
 
 ## Running locally
 

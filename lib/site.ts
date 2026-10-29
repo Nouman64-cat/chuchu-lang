@@ -6,10 +6,23 @@
  * disagrees with itself.
  */
 
-const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://chuchu-lang.org";
+const configuredSiteUrl = new URL(
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.chuchu-lang.org",
+);
+
+// Production redirects the apex domain to www. Canonicals and sitemap entries
+// must name that final destination, including with an older deployment override.
+if (
+  configuredSiteUrl.hostname === "chuchu-lang.org" ||
+  configuredSiteUrl.hostname === "www.chuchu-lang.org"
+) {
+  configuredSiteUrl.protocol = "https:";
+  configuredSiteUrl.hostname = "www.chuchu-lang.org";
+  configuredSiteUrl.port = "";
+}
 
 /** Absolute origin without a trailing slash. */
-export const SITE_URL = rawSiteUrl.replace(/\/+$/, "");
+export const SITE_URL = configuredSiteUrl.origin;
 
 export const site = {
   name: "Chuchu",
