@@ -8,7 +8,7 @@ cross-compilation option is provided.
 |---|---|---|---|
 | macOS Apple Silicon | `aarch64-apple-darwin` | xcrun clang / Mach-O | Local native tests pass |
 | macOS Intel | `x86_64-apple-darwin` | xcrun clang / Mach-O | NOT VERIFIED; CI job provided |
-| Linux x64 GNU | `x86_64-unknown-linux-gnu` | Clang + libm / ELF | See the Phase 8 verification report |
+| Linux x64 GNU | `x86_64-unknown-linux-gnu` | Clang + libm / ELF | Hosted native CI passes (138 Rust tests) |
 | Windows x64 MSVC | `x86_64-pc-windows-msvc` | clang-cl + MSVC CRT / PE/COFF | NOT VERIFIED; CI job provided |
 
 Implementation coverage is not evidence of validation. The matrix above must be

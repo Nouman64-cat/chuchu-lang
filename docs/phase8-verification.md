@@ -22,12 +22,17 @@ locking. No language feature or optimization default was removed.
 |---|---|---|---|---|
 | macOS ARM64 | PASS | PASS | PASS | NOT VERIFIED |
 | macOS Intel | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
-| Linux x64 GNU | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
+| Linux x64 GNU | PASS | PASS | PASS | PASS |
 | Windows x64 MSVC | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED | NOT VERIFIED |
 
 macOS uses installed LLVM 23.1.4 and Rust 1.99.1. Source changes are validated by
 build, full tests, warnings-denied Clippy, formatting, and native release smoke
 programs. Python benchmark portability/regression checks cover six tests.
+
+Linux hosted evidence: [native job at 4556aec](https://github.com/chuchu-lang/chuchu-core/actions/runs/40799074277/job/123202789214):
+138 Rust tests, debug/release builds, formatting, warnings-denied Clippy, six
+Python tests, 12 release example executions, benchmark smoke and packaging pass
+with LLVM 23.1.4 / Rust 1.99.1 on the x64 GNU runner.
 
 ## Commands
 
@@ -49,21 +54,40 @@ for exact platform setup and execution commands.
 
 ## Files
 
-- `Cargo.toml`: declare the existing code's Rust minimum (1.88).
-- `src/native.rs`, `src/main.rs`: driver selection, default/staged filenames,
-  linker diagnostics, libm/MSVC policy, safe-publication documentation.
-- `src/optimization.rs`: native Windows x64 MSVC guard, COFF relocation policy.
-- `src/codegen/program/runtime.rs`: platform CRT write ABI.
-- `tests/support/mod.rs`, native/phase6/optimization integration tests: shared
-  execution, exact newline bytes, new portability regression coverage.
-- `benchmarks/run.py`, `benchmarks/test_runner.py`: portable discovery, metadata,
-  executable names, startup controls, unavailable memory, x86 inspection/tests.
-- `.github/scripts/`: pinned SDK provisioning, native smoke and packaging.
-- `.github/workflows/`: four-target CI, shared native checks, gated draft releases.
-- `.github/docker/linux.Dockerfile`: Linux x64 container validation environment.
-- `README.md`, platform/build/audit/release/collaboration/report documents:
-  setup, ABI decisions, runtime dependencies, ownership, limitations, evidence.
-- `.gitignore`: ignore generated Python helper caches.
+| File | Change |
+|---|---|
+| `Cargo.toml` | Declare Rust 1.88 minimum; existing LLVM/Inkwell policy retained. |
+| `src/native.rs` | Platform linker drivers, libm/MSVC arguments, staging names and publication policy. |
+| `src/main.rs` | Platform default output and CLI regression expectation. |
+| `src/optimization.rs` | Windows x64 MSVC guard and native COFF relocation policy. |
+| `src/codegen/program/runtime.rs` | Correct Unix write / MSVC _write ABI. |
+| `tests/support/mod.rs` | Shared executable suffix and exact native newline helpers. |
+| `tests/native_integration.rs` | Portable real execution, object format, ABI, paths, replacements and Windows locking. |
+| `tests/phase6_native.rs` | Run existing language/runtime native tests on every OS. |
+| `tests/optimization_integration.rs` | Run exact O0–O3 semantics matrix and compiler artifact checks on every OS. |
+| `benchmarks/run.py` | Portable tool discovery, metadata, startup controls, suffixes and unavailable memory. |
+| `benchmarks/test_runner.py` | Six benchmark portability and correctness regression tests. |
+| `.github/scripts/provision-llvm.py` | Checksum-pinned SDK/source provisioning and platform loader configuration. |
+| `.github/scripts/test_provision.py` | Regression test preventing SDK libc++ from overriding the macOS system runtime. |
+| `.github/scripts/smoke.py` | Execute three representative release examples at all four optimization levels. |
+| `.github/scripts/package-release.py` | Host-checked native archive labels, license, examples and dependency requirements. |
+| `.github/workflows/cross-platform.yml` | Four native target jobs on pushes and PRs. |
+| `.github/workflows/native-build.yml` | Shared build, tests, Clippy, smoke, benchmark, cache and packaging checks. |
+| `.github/workflows/release.yml` | Draft release only after every native target succeeds. |
+| `.github/docker/linux.Dockerfile` | Additional Ubuntu x64 container verification environment. |
+| `.gitignore` | Ignore generated Python helper caches. |
+| `README.md` | Native platform policy and guide links. |
+| `docs/platform-support.md` | Target matrix, ABI, exact output names and replacement guarantees. |
+| `docs/build-macos.md` | Apple Silicon/Intel setup, native commands and SDK loader guidance. |
+| `docs/build-linux.md` | GNU/Clang/libm setup, commands and Docker verification. |
+| `docs/build-windows.md` | MSVC/SDK/source LLVM prerequisites, PowerShell commands and CRT behavior. |
+| `docs/phase8-audit.md` | Original portability assumptions and corresponding decisions. |
+| `docs/phase8-collaboration.md` | Three-developer ownership, temporary branches and integration order. |
+| `docs/release-runtime.md` | Archive labels and unbundled runtime/toolchain dependencies. |
+| `docs/phase8-verification.md` | This implementation and evidence report. |
+
+`Cargo.lock`, the frontend, array/arithmetic semantics, and examples are unchanged
+from the completed `assign` migration at `3fe3d90`.
 
 ## Remaining limits
 

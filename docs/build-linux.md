@@ -34,7 +34,8 @@ python3 .github/scripts/smoke.py --compiler target/release/cheeku
 
 Alternatively install `llvm-23-dev` and `clang-23` from the official
 [apt.llvm.org](https://apt.llvm.org/) repository for your distribution, set the
-prefix to that installation, and ensure its version is 23.1.x. That package
+prefix so that its `bin` directory contains `llvm-config-23` (Ubuntu: `/usr`),
+and ensure its version is 23.1.x. That package
 repository is rolling; it is not a reproducible exact-patch release source.
 The included Ubuntu container uses this route and records the actual version.
 

@@ -27,8 +27,12 @@ provisioner instead if needed (Python 3.12+):
 ```sh
 python3 .github/scripts/provision-llvm.py --directory "$PWD/target/llvm-sdk"
 export LLVM_SYS_231_PREFIX="$(cat target/llvm-sdk/prefix.txt)"
-export DYLD_LIBRARY_PATH="$LLVM_SYS_231_PREFIX/lib${DYLD_LIBRARY_PATH:+:$DYLD_LIBRARY_PATH}"
+export DYLD_LIBRARY_PATH="$LLVM_SYS_231_PREFIX/chuchu-runtime-lib${DYLD_LIBRARY_PATH:+:$DYLD_LIBRARY_PATH}"
 ```
+
+The provisioner creates an LLVM-only loader directory. Do not expose the whole
+SDK `lib` directory through `DYLD_LIBRARY_PATH`: its bundled libc++ can conflict
+with the system runtime used by Rust and other tools.
 
 On Intel, install CMake and Ninja (`brew install cmake ninja`); the provisioner
 builds LLVM 23.1.4 from checksum-verified official source with the X86 backend,

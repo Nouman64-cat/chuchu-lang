@@ -11,5 +11,5 @@ RUN curl --proto '=https' --tlsv1.2 -fsSL https://sh.rustup.rs -o /tmp/rustup.sh
     && sh /tmp/rustup.sh -y --default-toolchain 1.99.1 --profile minimal --component rustfmt,clippy \
     && rm /tmp/rustup.sh
 ENV PATH="/root/.cargo/bin:/usr/lib/llvm-23/bin:${PATH}"
-ENV LLVM_SYS_231_PREFIX=/usr/lib/llvm-23
+ENV LLVM_SYS_231_PREFIX=/usr
 WORKDIR /workspace

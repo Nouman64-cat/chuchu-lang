@@ -13,7 +13,9 @@ Starting compiler revision: `3fe3d90` (the completed `assign` migration).
 | All tests execute extensionless paths | Executable suffix helpers for actual program execution |
 | Benchmarks call brew/sysctl/sw_vers/true unconditionally | Conditional metadata, unavailable measurements as null, compiled native startup control |
 | SIMD inspection counts only AArch64 instructions | Also count x86 packed floating arithmetic |
-| LLVM shared preference assumed usable on Windows | Existing llvm-sys rejects MSVC shared linking and falls back to full SDK static libraries |
+| LLVM shared preference assumed usable on Windows | Existing llvm-sys rejects MSVC shared linking and falls back to native source-built static libraries |
+| Windows SDK embeds an S: drive zstd path | Rebuild pinned LLVM source without optional compression/XML, retain SDK clang-cl |
+| macOS SDK loader path exposes bundled libc++ | Expose only LLVM dylibs through a dedicated loader directory |
 | No CI, package workflow, or OS setup guides | Pinned SDK provisioning, build/test matrix, test-gated packaging, explicit dependency requirements |
 
 The lexer/parser/AST/type checker and checked arithmetic/array lowering are shared.

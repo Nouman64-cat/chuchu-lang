@@ -4,6 +4,9 @@
 The official Windows installer is not sufficient: llvm-sys needs llvm-config,
 headers and static libraries. Intel macOS has no SDK asset in this release,
 so build the same release's verified source with the X86 native backend.
+Windows also rebuilds LLVM: the upstream SDK embeds nonrelocatable system
+library paths (including its release builder's S: drive). Keep its clang-cl
+driver, but install a native static LLVM build without optional compression/XML.
 """
 import argparse
 import hashlib
@@ -17,6 +20,7 @@ import urllib.request
 import urllib.parse
 
 VERSION = '23.1.4'
+SOURCE = ('llvm-project-23.1.4.src.tar.xz', '819ecf7351f1a66f76b2d701d8942faaf5faeb324cb90c9d5b090de142434bb2')
 ASSETS = {
     ('Darwin', 'arm64'): ('LLVM-23.1.4-macOS-ARM64.tar.xz', '5d3179db39adeca5b17a34d82708fe976bc60e055b05fe557878fb3fb64d39ef'),
     ('Linux', 'x86_64'): ('LLVM-23.1.4-Linux-X64.tar.xz', '25d814fda50d5fb0084b42be09605d8b1595d49d5e2e03a3345d7e112ff6f9f3'),
@@ -55,6 +59,13 @@ def activate(prefix):
             raise RuntimeError('Windows SDK is missing required LLVM static libraries')
         if not (prefix / 'bin/clang-cl.exe').is_file():
             raise RuntimeError('Windows SDK is missing clang-cl.exe')
+    if platform.system() == 'Darwin':
+        runtime = prefix / 'chuchu-runtime-lib'
+        runtime.mkdir(exist_ok=True)
+        for library in (prefix / 'lib').glob('libLLVM*.dylib'):
+            link = runtime / library.name
+            if not link.is_symlink():
+                link.symlink_to(Path('..') / 'lib' / library.name)
     print(f'LLVM_SYS_231_PREFIX={prefix}', flush=True)
     if os.environ.get('GITHUB_ENV'):
         with open(os.environ['GITHUB_ENV'], 'a') as env:
@@ -62,7 +73,8 @@ def activate(prefix):
             if platform.system() == 'Linux':
                 env.write(f'LD_LIBRARY_PATH={prefix / "lib"}:{os.environ.get("LD_LIBRARY_PATH", "")}\n')
             if platform.system() == 'Darwin':
-                env.write(f'DYLD_LIBRARY_PATH={prefix / "lib"}:{os.environ.get("DYLD_LIBRARY_PATH", "")}\n')
+                # Expose LLVM alone, preserving rustc/Node's system libc++.
+                env.write(f'DYLD_LIBRARY_PATH={runtime}:{os.environ.get("DYLD_LIBRARY_PATH", "")}\n')
         with open(os.environ['GITHUB_PATH'], 'a') as paths:
             paths.write(f'{prefix / "bin"}\n')
 
@@ -84,25 +96,34 @@ def main():
     name, digest = ASSETS[key]
     download_archive(name, digest, destination)
     if key == ('Darwin', 'x86_64'):
-        source = destination / f'llvm-project-{VERSION}.src/llvm'
-        build = destination / 'llvm-build'
         prefix = destination / 'install'
-        run(['cmake', '-S', source, '-B', build, '-G', 'Ninja',
-             '-DCMAKE_BUILD_TYPE=Release', f'-DCMAKE_INSTALL_PREFIX={prefix}',
-             '-DLLVM_TARGETS_TO_BUILD=X86', '-DLLVM_INCLUDE_TESTS=OFF',
-             '-DLLVM_INCLUDE_BENCHMARKS=OFF', '-DLLVM_INCLUDE_EXAMPLES=OFF',
-             '-DLLVM_ENABLE_BINDINGS=OFF', '-DLLVM_BUILD_LLVM_DYLIB=ON',
-             '-DLLVM_LINK_LLVM_DYLIB=ON', '-DLLVM_ENABLE_ZSTD=OFF',
-             '-DLLVM_ENABLE_ZLIB=OFF', '-DLLVM_ENABLE_LIBXML2=OFF'])
-        run(['cmake', '--build', build, '--target', 'install', '--parallel', '3'])
-        shutil.rmtree(build)
-        shutil.rmtree(source.parent)
     else:
         candidates = list(destination.glob('*/bin/llvm-config*'))
         config = next((p for p in candidates if p.name in ('llvm-config', 'llvm-config.exe')), None)
         if config is None:
             raise RuntimeError('Archive has no bin/llvm-config; a full development SDK is required')
         prefix = config.parent.parent
+    if key == ('Darwin', 'x86_64') or system == 'Windows':
+        if system == 'Windows':
+            download_archive(*SOURCE, destination)
+        source = destination / f'llvm-project-{VERSION}.src/llvm'
+        build = destination / 'llvm-build'
+        options = ['cmake', '-S', source, '-B', build, '-G', 'Ninja',
+                   '-DCMAKE_BUILD_TYPE=Release', f'-DCMAKE_INSTALL_PREFIX={prefix}',
+                   '-DLLVM_TARGETS_TO_BUILD=X86', '-DLLVM_INCLUDE_TESTS=OFF',
+                   '-DLLVM_INCLUDE_BENCHMARKS=OFF', '-DLLVM_INCLUDE_EXAMPLES=OFF',
+                   '-DLLVM_ENABLE_BINDINGS=OFF', '-DLLVM_ENABLE_ZSTD=OFF',
+                   '-DLLVM_ENABLE_ZLIB=OFF', '-DLLVM_ENABLE_LIBXML2=OFF']
+        if system == 'Windows':
+            # llvm-sys requires static LLVM on MSVC. Use the same DLL CRT as Rust.
+            options += ['-DLLVM_BUILD_LLVM_DYLIB=OFF', '-DLLVM_LINK_LLVM_DYLIB=OFF',
+                        '-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL']
+        else:
+            options += ['-DLLVM_BUILD_LLVM_DYLIB=ON', '-DLLVM_LINK_LLVM_DYLIB=ON']
+        run(options)
+        run(['cmake', '--build', build, '--target', 'install', '--parallel', '3'])
+        shutil.rmtree(build)
+        shutil.rmtree(source.parent)
     activate(prefix)
     marker.write_text(str(prefix))
 

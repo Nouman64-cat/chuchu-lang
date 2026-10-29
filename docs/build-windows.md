@@ -9,9 +9,13 @@ Install:
    the x64 MSVC host toolchain.
 2. Visual Studio 2022 Build Tools or Visual Studio with **Desktop development
    with C++**, including x64 libraries and a Windows SDK.
-3. Python 3.12+ and the **full LLVM 23.1.4 Windows SDK**, including llvm-config.exe,
-   headers, static `.lib` libraries, and clang-cl.exe. The small LLVM installer
-   alone is insufficient for building the Rust compiler.
+3. Python 3.12+, CMake and Ninja (`python -m pip install cmake ninja`). The
+   provisioner downloads the full LLVM 23.1.4 SDK for clang-cl, then builds LLVM
+   from checksum-verified source. The upstream SDK's static-link metadata embeds
+   the release builder's `S:` drive path to zstd, so it cannot be used unchanged.
+   The source build disables optional zlib/zstd/XML dependencies and installs
+   matching static LLVM libraries using the MSVC DLL CRT. This is a substantial
+   source build; keep its SDK directory to reuse it.
 
 Open **Developer PowerShell for VS 2022**, configured for x64. Provision the full
 checksum-verified SDK and build:
