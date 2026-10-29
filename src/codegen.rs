@@ -261,6 +261,16 @@ pub fn generate_program<'ctx>(
     program::generate(context, statements)
 }
 
+/// Production lowering with optional source-level native debug metadata.
+pub fn generate_program_with_options<'ctx>(
+    context: &'ctx Context,
+    statements: &[Stmt],
+    source: Option<&crate::source::SourceFile>,
+    options: &crate::optimization::BuildOptions,
+) -> Result<Module<'ctx>, CodegenError> {
+    program::generate_with_options(context, statements, source, options)
+}
+
 /// Generates a verified module containing `main`, which returns an i32 zero.
 /// The returned module borrows the caller's LLVM context.
 pub fn generate_module<'ctx>(context: &'ctx Context) -> Result<Module<'ctx>, CodegenError> {

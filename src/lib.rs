@@ -5,6 +5,7 @@ pub mod lexer;
 pub mod native;
 pub mod optimization;
 pub mod parser;
+pub mod source;
 pub mod symbol_table;
 pub mod token;
 pub mod type_checker;

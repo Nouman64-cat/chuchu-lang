@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 
 use inkwell::context::Context;
 
-use crate::codegen::{CodegenError, generate_program};
+use crate::codegen::{CodegenError, generate_program_with_options};
 use crate::lexer::{LexError, tokenize};
 use crate::native::{NativeError, NativeTimings, build_executable_with_options};
 use crate::optimization::BuildOptions;
@@ -16,6 +16,7 @@ use std::time::{Duration, Instant};
 #[derive(Debug)]
 pub enum CompileError {
     UnsupportedExtension(PathBuf),
+    MissingDebugSource,
     SourceRead { path: PathBuf, source: io::Error },
     InputOutputConflict(PathBuf),
     ConflictingOutputs(PathBuf),
@@ -29,6 +30,10 @@ pub enum CompileError {
 impl fmt::Display for CompileError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Self::MissingDebugSource => write!(
+                f,
+                "Debug compilation requires a source file; use compile_file_with_options or compile_named_source_with_options"
+            ),
             Self::UnsupportedExtension(path) => {
                 write!(f, "Expected a .chuchu source file: {}", path.display())
             }
@@ -178,16 +183,27 @@ fn validate_artifacts(
     options: &BuildOptions,
     input: Option<&Path>,
 ) -> Result<(), CompileError> {
+    let sidecar = (options.debug_info == crate::optimization::DebugInfo::Full)
+        .then(|| crate::native::debug_symbol_path(output))
+        .flatten();
     let mut paths = vec![output];
+    paths.extend(sidecar.as_deref());
     paths.extend(options.emit_ir.as_deref());
     paths.extend(options.emit_assembly.as_deref());
     let mut seen = Vec::new();
     for path in paths {
         let normalized = identity(path);
-        if input.is_some_and(|input| identity(input) == normalized) {
+        if input.is_some_and(|input| {
+            let input = identity(input);
+            input == normalized || input.starts_with(&normalized)
+        }) {
             return Err(CompileError::InputOutputConflict(path.to_owned()));
         }
-        if seen.contains(&normalized) {
+        if seen.iter().any(|previous: &PathBuf| {
+            previous == &normalized
+                || previous.starts_with(&normalized)
+                || normalized.starts_with(previous)
+        }) {
             return Err(CompileError::ConflictingOutputs(path.to_owned()));
         }
         seen.push(normalized);
@@ -205,8 +221,45 @@ pub fn compile_source_with_options(
     output: &Path,
     options: &BuildOptions,
 ) -> Result<CompilationTimings, CompileError> {
+    compile_input(source, None, output, options)
+}
+
+/// Compile source with a real, stable debugger-visible file. The file must contain
+/// exactly this source, so the debugger never displays unrelated source text.
+pub fn compile_named_source_with_options(
+    source: &crate::source::SourceFile,
+    output: &Path,
+    options: &BuildOptions,
+) -> Result<CompilationTimings, CompileError> {
+    let path = identity(source.path());
+    let disk = std::fs::read_to_string(&path).map_err(|source| CompileError::SourceRead {
+        path: path.clone(),
+        source,
+    })?;
+    if disk != source.text() {
+        return Err(CompileError::SourceRead {
+            path,
+            source: io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "Named debug source differs from file contents",
+            ),
+        });
+    }
+    let source = crate::source::SourceFile::new(path, disk);
+    compile_input(source.text(), Some(&source), output, options)
+}
+
+fn compile_input(
+    source: &str,
+    named: Option<&crate::source::SourceFile>,
+    output: &Path,
+    options: &BuildOptions,
+) -> Result<CompilationTimings, CompileError> {
     let total = Instant::now();
-    validate_artifacts(output, options, None)?;
+    if options.debug_info == crate::optimization::DebugInfo::Full && named.is_none() {
+        return Err(CompileError::MissingDebugSource);
+    }
+    validate_artifacts(output, options, named.map(|s| s.path()))?;
     let start = Instant::now();
     let tokens = tokenize(source).map_err(CompileError::Lex)?;
     let lex = start.elapsed();
@@ -222,7 +275,8 @@ pub fn compile_source_with_options(
     let type_check = start.elapsed();
     let start = Instant::now();
     let context = Context::create();
-    let module = generate_program(&context, &statements).map_err(CompileError::Codegen)?;
+    let module = generate_program_with_options(&context, &statements, named, options)
+        .map_err(CompileError::Codegen)?;
     let llvm_generation = start.elapsed();
     let native =
         build_executable_with_options(&module, output, options).map_err(CompileError::Native)?;
@@ -257,7 +311,8 @@ pub fn compile_file_with_options(
         source,
     })?;
     validate_artifacts(output, options, Some(input))?;
-    let mut timing = compile_source_with_options(&source, output, options)?;
+    let named = crate::source::SourceFile::new(identity(input), source);
+    let mut timing = compile_input(named.text(), Some(&named), output, options)?;
     timing.total = total.elapsed();
     Ok(timing)
 }

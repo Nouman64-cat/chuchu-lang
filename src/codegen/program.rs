@@ -14,6 +14,7 @@ use inkwell::{AddressSpace, FloatPredicate, IntPredicate};
 use super::CodegenError;
 
 mod arrays;
+mod debug;
 mod runtime;
 use crate::ast::{BinaryOperator as Op, Expr, ExprKind, Stmt, StmtKind};
 use crate::token::Span;
@@ -61,6 +62,9 @@ struct Function<'ctx> {
 
 struct Generator<'ctx> {
     context: &'ctx Context,
+    // The DI builder finalizes on drop and must be disposed before its module,
+    // including when lowering returns an error. Rust drops fields in this order.
+    debug: Option<debug::DebugState<'ctx>>,
     module: Module<'ctx>,
     builder: Builder<'ctx>,
     scopes: Vec<HashMap<String, Binding<'ctx>>>,
@@ -72,9 +76,38 @@ pub(super) fn generate<'ctx>(
     context: &'ctx Context,
     statements: &[Stmt],
 ) -> Result<Module<'ctx>, CodegenError> {
+    generate_with_options(
+        context,
+        statements,
+        None,
+        &crate::optimization::BuildOptions::default(),
+    )
+}
+
+pub(super) fn generate_with_options<'ctx>(
+    context: &'ctx Context,
+    statements: &[Stmt],
+    source: Option<&crate::source::SourceFile>,
+    options: &crate::optimization::BuildOptions,
+) -> Result<Module<'ctx>, CodegenError> {
+    let module = context.create_module("cheeku");
+    let debug = if options.debug_info == crate::optimization::DebugInfo::Full {
+        Some(debug::DebugState::new(
+            context,
+            &module,
+            source.ok_or(invalid(
+                "Debug generation requires named source",
+                Span { start: 0, end: 0 },
+            ))?,
+            options,
+        )?)
+    } else {
+        None
+    };
     let mut generator = Generator {
         context,
-        module: context.create_module("cheeku"),
+        module,
+        debug,
         builder: context.create_builder(),
         scopes: vec![HashMap::new()],
         functions: HashMap::new(),
@@ -134,6 +167,23 @@ pub(super) fn generate<'ctx>(
             generator
                 .builder
                 .position_at_end(context.append_basic_block(function, "entry"));
+            generator.builder.unset_current_debug_location();
+            if generator.debug.is_some() {
+                let result = generator.llvm_type(*return_type, statement.span)?;
+                let params = parameters
+                    .iter()
+                    .map(|p| generator.llvm_type(p.ty, p.span).map(|llvm| (p.ty, llvm)))
+                    .collect::<Result<Vec<_>, _>>()?;
+                if let Some(debug) = &mut generator.debug {
+                    debug.function(
+                        function,
+                        name,
+                        statement.span,
+                        Some((*return_type, result)),
+                        &params,
+                    )?;
+                }
+            }
             for (index, parameter) in parameters.iter().enumerate() {
                 let value = function
                     .get_nth_param(
@@ -148,6 +198,10 @@ pub(super) fn generate<'ctx>(
                         ty: parameter.ty,
                     },
                     parameter.span,
+                    Some(
+                        u32::try_from(index + 1)
+                            .map_err(|_| invalid("Too many parameters", parameter.span))?,
+                    ),
                 )?;
             }
             generator.statements(body)?;
@@ -156,11 +210,6 @@ pub(super) fn generate<'ctx>(
                     "Function may finish without returning",
                     statement.span,
                 ));
-            }
-            if !function.verify(false) {
-                return Err(CodegenError::Verification(format!(
-                    "Invalid function {name}"
-                )));
             }
         }
     }
@@ -172,12 +221,22 @@ pub(super) fn generate<'ctx>(
     generator
         .builder
         .position_at_end(context.append_basic_block(main, "entry"));
+    generator.builder.unset_current_debug_location();
+    if let Some(debug) = &mut generator.debug {
+        let span = statements
+            .iter()
+            .find(|s| !matches!(s.kind, StmtKind::Function { .. }))
+            .map(|s| s.span)
+            .unwrap_or(Span { start: 0, end: 0 });
+        debug.function(main, "main", span, None, &[])?;
+    }
     for statement in statements {
         if !matches!(statement.kind, StmtKind::Function { .. }) {
             generator.statement(statement)?;
         }
     }
     if !generator.terminated() {
+        generator.builder.unset_current_debug_location();
         build(
             generator
                 .builder
@@ -185,10 +244,8 @@ pub(super) fn generate<'ctx>(
             Span { start: 0, end: 0 },
         )?;
     }
-    if !main.verify(false) {
-        return Err(CodegenError::Verification(
-            "Invalid main function".to_owned(),
-        ));
+    if let Some(debug) = &generator.debug {
+        debug.builder.finalize();
     }
     generator
         .module
@@ -250,7 +307,13 @@ impl<'ctx> Generator<'ctx> {
                 span,
             })
     }
-    fn declare(&mut self, name: &str, value: Value<'ctx>, span: Span) -> Result<(), CodegenError> {
+    fn declare(
+        &mut self,
+        name: &str,
+        value: Value<'ctx>,
+        span: Span,
+        argument: Option<u32>,
+    ) -> Result<(), CodegenError> {
         if self
             .scopes
             .last()
@@ -262,7 +325,30 @@ impl<'ctx> Generator<'ctx> {
             });
         }
         let pointer = self.allocate(value.ty, span)?;
+        if argument.is_none() {
+            self.set_location(span)?;
+        } else {
+            self.builder.unset_current_debug_location();
+        }
         build(self.builder.build_store(pointer, value.raw), span)?;
+        let llvm = self.llvm_type(value.ty, span)?;
+        if let Some(debug) = &mut self.debug {
+            let block = self
+                .builder
+                .get_insert_block()
+                .ok_or(CodegenError::InvalidInsertionPoint { span })?;
+            debug.variable(
+                name,
+                Binding {
+                    pointer,
+                    ty: value.ty,
+                },
+                llvm,
+                span,
+                argument,
+                block,
+            )?;
+        }
         self.scopes
             .last_mut()
             .ok_or(invalid("Missing lexical scope", span))?
@@ -301,7 +387,25 @@ impl<'ctx> Generator<'ctx> {
         Err(invalid("Incompatible value type", span))
     }
 
+    fn set_location(&self, span: Span) -> Result<(), CodegenError> {
+        if let Some(debug) = &self.debug {
+            self.builder
+                .set_current_debug_location(debug.location(self.context, span)?);
+        }
+        Ok(())
+    }
     fn expression(&mut self, expr: &Expr) -> Result<Value<'ctx>, CodegenError> {
+        let previous = self.builder.get_current_debug_location();
+        self.set_location(expr.span)?;
+        let result = self.expression_inner(expr);
+        if let Some(location) = previous {
+            self.builder.set_current_debug_location(location);
+        } else {
+            self.builder.unset_current_debug_location();
+        }
+        result
+    }
+    fn expression_inner(&mut self, expr: &Expr) -> Result<Value<'ctx>, CodegenError> {
         let span = expr.span;
         match &expr.kind {
             ExprKind::Integer(literal) => {
@@ -696,13 +800,25 @@ impl<'ctx> Generator<'ctx> {
         Ok(())
     }
     fn scoped(&mut self, body: &[Stmt]) -> Result<(), CodegenError> {
+        if let Some(debug) = &mut self.debug {
+            if let Some(first) = body.first() {
+                debug.enter_scope(first.span)?;
+            } else {
+                return Ok(());
+            }
+        }
         self.scopes.push(HashMap::new());
         let result = self.statements(body);
         self.scopes.pop();
+        if let Some(debug) = &mut self.debug {
+            debug.exit_scope();
+        }
+        self.builder.unset_current_debug_location();
         result
     }
     fn statement(&mut self, stmt: &Stmt) -> Result<(), CodegenError> {
         let span = stmt.span;
+        self.set_location(span)?;
         match &stmt.kind {
             StmtKind::Set { name, value } => {
                 if self
@@ -716,7 +832,7 @@ impl<'ctx> Generator<'ctx> {
                     });
                 }
                 let value = self.expression(value)?;
-                self.declare(name, value, span)
+                self.declare(name, value, span, None)
             }
             StmtKind::Assign { name, value } => {
                 let binding = self.lookup(name, span)?;
@@ -776,8 +892,12 @@ impl<'ctx> Generator<'ctx> {
                 let test = self.context.append_basic_block(function, "while.condition");
                 let loop_body = self.context.append_basic_block(function, "while.body");
                 let done = self.context.append_basic_block(function, "while.end");
+                // A line breakpoint must resolve to the repeated condition,
+                // not the one-time jump from the preceding statement.
+                self.builder.unset_current_debug_location();
                 build(self.builder.build_unconditional_branch(test), span)?;
                 self.builder.position_at_end(test);
+                self.set_location(condition.span)?;
                 let value = self.expression(condition)?;
                 if value.ty != Type::Bool {
                     return Err(invalid("Condition must be Bool", condition.span));

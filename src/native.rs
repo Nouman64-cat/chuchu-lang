@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::atomic::{AtomicU64, Ordering};
 
-use crate::optimization::{self, BuildOptions, OptimizationError};
+use crate::optimization::{self, BuildOptions, DebugInfo, OptimizationError};
 use inkwell::module::Module;
 use inkwell::targets::FileType;
 use std::time::{Duration, Instant};
@@ -17,6 +17,7 @@ pub enum NativeError {
     Optimization(OptimizationError),
     Verification(String),
     ObjectEmission(String),
+    DebugSymbols(String),
     Filesystem { path: PathBuf, source: io::Error },
     LinkerUnavailable(io::Error),
     LinkerFailed { status: Option<i32>, stderr: String },
@@ -28,6 +29,9 @@ impl fmt::Display for NativeError {
             Self::Optimization(error) => error.fmt(f),
             Self::Target(message) => write!(f, "LLVM host target initialization failed: {message}"),
             Self::Verification(message) => write!(f, "LLVM module verification failed: {message}"),
+            Self::DebugSymbols(message) => {
+                write!(f, "Debug symbol generation/publication failed: {message}")
+            }
             Self::ObjectEmission(message) => write!(f, "LLVM object emission failed: {message}"),
             Self::Filesystem { path, source } => {
                 write!(f, "Cannot access {}: {source}", path.display())
@@ -76,6 +80,21 @@ pub struct NativeTimings {
 pub const DEFAULT_EXECUTABLE_NAME: &str = "main.exe";
 #[cfg(not(target_os = "windows"))]
 pub const DEFAULT_EXECUTABLE_NAME: &str = "main";
+
+/// Persistent symbols associated with an executable. Append rather than replace
+/// its extension so custom executable filenames always have distinct sidecars.
+pub fn debug_symbol_path(output: &Path) -> Option<PathBuf> {
+    let suffix = if cfg!(target_os = "macos") {
+        ".dSYM"
+    } else if cfg!(target_os = "windows") {
+        ".pdb"
+    } else {
+        return None;
+    };
+    let mut path = output.as_os_str().to_owned();
+    path.push(suffix);
+    Some(path.into())
+}
 
 fn linker_hint() -> &'static str {
     if cfg!(target_os = "macos") {
@@ -156,7 +175,10 @@ pub fn emit_object_with_options(
 pub fn link_object(object: &Path, output: &Path) -> Result<(), NativeError> {
     let object = std::path::absolute(object).map_err(|error| filesystem_error(object, error))?;
     let output = std::path::absolute(output).map_err(|error| filesystem_error(output, error))?;
-    let mut command = linker_command(&object, &output);
+    run_linker(linker_command(&object, &output))
+}
+
+fn run_linker(mut command: Command) -> Result<(), NativeError> {
     let result = command.output().map_err(NativeError::LinkerUnavailable)?;
     if !result.status.success() {
         // Some drivers report useful diagnostics on stdout (notably MSVC).
@@ -215,7 +237,7 @@ fn linker_command(object: &Path, output: &Path) -> Command {
 
 static NEXT_TEMP: AtomicU64 = AtomicU64::new(0);
 
-struct TemporaryDirectory(PathBuf);
+struct TemporaryDirectory(PathBuf, bool);
 
 impl TemporaryDirectory {
     fn create(parent: &Path) -> Result<Self, NativeError> {
@@ -223,7 +245,7 @@ impl TemporaryDirectory {
             let id = NEXT_TEMP.fetch_add(1, Ordering::Relaxed);
             let path = parent.join(format!(".cheeku-{}-{id}", std::process::id()));
             match fs::create_dir(&path) {
-                Ok(()) => return Ok(Self(path)),
+                Ok(()) => return Ok(Self(path, false)),
                 Err(error) if error.kind() == io::ErrorKind::AlreadyExists => continue,
                 Err(error) => return Err(filesystem_error(&path, error)),
             }
@@ -240,7 +262,9 @@ impl TemporaryDirectory {
 
 impl Drop for TemporaryDirectory {
     fn drop(&mut self) {
-        let _ = fs::remove_dir_all(&self.0);
+        if !self.1 {
+            let _ = fs::remove_dir_all(&self.0);
+        }
     }
 }
 
@@ -264,28 +288,171 @@ pub fn build_executable_with_options(
             ),
         )
     })?;
-    let temporary = TemporaryDirectory::create(parent)?;
+    let mut temporary = TemporaryDirectory::create(parent)?;
     let object = temporary.0.join(if cfg!(windows) {
         "program.obj"
     } else {
         "program.o"
     });
-    let executable = temporary.0.join(DEFAULT_EXECUTABLE_NAME);
+    let artifacts = temporary.0.join("artifacts");
+    fs::create_dir(&artifacts).map_err(|error| filesystem_error(&artifacts, error))?;
+    // Keep the final basename inside a macOS dSYM's DWARF directory, in a
+    // separate directory so an output named program.o cannot collide with input.
+    let executable = artifacts.join(output.file_name().ok_or_else(|| {
+        filesystem_error(
+            &output,
+            io::Error::new(io::ErrorKind::InvalidInput, "Missing executable filename"),
+        )
+    })?);
     let mut timings = emit_object_with_options(module, &object, options)?;
     let start = Instant::now();
-    link_object(&object, &executable)?;
+    let symbols = if options.debug_info == DebugInfo::Full {
+        debug_symbol_path(&output)
+    } else {
+        None
+    };
+    let staged_symbols = symbols
+        .as_ref()
+        .map(|_| debug_symbol_path(&executable).expect("host sidecar"));
+    let command = linker_command(&object, &executable);
+    #[cfg(target_os = "windows")]
+    let command = {
+        let mut command = command;
+        if let (Some(staged), Some(destination)) = (&staged_symbols, &symbols) {
+            command.arg("/DEBUG");
+            let mut pdb = OsString::from("/PDB:");
+            pdb.push(staged);
+            command.arg(pdb);
+            let mut location = OsString::from("/PDBALTPATH:");
+            location.push(destination);
+            command.arg(location);
+        }
+        command
+    };
+    run_linker(command)?;
+    #[cfg(target_os = "macos")]
+    if let Some(staged) = &staged_symbols {
+        let mut tool = if let Some(configured) = std::env::var_os("CHEEKU_DSYMUTIL") {
+            Command::new(configured)
+        } else if let Some(tool) = std::env::var_os("LLVM_SYS_231_PREFIX")
+            .map(|prefix| PathBuf::from(prefix).join("bin/dsymutil"))
+            .filter(|path| path.is_file())
+        {
+            Command::new(tool)
+        } else {
+            let mut tool = Command::new("xcrun");
+            tool.arg("dsymutil");
+            tool
+        };
+        let result = tool
+            .arg(&executable)
+            .arg("-o")
+            .arg(staged)
+            .output()
+            .map_err(|error| {
+                NativeError::DebugSymbols(format!("Cannot start dsymutil: {error}"))
+            })?;
+        if !result.status.success() {
+            return Err(NativeError::DebugSymbols(format!(
+                "dsymutil: {}{}",
+                String::from_utf8_lossy(&result.stdout),
+                String::from_utf8_lossy(&result.stderr)
+            )));
+        }
+    }
+    if let (Some(staged), Some(destination)) = (&staged_symbols, &symbols) {
+        if !staged.exists() {
+            return Err(NativeError::DebugSymbols(format!(
+                "Symbol tool produced no {}",
+                staged.display()
+            )));
+        }
+        publish_debug_artifacts(&executable, &output, staged, destination, &mut temporary)?;
+    } else {
+        fs::rename(&executable, &output).map_err(|error| filesystem_error(&output, error))?;
+    }
     timings.link = start.elapsed();
-    // Rust's rename replaces an existing destination on Unix and Windows. Never
-    // remove the working executable first: a locked/invalid destination must fail
-    // without deleting it. Both files are on the same filesystem. No universal
-    // filesystem atomicity or power-loss durability guarantee is claimed.
-    fs::rename(&executable, &output).map_err(|error| filesystem_error(&output, error))?;
     Ok(timings)
+}
+
+/// Publish symbols first and replace the executable last. A failed executable
+/// replacement rolls back symbols. If rollback itself fails, preserve staging
+/// (including the old symbols) and report its location for manual recovery.
+fn publish_debug_artifacts(
+    executable: &Path,
+    output: &Path,
+    staged: &Path,
+    destination: &Path,
+    temporary: &mut TemporaryDirectory,
+) -> Result<(), NativeError> {
+    if output.is_dir() {
+        return Err(filesystem_error(
+            output,
+            io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "Executable destination is a directory",
+            ),
+        ));
+    }
+    let backup = temporary.0.join("previous-symbols");
+    let had_symbols = fs::symlink_metadata(destination).is_ok();
+    if had_symbols {
+        fs::rename(destination, &backup).map_err(|error| filesystem_error(destination, error))?;
+    }
+    let mut installed = false;
+    let publication = (|| {
+        fs::rename(staged, destination).map_err(|error| filesystem_error(destination, error))?;
+        installed = true;
+        fs::rename(executable, output).map_err(|error| filesystem_error(output, error))
+    })();
+    if let Err(error) = publication {
+        let rollback = (|| -> io::Result<()> {
+            if installed {
+                fs::rename(destination, staged)?;
+            }
+            if had_symbols {
+                fs::rename(&backup, destination)?;
+            }
+            Ok(())
+        })();
+        if let Err(rollback) = rollback {
+            temporary.1 = true;
+            return Err(NativeError::DebugSymbols(format!(
+                "{error}; rollback failed: {rollback}; recovery files preserved at {}",
+                temporary.0.display()
+            )));
+        }
+        return Err(error);
+    }
+    Ok(())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn failed_executable_publication_restores_previous_symbols() {
+        let mut temporary = TemporaryDirectory::create(&std::env::temp_dir()).unwrap();
+        let output = temporary.0.join("working-program");
+        let destination = temporary.0.join("working-symbols");
+        let staged = temporary.0.join("new-symbols");
+        fs::write(&output, "previous executable").unwrap();
+        fs::write(&destination, "previous symbols").unwrap();
+        fs::write(&staged, "new symbols").unwrap();
+        let missing = temporary.0.join("missing-executable");
+        assert!(
+            publish_debug_artifacts(&missing, &output, &staged, &destination, &mut temporary)
+                .is_err()
+        );
+        assert_eq!(fs::read_to_string(&output).unwrap(), "previous executable");
+        assert_eq!(
+            fs::read_to_string(&destination).unwrap(),
+            "previous symbols"
+        );
+        assert_eq!(fs::read_to_string(&staged).unwrap(), "new symbols");
+        assert!(!temporary.1);
+    }
 
     #[test]
     fn linker_keeps_paths_as_individual_arguments() {

@@ -3,9 +3,9 @@ use std::fmt;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-use chuchu::optimization::{BuildOptions, Cpu, InvalidOptimization};
+use chuchu::optimization::{BuildOptions, Cpu, DebugInfo, InvalidOptimization, Optimization};
 
-const USAGE: &str = "Usage: cheeku <source.chuchu> [-O0|-O1|-O2|-O3] [-o <executable>] [--cpu generic|native] [--time-compilation] [--emit-ir <file>] [--emit-assembly <file>] [--no-vectorize]";
+const USAGE: &str = "Usage: cheeku <source.chuchu> [--debug|-g] [-O0|-O1|-O2|-O3] [-o <executable>] [--cpu generic|native] [--time-compilation] [--emit-ir <file>] [--emit-assembly <file>] [--no-vectorize]";
 
 #[derive(Debug)]
 enum CliError {
@@ -95,12 +95,16 @@ fn parse_args(
                 }
             }
             "--time-compilation" => invocation.time = true,
+            "--debug" | "-g" => invocation.options.debug_info = DebugInfo::Full,
             "--no-vectorize" => invocation.options.vectorize = false,
             flag if flag.starts_with("-O") => {
                 invocation.options.optimization = flag.parse().map_err(CliError::Optimization)?
             }
             _ => return Err(CliError::Argument(format!("Unknown argument: {flag}"))),
         }
+    }
+    if seen.contains("--debug") && !seen.contains("optimization") {
+        invocation.options.optimization = Optimization::O0;
     }
     Ok(Some(invocation))
 }
@@ -148,6 +152,30 @@ mod tests {
             invocation.output,
             PathBuf::from(chuchu::native::DEFAULT_EXECUTABLE_NAME)
         );
+    }
+    #[test]
+    fn debug_profile_and_explicit_optimization_are_order_independent() {
+        let debug = args(&["input.chuchu", "--debug"]).unwrap().unwrap();
+        assert_eq!(debug.options.debug_info, DebugInfo::Full);
+        assert_eq!(debug.options.optimization, Optimization::O0);
+        assert_eq!(
+            args(&["input.chuchu", "-g"])
+                .unwrap()
+                .unwrap()
+                .options
+                .optimization,
+            Optimization::O2
+        );
+        for flags in [
+            vec!["input.chuchu", "--debug", "-O2"],
+            vec!["input.chuchu", "-O2", "--debug"],
+        ] {
+            let invocation = args(&flags).unwrap().unwrap();
+            assert_eq!(invocation.options.optimization, Optimization::O2);
+            assert_eq!(invocation.options.debug_info, DebugInfo::Full);
+        }
+        assert!(args(&["input.chuchu", "--debug", "--debug"]).is_err());
+        assert!(args(&["input.chuchu", "-g", "-g"]).is_err());
     }
     #[test]
     fn output_and_optimization_accept_both_orders() {

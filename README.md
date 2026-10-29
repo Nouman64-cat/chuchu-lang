@@ -72,6 +72,12 @@ describes the development workflow and required checks. All four targets pass
 
 ## Optimization and performance
 
+For source breakpoints, stepping and variable inspection, compile with
+`cheeku source.chuchu --debug -o debug-program` (`debug-program.exe` on Windows).
+See [native debugging](DEBUGGING.md) for platform artifacts, LLDB/editor setup,
+and the current validation status. `--debug` defaults to O0; `-g` adds debug
+information at the selected optimization level.
+
 Cheeku defaults to `-O2`. Use `-O0` for the unoptimized IR baseline, `-O1` for
 scalar optimization or `-O3` for LLVM's more aggressive standard pipeline.
 Optimization and output flags can appear in either order after the source:

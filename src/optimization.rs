@@ -67,6 +67,7 @@ pub enum Cpu {
 
 #[derive(Debug, Clone)]
 pub struct BuildOptions {
+    pub debug_info: DebugInfo,
     pub optimization: Optimization,
     pub cpu: Cpu,
     pub vectorize: bool,
@@ -76,6 +77,7 @@ pub struct BuildOptions {
 impl Default for BuildOptions {
     fn default() -> Self {
         Self {
+            debug_info: DebugInfo::None,
             optimization: Optimization::default(),
             cpu: Cpu::default(),
             vectorize: true,
@@ -83,6 +85,13 @@ impl Default for BuildOptions {
             emit_assembly: None,
         }
     }
+}
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub enum DebugInfo {
+    #[default]
+    None,
+    Full,
 }
 
 #[derive(Debug)]
