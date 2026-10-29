@@ -8,7 +8,7 @@ const baseUrl = process.env.BASE_URL || '/';
 const config: Config = {
   title: 'Chuchu',
   tagline: 'Simple syntax. Native possibilities.',
-  favicon: 'img/chuchu-lang-png.png',
+  favicon: 'img/chuchu-logo-3.png',
   url,
   baseUrl,
   organizationName: 'chuchu-lang',
@@ -36,11 +36,11 @@ const config: Config = {
     highlightSearchTermsOnTargetPage: true,
   }]],
   themeConfig: {
-    image: 'img/chuchu-lang-png.png',
+    image: 'img/chuchu-logo-3.png',
     colorMode: {defaultMode: 'light', respectPrefersColorScheme: false},
     metadata: [{name: 'theme-color', content: '#6154cc'}],
     navbar: {
-      logo: {alt: 'Chuchu', src: 'img/chuchu-lang-png.png', srcDark: 'img/chuchu-lang-png.png', width: 110, height: 54},
+      logo: {alt: 'Chuchu', src: 'img/chuchu-logo-3.png', srcDark: 'img/chuchu-logo-3.png', width: 110, height: 54},
       items: [
         {type: 'docSidebar', sidebarId: 'docsSidebar', position: 'left', label: 'Documentation'},
         {to: '/docs/guides/examples', label: 'Examples', position: 'left'},
