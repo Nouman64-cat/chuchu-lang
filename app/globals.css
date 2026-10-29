@@ -5,8 +5,11 @@
   --background: #f8f8f6;
   --foreground: #20201f;
   --muted: #73736f;
-  --accent: #6656ce;
-  --accent-dark: #5242b8;
+  --accent: #168a45;
+  --accent-dark: #0e6632;
+  --accent-soft: #eff7ee;
+  --accent-yellow: #f0ca4d;
+  --accent-pink: #ef9ab1;
   --line: #e8e7e2;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -46,7 +49,7 @@ a {
   min-height: 100vh;
   overflow: hidden;
   background:
-    radial-gradient(ellipse at 76% 21%, rgb(230 225 255 / 48%), transparent 29rem),
+    radial-gradient(ellipse at 76% 21%, rgb(222 240 220 / 58%), transparent 29rem),
     var(--background);
 }
 
@@ -69,19 +72,10 @@ a {
   gap: 10px;
 }
 
-.brand-mark {
-  display: grid;
-  width: 40px;
-  height: 40px;
-  place-items: center;
-  overflow: hidden;
-  border-radius: 13px;
-  background: var(--accent);
-}
-
-.brand-mark img {
-  width: 31px;
-  height: 31px;
+.brand-logo {
+  display: block;
+  width: 44px;
+  height: auto;
   object-fit: contain;
 }
 
@@ -116,10 +110,10 @@ a {
   align-items: center;
   gap: 12px;
   padding: 0 16px;
-  border: 1px solid #dcd7f5;
+  border: 1px solid #d2e7d2;
   border-radius: 8px;
-  color: var(--accent-dark);
-  background: #f0edff;
+  color: #116c37;
+  background: var(--accent-soft);
 }
 
 .hero {
@@ -151,8 +145,8 @@ a {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #43a778;
-  box-shadow: 0 0 0 4px rgb(67 167 120 / 12%);
+  background: var(--accent);
+  box-shadow: 0 0 0 4px rgb(22 138 69 / 12%);
 }
 
 .hero h1 {
@@ -206,7 +200,7 @@ a {
 .button-primary {
   color: #fff;
   background: var(--accent);
-  box-shadow: 0 5px 14px rgb(102 86 206 / 18%);
+  box-shadow: 0 5px 14px rgb(22 138 69 / 18%);
 }
 
 .button-primary:hover {
@@ -219,7 +213,7 @@ a {
 }
 
 .button-secondary:hover {
-  border-color: #c9c4e7;
+  border-color: #c6dfc7;
   background: #fff;
 }
 
@@ -237,12 +231,12 @@ a {
 .code-card {
   position: relative;
   overflow: hidden;
-  border: 1px solid #e6e3ec;
+  border: 1px solid #e3e7df;
   border-radius: 15px;
   background: #fff;
   box-shadow:
-    0 28px 80px rgb(47 39 98 / 9%),
-    0 4px 14px rgb(47 39 98 / 4%);
+    0 28px 80px rgb(37 69 40 / 9%),
+    0 4px 14px rgb(37 69 40 / 4%);
   transform: rotate(1.2deg);
 }
 
@@ -252,7 +246,7 @@ a {
   grid-template-columns: 1fr 1fr 1fr;
   align-items: center;
   padding-inline: 20px;
-  border-bottom: 1px solid #efedf2;
+  border-bottom: 1px solid #eeefea;
   color: #77767d;
   font-family: var(--font-geist-mono), monospace;
   font-size: 11px;
@@ -282,22 +276,22 @@ a {
 }
 
 .window-dots span:first-child {
-  background: #ed9890;
+  background: var(--accent-pink);
 }
 
 .window-dots span:nth-child(2) {
-  background: #e9c36e;
+  background: var(--accent-yellow);
 }
 
 .window-dots span:last-child {
-  background: #81c9a1;
+  background: #77c98b;
 }
 
 .code-card pre {
   min-height: 208px;
   margin: 0;
   padding: 47px 32px 38px;
-  color: #33313a;
+  color: #333630;
   font-family: var(--font-geist-mono), monospace;
   font-size: 14px;
   line-height: 2.45;
@@ -320,8 +314,8 @@ a {
   align-items: center;
   gap: 22px;
   padding: 16px 32px;
-  border-top: 1px solid #efedf2;
-  background: #fbfafc;
+  border-top: 1px solid #eeefea;
+  background: #fbfcf9;
 }
 
 .code-output span {
@@ -332,7 +326,7 @@ a {
 }
 
 .code-output code {
-  color: #34845f;
+  color: var(--accent-dark);
   font-family: var(--font-geist-mono), monospace;
   font-size: 12px;
 }
@@ -350,8 +344,8 @@ a {
 .caption-dot {
   width: 7px;
   height: 7px;
-  background: #8d7ce2;
-  box-shadow: 0 0 0 4px rgb(141 124 226 / 12%);
+  background: var(--accent);
+  box-shadow: 0 0 0 4px rgb(22 138 69 / 12%);
 }
 
 .features {
@@ -372,7 +366,7 @@ a {
 }
 
 .feature-number {
-  color: #9e98ca;
+  color: #9a7a13;
   font-family: var(--font-geist-mono), monospace;
   font-size: 10px;
   letter-spacing: 0.08em;

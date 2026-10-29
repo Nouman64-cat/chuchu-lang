@@ -9,15 +9,14 @@ export default function Home() {
     <main className="site-shell">
       <header className="site-header page-width">
         <Link className="brand" href="/" aria-label="Chuchu home">
-          <span className="brand-mark">
-            <Image
-              src="/chuchu-logo-3.svg"
-              alt=""
-              width={34}
-              height={34}
-              priority
-            />
-          </span>
+          <Image
+            className="brand-logo"
+            src="/chuchu-logo-3.svg"
+            alt=""
+            width={44}
+            height={27}
+            priority
+          />
           <span className="brand-name">chuchu</span>
         </Link>
         <nav className="site-nav" aria-label="Main navigation">
