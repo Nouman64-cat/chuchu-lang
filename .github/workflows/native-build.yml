@@ -1,0 +1,113 @@
+name: Native build (shared)
+on:
+  workflow_call:
+    inputs:
+      os:
+        required: true
+        type: string
+      target:
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ${{ inputs.os }}
+    timeout-minutes: 120
+    env:
+      CARGO_TERM_COLOR: always
+      LLVM_SYS_231_STRICT_VERSIONING: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Initialize x64 MSVC and Windows SDK
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Windows LLVM source build prerequisites
+        if: runner.os == 'Windows'
+        run: python -m pip install cmake ninja
+      - name: Linux SDK dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y clang build-essential libtinfo6 libxml2-dev libzstd-dev zlib1g-dev
+      - name: macOS source build prerequisites
+        if: runner.os == 'macOS'
+        run: brew install cmake ninja
+      - name: Install Rust
+        run: rustup toolchain install 1.99.1 --profile minimal --component rustfmt,clippy
+      - run: rustup default 1.99.1
+      # Recipe ids: Linux, macOS Intel and Windows still use the SDK trees already
+      # cached under their original script hashes (Windows's differs only from
+      # CRLF checkout), so a script edit must not force their ~2,800-task LLVM
+      # rebuilds. macOS ARM64 changed from the unusable bitcode SDK to a source
+      # build, so it keys on the current script hash. Bump a pinned id only when
+      # that platform's SDK contents change.
+      - name: Select LLVM SDK recipe id
+        id: llvm-recipe
+        shell: python
+        run: |
+          import hashlib, os
+          if os.environ['RUNNER_OS'] == 'macOS' and os.environ['RUNNER_ARCH'] == 'ARM64':
+              digest = hashlib.sha256(hashlib.sha256(open('.github/scripts/provision-llvm.py', 'rb').read()).digest()).hexdigest()
+              recipe = 'source-dylib-' + digest
+          elif os.environ['RUNNER_OS'] == 'Windows':
+              recipe = '9b7d6d0215cefa49a702d87606f9ed8cb07dd0908afe01f5b5fba316d5f44dbd'
+          else:
+              recipe = '642e05077fbd4863ab33f70b1b20e48856aff349ed65e4a79175d357c530ea31'
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as out:
+              out.write(f'id={recipe}\n')
+      - name: Cache verified LLVM SDK
+        id: llvm-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/chuchu-llvm
+          key: llvm-23.1.4-${{ runner.os }}-${{ runner.arch }}-${{ steps.llvm-recipe.outputs.id }}
+      - name: Provision LLVM 23.1.4
+        run: python .github/scripts/provision-llvm.py --directory "${{ runner.temp }}/chuchu-llvm"
+      - name: Save verified LLVM SDK
+        if: steps.llvm-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/chuchu-llvm
+          key: ${{ steps.llvm-cache.outputs.cache-primary-key }}
+      - name: Verify native Rust host
+        shell: python
+        run: |
+          import subprocess
+          host = subprocess.check_output(['rustc', '-vV'], text=True).split('host: ')[1].splitlines()[0]
+          assert host == '${{ inputs.target }}', host
+      - run: cargo fmt --all -- --check
+      - run: cargo build --locked
+      - run: cargo test --locked
+      - run: cargo clippy --locked --all-targets -- -D warnings
+      - run: cargo build --locked --release
+      - name: Python regression tests
+        run: python -m unittest discover -s benchmarks -p test_runner.py
+      - name: SDK provisioning regression tests
+        run: python -m unittest discover -s .github/scripts -p "test_*.py"
+      - name: Native release smoke tests
+        shell: python
+        run: |
+          import os, subprocess
+          binary = 'target/release/cheeku' + ('.exe' if os.name == 'nt' else '')
+          subprocess.run(['python', '.github/scripts/smoke.py', '--compiler', binary], check=True)
+      - name: Portable benchmark harness smoke
+        shell: python
+        run: |
+          import os, subprocess
+          binary = 'target/release/cheeku' + ('.exe' if os.name == 'nt' else '')
+          subprocess.run(['python', 'benchmarks/run.py', '--cheeku', binary,
+                          '--workloads', 'integer_loop,float_loop,array_multiply',
+                          '--levels', 'O2', '--languages', 'chuchu', '--repetitions', '3',
+                          '--compile-repetitions', '1', '--warmups', '0', '--no-throughput',
+                          '--no-simd-probe', '--output', 'target/benchmark-smoke.json'], check=True)
+      - name: Package only after native tests pass
+        run: python .github/scripts/package-release.py --target ${{ inputs.target }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cheeku-${{ inputs.target }}
+          path: target/distributions/*
+          if-no-files-found: error

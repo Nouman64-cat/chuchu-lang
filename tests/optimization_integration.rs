@@ -1,3 +1,4 @@
+mod support;
 use chuchu::codegen::generate_program;
 use chuchu::lexer::tokenize;
 use chuchu::optimization::{
@@ -52,8 +53,8 @@ fn invalid_modules_produce_structured_verification_errors() {
     ));
 }
 
-#[cfg(target_os = "macos")]
 mod native {
+    use super::support::{executable_name, native_output};
     use std::fs;
     use std::path::PathBuf;
     use std::process::{Command, Output};
@@ -147,7 +148,9 @@ mod native {
             fs::write(&input, source).unwrap();
             let mut baseline = None;
             for level in ["-O0", "-O1", "-O2", "-O3"] {
-                let executable = directory.0.join(format!("program {level}"));
+                let executable = directory
+                    .0
+                    .join(executable_name(&format!("program {level}")));
                 let compiled = directory
                     .command()
                     .arg(&input)
@@ -167,7 +170,7 @@ mod native {
                 if let Some(expected) = expected {
                     assert_eq!(
                         signature(&output),
-                        (Some(0), expected.as_bytes(), b"".as_slice()),
+                        (Some(0), native_output(expected).as_slice(), b"".as_slice()),
                         "{source} at {level}"
                     );
                 } else {
@@ -192,7 +195,7 @@ mod native {
         let directory = Directory::new();
         let input = directory.0.join("input.chuchu");
         fs::write(&input, "show 42").unwrap();
-        let output = directory.0.join("program");
+        let output = directory.0.join(executable_name("program"));
         fs::write(&output, b"previous").unwrap();
         for extra in [vec!["-O9"], vec!["--cpu", "unknown"], vec!["-O0", "-O3"]] {
             let result = directory
@@ -261,6 +264,9 @@ mod native {
         }
         assert!(fs::read_to_string(ir).unwrap().contains("@main"));
         assert!(!fs::read(assembly).unwrap().is_empty());
-        assert_eq!(Command::new(output).output().unwrap().stdout, b"42\n");
+        assert_eq!(
+            Command::new(output).output().unwrap().stdout,
+            native_output("42\n").as_slice()
+        );
     }
 }

@@ -50,26 +50,37 @@ impl<'ctx> Generator<'ctx> {
             span,
         )?;
         let ptr = self.context.ptr_type(AddressSpace::default());
+        // Unix write: ssize_t write(int, const void *, size_t).
+        // MSVC _write: int _write(int, const void *, unsigned int).
+        // All supported hosts are 64-bit, but Windows uses a 32-bit count/result.
+        let (write_name, count_type) = if cfg!(target_os = "windows") {
+            ("_write", self.context.i32_type())
+        } else {
+            ("write", self.context.i64_type())
+        };
         let write = self.external(
-            "write",
-            self.context.i64_type().fn_type(
+            write_name,
+            count_type.fn_type(
                 &[
                     self.context.i32_type().into(),
                     ptr.into(),
-                    self.context.i64_type().into(),
+                    count_type.into(),
                 ],
                 false,
             ),
         )?;
         let length =
             u64::try_from(message.len()).map_err(|_| invalid("Runtime message too long", span))?;
+        if cfg!(target_os = "windows") && length > u64::from(u32::MAX) {
+            return Err(invalid("Runtime message too long for _write", span));
+        }
         build(
             self.builder.build_call(
                 write,
                 &[
                     self.context.i32_type().const_int(2, false).into(),
                     text.as_pointer_value().into(),
-                    self.context.i64_type().const_int(length, false).into(),
+                    count_type.const_int(length, false).into(),
                 ],
                 "diagnostic",
             ),

@@ -1,3 +1,4 @@
+use std::ffi::OsString;
 use std::fmt;
 use std::fs;
 use std::io;
@@ -33,7 +34,8 @@ impl fmt::Display for NativeError {
             }
             Self::LinkerUnavailable(source) => write!(
                 f,
-                "Cannot start the system Clang linker driver (install Xcode command line tools): {source}"
+                "Cannot start the system Clang linker driver ({}): {source}",
+                linker_hint()
             ),
             Self::LinkerFailed { status, stderr } => write!(
                 f,
@@ -67,6 +69,40 @@ pub struct NativeTimings {
     pub optimization: Duration,
     pub object: Duration,
     pub link: Duration,
+}
+
+/// Default CLI output; explicitly requested paths are never rewritten.
+#[cfg(target_os = "windows")]
+pub const DEFAULT_EXECUTABLE_NAME: &str = "main.exe";
+#[cfg(not(target_os = "windows"))]
+pub const DEFAULT_EXECUTABLE_NAME: &str = "main";
+
+fn linker_hint() -> &'static str {
+    if cfg!(target_os = "macos") {
+        "install Xcode command line tools (xcrun clang)"
+    } else if cfg!(target_os = "windows") {
+        "install LLVM clang-cl and Visual Studio C++ Build Tools with the Windows SDK; use an x64 Developer PowerShell"
+    } else {
+        "install Clang, a GNU linker, and the C library development packages"
+    }
+}
+
+/// One executable path, never a shell command. Useful for controlled toolchain selection.
+fn configured_linker() -> Option<OsString> {
+    if let Some(linker) = std::env::var_os("CHEEKU_LINKER") {
+        return Some(linker);
+    }
+    #[cfg(target_os = "windows")]
+    {
+        std::env::var_os("LLVM_SYS_231_PREFIX")
+            .map(|prefix| PathBuf::from(prefix).join("bin").join("clang-cl.exe"))
+            .filter(|path| path.is_file())
+            .map(Into::into)
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        None
+    }
 }
 
 /// Compatibility object API; new programs use the default O2 policy.
@@ -115,30 +151,66 @@ pub fn emit_object_with_options(
     })
 }
 
-/// Uses Clang only as the native linker driver; paths are passed as separate arguments.
+/// Uses the platform Clang driver with separate arguments, never a shell.
+/// Windows requires an x64 MSVC developer environment (LIB/INCLUDE/SDK).
 pub fn link_object(object: &Path, output: &Path) -> Result<(), NativeError> {
-    #[cfg(target_os = "macos")]
-    let mut command = {
-        let mut command = Command::new("xcrun");
-        command.arg("clang");
-        command
-    };
-    #[cfg(not(target_os = "macos"))]
-    let mut command = Command::new("clang");
-
-    let result = command
-        .arg(object)
-        .arg("-o")
-        .arg(output)
-        .output()
-        .map_err(NativeError::LinkerUnavailable)?;
+    let object = std::path::absolute(object).map_err(|error| filesystem_error(object, error))?;
+    let output = std::path::absolute(output).map_err(|error| filesystem_error(output, error))?;
+    let mut command = linker_command(&object, &output);
+    let result = command.output().map_err(NativeError::LinkerUnavailable)?;
     if !result.status.success() {
+        // Some drivers report useful diagnostics on stdout (notably MSVC).
+        let diagnostics = format!(
+            "{}{}",
+            String::from_utf8_lossy(&result.stdout),
+            String::from_utf8_lossy(&result.stderr)
+        );
         return Err(NativeError::LinkerFailed {
             status: result.status.code(),
-            stderr: String::from_utf8_lossy(&result.stderr).into_owned(),
+            stderr: format!("{diagnostics}\nToolchain: {}", linker_hint()),
         });
     }
     Ok(())
+}
+
+fn linker_command(object: &Path, output: &Path) -> Command {
+    #[cfg(target_os = "windows")]
+    {
+        let mut command =
+            Command::new(configured_linker().unwrap_or_else(|| "clang-cl.exe".into()));
+        let mut destination = OsString::from("/Fe");
+        destination.push(output);
+        command
+            .args(["/nologo", "/MD"])
+            .arg(object)
+            .arg(destination)
+            .args([
+                "/link",
+                "/MACHINE:X64",
+                "/SUBSYSTEM:CONSOLE",
+                "/DEFAULTLIB:msvcrt.lib",
+                "/DEFAULTLIB:legacy_stdio_definitions.lib",
+            ]);
+        command
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let mut command = if let Some(linker) = configured_linker() {
+            Command::new(linker)
+        } else if cfg!(target_os = "macos") {
+            let mut driver = Command::new("xcrun");
+            driver.arg("clang");
+            driver
+        } else {
+            Command::new("clang")
+        };
+        // link_object normalizes both paths to absolute paths, so they cannot
+        // be mistaken for options. Keep libm after the object for --as-needed.
+        command.arg("-o").arg(output).arg(object);
+        #[cfg(target_os = "linux")]
+        command.arg("-lm");
+        command
+    }
 }
 
 static NEXT_TEMP: AtomicU64 = AtomicU64::new(0);
@@ -193,12 +265,42 @@ pub fn build_executable_with_options(
         )
     })?;
     let temporary = TemporaryDirectory::create(parent)?;
-    let object = temporary.0.join("program.o");
-    let executable = temporary.0.join("program");
+    let object = temporary.0.join(if cfg!(windows) {
+        "program.obj"
+    } else {
+        "program.o"
+    });
+    let executable = temporary.0.join(DEFAULT_EXECUTABLE_NAME);
     let mut timings = emit_object_with_options(module, &object, options)?;
     let start = Instant::now();
     link_object(&object, &executable)?;
     timings.link = start.elapsed();
+    // Rust's rename replaces an existing destination on Unix and Windows. Never
+    // remove the working executable first: a locked/invalid destination must fail
+    // without deleting it. Both files are on the same filesystem. No universal
+    // filesystem atomicity or power-loss durability guarantee is claimed.
     fs::rename(&executable, &output).map_err(|error| filesystem_error(&output, error))?;
     Ok(timings)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn linker_keeps_paths_as_individual_arguments() {
+        let object = Path::new("object with spaces.obj");
+        let output = Path::new("program with spaces.exe");
+        let command = linker_command(object, output);
+        let args: Vec<_> = command.get_args().collect();
+        assert!(args.contains(&object.as_os_str()));
+        #[cfg(not(windows))]
+        {
+            assert!(args.contains(&output.as_os_str()));
+            #[cfg(target_os = "linux")]
+            assert!(args.contains(&std::ffi::OsStr::new("-lm")));
+        }
+        #[cfg(windows)]
+        assert!(args.contains(&std::ffi::OsStr::new("/Feprogram with spaces.exe")));
+    }
 }

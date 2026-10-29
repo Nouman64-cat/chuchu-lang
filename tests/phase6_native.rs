@@ -1,5 +1,5 @@
-#![cfg(target_os = "macos")]
-
+use support::{executable_name, native_output};
+mod support;
 use std::fs;
 use std::path::PathBuf;
 use std::process::{Command, Output};
@@ -35,7 +35,9 @@ impl Case {
             .unwrap()
     }
     fn run(&self) -> Output {
-        Command::new(self.directory.join("main")).output().unwrap()
+        Command::new(self.directory.join(executable_name("main")))
+            .output()
+            .unwrap()
     }
 }
 impl Drop for Case {
@@ -62,7 +64,11 @@ fn succeeds(source: &str, expected: &str) {
         "{}",
         String::from_utf8_lossy(&output.stderr)
     );
-    assert_eq!(output.stdout, expected.as_bytes(), "{source}");
+    assert_eq!(
+        output.stdout,
+        native_output(expected).as_slice(),
+        "{source}"
+    );
     assert!(output.stderr.is_empty());
 }
 
@@ -225,7 +231,7 @@ fn runtime_bounds_checks_cover_negative_and_upper_indices() {
 #[test]
 fn invalid_phase6_programs_preserve_existing_executable() {
     let case = Case::new();
-    let executable = case.directory.join("main");
+    let executable = case.directory.join(executable_name("main"));
     fs::write(&executable, b"previous executable").unwrap();
     for source in [
         "show true + 1",
