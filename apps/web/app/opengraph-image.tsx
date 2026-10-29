@@ -15,7 +15,7 @@ export default async function Image() {
         description="A high-performance, statically typed language with inferred types. Its Rust compiler, Cheeku, turns your code into native programs through LLVM."
         pills={["Static types", "Type inference", "Native binaries"]}
         code={{
-          lines: ["assign x to 5", "reassign x to 6", "show x"],
+          lines: ["assign x 5", "reassign x 6", "show x"],
           output: "6",
         }}
       />

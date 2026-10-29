@@ -73,7 +73,7 @@ pub struct Stmt {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum StmtKind {
-    /// Declares a variable using `assign name value` (the legacy `assign name to value` also parses).
+    /// Declares a variable using `assign name value`.
     Set {
         name: String,
         value: Expr,

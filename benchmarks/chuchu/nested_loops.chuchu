@@ -1,11 +1,11 @@
-assign i to 0
-assign total to 0
+assign i 0
+assign total 0
 while i < 500 {
-assign j to 0
+assign j 0
 while j < 500 {
-reassign total to total + i * j
-reassign j to j + 1
+reassign total total + i * j
+reassign j j + 1
 }
-reassign i to i + 1
+reassign i i + 1
 }
 show total

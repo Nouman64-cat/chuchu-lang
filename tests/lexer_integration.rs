@@ -3,14 +3,14 @@ use chuchu::token::TokenKind;
 
 #[test]
 fn assign_is_reserved_and_set_is_an_identifier() {
-    let tokens = tokenize("assign set to 5\nshow assignable").unwrap();
+    let tokens = tokenize("assign set 5\nshow assignable").unwrap();
     assert_eq!(tokens[0].kind, TokenKind::Set);
     assert_eq!(tokens[0].span, chuchu::token::Span { start: 0, end: 6 });
     assert_eq!(tokens[1].kind, TokenKind::Identifier("set".to_owned()));
-    assert_eq!(tokens[2].kind, TokenKind::To);
-    assert_eq!(tokens[3].span, chuchu::token::Span { start: 14, end: 15 });
+    assert_eq!(tokens[2].kind, TokenKind::Integer("5".to_owned()));
+    assert_eq!(tokens[2].span, chuchu::token::Span { start: 11, end: 12 });
     assert_eq!(
-        tokens[6].kind,
+        tokens[5].kind,
         TokenKind::Identifier("assignable".to_owned())
     );
 }
@@ -32,15 +32,12 @@ fn tokenizes_complete_chuchu_program() {
         vec![
             TokenKind::Set,
             TokenKind::Identifier("x".to_owned()),
-            TokenKind::To,
             TokenKind::Integer("10".to_owned()),
             TokenKind::Set,
             TokenKind::Identifier("y".to_owned()),
-            TokenKind::To,
             TokenKind::Integer("20".to_owned()),
             TokenKind::Reassign,
             TokenKind::Identifier("x".to_owned()),
-            TokenKind::To,
             TokenKind::Integer("15".to_owned()),
             TokenKind::Show,
             TokenKind::Identifier("x".to_owned()),

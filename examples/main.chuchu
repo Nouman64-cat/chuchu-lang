@@ -1,6 +1,6 @@
-assign x to 10
-assign y to 20
+assign x 10
+assign y 20
 
-reassign x to 15
+reassign x 15
 
 show x + y

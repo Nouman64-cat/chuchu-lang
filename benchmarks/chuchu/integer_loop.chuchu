@@ -1,7 +1,7 @@
-assign i to 0
-assign total to 0
+assign i 0
+assign total 0
 while i < 3000000 {
-reassign total to total + i
-reassign i to i + 1
+reassign total total + i
+reassign i i + 1
 }
 show total

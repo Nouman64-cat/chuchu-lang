@@ -16,16 +16,16 @@ const STAGES: readonly Stage[] = [
     description:
       "Reads your text one character at a time and groups it into tokens: keywords, names, numbers and symbols.",
     why: "Anything the compiler does not recognise, like a stray @, is reported here with its exact position.",
-    input: "assign total to 2 + 3",
+    input: "assign total 2 + 3",
     output:
-      "Set          assign\nIdentifier   total\nTo           to\nInteger      2\nPlus         +\nInteger      3",
+      "Set          assign\nIdentifier   total\nInteger      2\nPlus         +\nInteger      3",
   },
   {
     name: "Parser",
     description:
       "Checks the grammar and arranges the tokens into a tree that shows how the pieces fit together.",
     why: "Operator precedence is settled here, so 2 + 3 * 4 multiplies before it adds.",
-    input: "Set  Identifier(total)  To\nInteger(2)  Plus  Integer(3)",
+    input: "Set  Identifier(total)\nInteger(2)  Plus  Integer(3)",
     output: "Set total\n└─ Add\n   ├─ 2\n   └─ 3",
   },
   {

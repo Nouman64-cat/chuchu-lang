@@ -1,7 +1,7 @@
-assign x 50
-assign y 70
+assign x 15
+assign y 20
 
 show(x + y)
 
-reassign x 100
+reassign x 30
 show(x + y)

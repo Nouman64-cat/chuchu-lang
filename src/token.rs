@@ -2,7 +2,6 @@
 pub enum TokenKind {
     /// Variable declaration keyword: `assign`.
     Set,
-    To,
     Show,
 
     Identifier(String),

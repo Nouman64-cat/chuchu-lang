@@ -10,8 +10,6 @@ reassign x 6
 show x
 ```
 
-The older `assign x to 5` / `reassign x to 6` form is still accepted.
-
 ## Native build and platform status
 
 New contributors should start with the [setup guide](setup.md).

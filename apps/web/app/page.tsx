@@ -275,7 +275,7 @@ export default function Home() {
 
           <p className="how-note">
             A simplified illustration of how Cheeku handles{" "}
-            <span>assign total to 2 + 3</span>. The real compiler does more at
+            <span>assign total 2 + 3</span>. The real compiler does more at
             every stage.
           </p>
         </div>

@@ -49,12 +49,6 @@ impl Parser {
         self.advance();
         Ok(token)
     }
-    /// Consumes the legacy `to` separator of `assign x to 1`, which is now optional.
-    fn skip_legacy_to(&mut self) {
-        if self.at(&TokenKind::To) {
-            self.advance();
-        }
-    }
     fn newlines(&mut self) -> Result<(), ParseError> {
         while self.at(&TokenKind::Newline) {
             if self.position + 1 >= self.tokens.len() {
@@ -130,7 +124,6 @@ impl Parser {
             TokenKind::Set => {
                 self.advance();
                 let (name, _) = self.name()?;
-                self.skip_legacy_to();
                 let value = self.parse_expression()?;
                 let end = value.span.end;
                 (StmtKind::Set { name, value }, end)
@@ -138,7 +131,6 @@ impl Parser {
             TokenKind::Reassign => {
                 self.advance();
                 let (name, _) = self.name()?;
-                self.skip_legacy_to();
                 let value = self.parse_expression()?;
                 let end = value.span.end;
                 (StmtKind::Assign { name, value }, end)
@@ -396,7 +388,7 @@ mod tests {
 
     #[test]
     fn parses_multiple_statements() {
-        let mut parser = Parser::new(tokenize("assign x to 10\nshow x").unwrap());
+        let mut parser = Parser::new(tokenize("assign x 10\nshow x").unwrap());
         assert_eq!(
             parser.parse_program(),
             Ok(vec![
@@ -405,17 +397,17 @@ mod tests {
                         name: "x".to_owned(),
                         value: Expr {
                             kind: ExprKind::Integer("10".to_owned()),
-                            span: Span { start: 12, end: 14 },
+                            span: Span { start: 9, end: 11 },
                         },
                     },
-                    span: Span { start: 0, end: 14 },
+                    span: Span { start: 0, end: 11 },
                 },
                 Stmt {
                     kind: StmtKind::Show(Expr {
                         kind: ExprKind::Identifier("x".to_owned()),
-                        span: Span { start: 20, end: 21 },
+                        span: Span { start: 17, end: 18 },
                     }),
-                    span: Span { start: 15, end: 21 },
+                    span: Span { start: 12, end: 18 },
                 },
             ])
         );
@@ -479,7 +471,7 @@ mod tests {
 
     #[test]
     fn rejects_program_without_statement_separator() {
-        for source in ["show 1 show 2", "show 1 assign x to 2", "show 1 2"] {
+        for source in ["show 1 show 2", "show 1 assign x 2", "show 1 2"] {
             let tokens = tokenize(source).unwrap();
             let unexpected = tokens[2].clone();
             let mut parser = Parser::new(tokens);
@@ -503,9 +495,9 @@ mod tests {
                 },
             ),
             (
-                "show 1\nassign to 2",
+                "show 1\nassign 2",
                 ParseError::ExpectedIdentifier {
-                    span: Span { start: 14, end: 16 },
+                    span: Span { start: 14, end: 15 },
                 },
             ),
             (
@@ -537,7 +529,7 @@ mod tests {
 
     #[test]
     fn parses_variable_declaration() {
-        for (source, start) in [("assign x to 10", 0), ("  assign x to 10  ", 2)] {
+        for (source, start) in [("assign x 10", 0), ("  assign x 10  ", 2)] {
             let tokens = tokenize(source).expect("Lexer should succeed");
             let mut parser = Parser::new(tokens);
 
@@ -549,14 +541,14 @@ mod tests {
                         value: Expr {
                             kind: ExprKind::Integer("10".to_owned()),
                             span: Span {
-                                start: start + 12,
-                                end: start + 14,
+                                start: start + 9,
+                                end: start + 11,
                             },
                         },
                     },
                     span: Span {
                         start,
-                        end: start + 14
+                        end: start + 11
                     },
                 })
             );
@@ -569,7 +561,7 @@ mod tests {
 
     #[test]
     fn parses_variable_declaration_with_addition() {
-        let tokens = tokenize("assign result to x + 20").expect("Lexer should succeed");
+        let tokens = tokenize("assign result x + 20").expect("Lexer should succeed");
         let mut parser = Parser::new(tokens);
 
         assert_eq!(
@@ -581,18 +573,18 @@ mod tests {
                         kind: ExprKind::Binary {
                             left: Box::new(Expr {
                                 kind: ExprKind::Identifier("x".to_owned()),
-                                span: Span { start: 17, end: 18 },
+                                span: Span { start: 14, end: 15 },
                             }),
                             operator: BinaryOperator::Add,
                             right: Box::new(Expr {
                                 kind: ExprKind::Integer("20".to_owned()),
-                                span: Span { start: 21, end: 23 },
+                                span: Span { start: 18, end: 20 },
                             }),
                         },
-                        span: Span { start: 17, end: 23 },
+                        span: Span { start: 14, end: 20 },
                     },
                 },
-                span: Span { start: 0, end: 23 },
+                span: Span { start: 0, end: 20 },
             })
         );
         assert_eq!(
@@ -604,7 +596,6 @@ mod tests {
     #[test]
     fn rejects_variable_declaration_without_identifier() {
         for (source, span, kind) in [
-            ("assign to 10", Span { start: 7, end: 9 }, TokenKind::To),
             (
                 "assign 10",
                 Span { start: 7, end: 9 },
@@ -624,11 +615,10 @@ mod tests {
     }
 
     #[test]
-    fn parses_declaration_and_reassignment_without_to() {
+    fn parses_declaration_and_reassignment() {
         for (source, name, value) in [
             ("assign x 10", "x", ExprKind::Integer("10".to_owned())),
             ("assign x 1.5", "x", ExprKind::Float("1.5".to_owned())),
-            ("assign x to 10", "x", ExprKind::Integer("10".to_owned())),
         ] {
             let mut parser = Parser::new(tokenize(source).unwrap());
             let statement = parser.parse_statement().expect("declaration should parse");
@@ -641,17 +631,15 @@ mod tests {
             };
             assert_eq!((parsed.as_str(), expr.kind), (name, value));
         }
-        for source in ["reassign x 30", "reassign x to 30"] {
-            let mut parser = Parser::new(tokenize(source).unwrap());
-            let statement = parser.parse_statement().expect("reassignment should parse");
-            let StmtKind::Assign { name, value } = statement.kind else {
-                panic!("expected reassignment for {source:?}");
-            };
-            assert_eq!(
-                (name.as_str(), value.kind),
-                ("x", ExprKind::Integer("30".to_owned()))
-            );
-        }
+        let mut parser = Parser::new(tokenize("reassign x 30").unwrap());
+        let statement = parser.parse_statement().expect("reassignment should parse");
+        let StmtKind::Assign { name, value } = statement.kind else {
+            panic!("expected reassignment");
+        };
+        assert_eq!(
+            (name.as_str(), value.kind),
+            ("x", ExprKind::Integer("30".to_owned()))
+        );
     }
 
     #[test]
@@ -678,22 +666,9 @@ mod tests {
     #[test]
     fn rejects_variable_declaration_without_valid_initializer() {
         for (source, span, kind) in [
-            ("assign x to", Span { start: 11, end: 11 }, TokenKind::Eof),
-            (
-                "assign x to +",
-                Span { start: 12, end: 13 },
-                TokenKind::Plus,
-            ),
-            (
-                "assign x to show",
-                Span { start: 12, end: 16 },
-                TokenKind::Show,
-            ),
-            (
-                "assign x to 10 +",
-                Span { start: 16, end: 16 },
-                TokenKind::Eof,
-            ),
+            ("assign x +", Span { start: 9, end: 10 }, TokenKind::Plus),
+            ("assign x show", Span { start: 9, end: 13 }, TokenKind::Show),
+            ("assign x 10 +", Span { start: 13, end: 13 }, TokenKind::Eof),
         ] {
             let tokens = tokenize(source).expect("Lexer should succeed");
             let mut parser = Parser::new(tokens);

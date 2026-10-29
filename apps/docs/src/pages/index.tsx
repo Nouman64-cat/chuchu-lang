@@ -9,8 +9,8 @@ const example = `function square(x: int) -> int {
     return x * x
 }
 
-assign numbers to [1, 2, 3, 4]
-assign total to sum(numbers)
+assign numbers [1, 2, 3, 4]
+assign total sum(numbers)
 
 show square(total)`;
 
@@ -169,7 +169,7 @@ export default function Home(): ReactNode {
             </div>
             <div className={styles.firstProgram}>
               <div className={styles.snippetLabel}><span aria-hidden="true">✳</span> A SMALL VOCABULARY</div>
-              <CodeBlock language="chuchu">{'assign count to 5\nreassign count to count + 1\nshow count'}</CodeBlock>
+              <CodeBlock language="chuchu">{'assign count 5\nreassign count count + 1\nshow count'}</CodeBlock>
               <div className={styles.resultRow}><span>OUTPUT</span><code>6</code><span>One small step. A working program.</span></div>
             </div>
           </div>
