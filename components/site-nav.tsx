@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import MobileNav, { type MobileNavItem } from "@/components/mobile-nav";
 import { site } from "@/lib/site";
 
 // Logo intrinsic size from public/chuchu-logo-3.svg (976 x 586).
@@ -15,6 +16,13 @@ type SiteNavProps = {
  * between pages.
  */
 export default function SiteNav({ current }: SiteNavProps) {
+  const mobileItems: MobileNavItem[] = [
+    { label: "About", href: "/about", current: current === "about" },
+    { label: "Documentation", href: site.links.docs, external: true },
+    { label: "Community", href: "/community", current: current === "community" },
+    { label: "Downloads", href: "/downloads", current: current === "downloads" },
+    { label: "GitHub", href: site.links.source, external: true },
+  ];
   return (
     <div className="navwrap">
       <nav className="glass navpill" aria-label="Main navigation">
@@ -58,12 +66,15 @@ export default function SiteNav({ current }: SiteNavProps) {
             GitHub
           </a>
         </div>
-        <a className="btn btn-primary btn-nav" href={site.links.install}>
-          Get started{" "}
-          <span className="arr" aria-hidden="true">
-            &rarr;
-          </span>
-        </a>
+        <div className="navend">
+          <a className="btn btn-primary btn-nav" href={site.links.install}>
+            Get started{" "}
+            <span className="arr" aria-hidden="true">
+              &rarr;
+            </span>
+          </a>
+          <MobileNav items={mobileItems} />
+        </div>
       </nav>
     </div>
   );
