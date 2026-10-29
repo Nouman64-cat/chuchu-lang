@@ -7,7 +7,7 @@ const LOGO_RATIO = 586 / 976;
 
 type SiteNavProps = {
   /** Marks the active section for assistive technology. */
-  current?: "home" | "about";
+  current?: "home" | "about" | "community" | "downloads";
 };
 
 /**
@@ -30,12 +30,6 @@ export default function SiteNav({ current }: SiteNavProps) {
           <span className="brand-name">chuchu</span>
         </Link>
         <div className="navlinks">
-          <Link className="navlink" href="/#how-it-works">
-            How it works
-          </Link>
-          <Link className="navlink" href="/#features">
-            Features
-          </Link>
           <Link
             className="navlink"
             href="/about"
@@ -46,6 +40,20 @@ export default function SiteNav({ current }: SiteNavProps) {
           <a className="navlink" href={site.links.docs}>
             Documentation
           </a>
+          <Link
+            className="navlink"
+            href="/community"
+            aria-current={current === "community" ? "page" : undefined}
+          >
+            Community
+          </Link>
+          <Link
+            className="navlink"
+            href="/downloads"
+            aria-current={current === "downloads" ? "page" : undefined}
+          >
+            Downloads
+          </Link>
           <a className="navlink" href={site.links.source}>
             GitHub
           </a>

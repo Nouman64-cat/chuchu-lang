@@ -86,7 +86,7 @@ export function projectStructuredData() {
         programmingLanguage: { "@type": "ComputerLanguage", name: "Rust" },
         codeRepository: site.links.source,
         license: "https://opensource.org/license/mit",
-        downloadUrl: site.links.install,
+        downloadUrl: absoluteUrl("/downloads"),
         offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
         author: { "@id": ORGANIZATION_ID },
       },
@@ -125,5 +125,51 @@ export function aboutStructuredData() {
         },
       ],
     },
+  };
+}
+
+/** Breadcrumb trail for a first-level route under the home page. */
+function breadcrumb(name: string, path: string) {
+  return {
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
+      { "@type": "ListItem", position: 2, name, item: absoluteUrl(path) },
+    ],
+  };
+}
+
+/** The Community route: where to report issues, contribute and find the code. */
+export function communityStructuredData() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${absoluteUrl("/community")}#webpage`,
+    url: absoluteUrl("/community"),
+    name: "Chuchu community",
+    description:
+      "Join the open-source Chuchu community: report issues, propose changes and contribute to the language, the Cheeku compiler, the docs and this site.",
+    inLanguage: site.language,
+    isPartOf: { "@id": WEBSITE_ID },
+    about: { "@id": LANGUAGE_ID },
+    breadcrumb: breadcrumb("Community", "/community"),
+  };
+}
+
+/** The Downloads route, describing the Cheeku compiler as downloadable software. */
+export function downloadsStructuredData() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${absoluteUrl("/downloads")}#webpage`,
+    url: absoluteUrl("/downloads"),
+    name: "Download Cheeku, the Chuchu compiler",
+    description:
+      "How to get Cheeku, the Chuchu compiler: native archives for macOS, Linux and Windows, their requirements, and how to build from source.",
+    inLanguage: site.language,
+    isPartOf: { "@id": WEBSITE_ID },
+    mainEntity: { "@id": COMPILER_ID },
+    about: { "@id": COMPILER_ID },
+    breadcrumb: breadcrumb("Downloads", "/downloads"),
   };
 }
