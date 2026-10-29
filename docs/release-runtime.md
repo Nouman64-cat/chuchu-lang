@@ -14,9 +14,10 @@ contents. Install dependencies from their vendors and retain their licenses.
 
 CI pins SDK 23.1.4. Unix users must make its libraries discoverable:
 `LD_LIBRARY_PATH=<LLVM prefix>/lib` on Linux or
-`DYLD_LIBRARY_PATH=<LLVM prefix>/chuchu-runtime-lib` on macOS when needed by
-the binary's load commands. The provisioner creates that LLVM-only directory;
-using the entire macOS SDK `lib` directory can override the system C++ runtime. Use architecture-matching installations. Do not rename an ARM binary
+the LLVM `lib` directory on macOS. Source builds of Cheeku embed that directory
+as an rpath, so macOS needs no `DYLD_LIBRARY_PATH`; do not set one, because rustc
+loads its own `@rpath/libLLVM.dylib` and a global path swaps in an incompatible
+LLVM and crashes it. Use architecture-matching installations. Do not rename an ARM binary
 and describe it as x64. Windows users need a configured x64 developer environment
 for native program linking even when Cheeku itself starts successfully.
 

@@ -4,6 +4,9 @@
 The official Windows installer is not sufficient: llvm-sys needs llvm-config,
 headers and static libraries. Intel macOS has no SDK asset in this release,
 so build the same release's verified source with the X86 native backend.
+The macOS ARM64 SDK is also unusable: it ships no libLLVM dylib and its static
+archives are LTO bitcode that Apple's linker cannot read, so build it from source
+as a native-object libLLVM dylib with the AArch64 backend.
 Windows also rebuilds LLVM: the upstream SDK embeds nonrelocatable system
 library paths (including its release builder's S: drive). Keep its clang-cl
 driver, but install a native static LLVM build without optional compression/XML.
@@ -22,11 +25,13 @@ import urllib.parse
 VERSION = '23.1.4'
 SOURCE = ('llvm-project-23.1.4.src.tar.xz', '819ecf7351f1a66f76b2d701d8942faaf5faeb324cb90c9d5b090de142434bb2')
 ASSETS = {
-    ('Darwin', 'arm64'): ('LLVM-23.1.4-macOS-ARM64.tar.xz', '5d3179db39adeca5b17a34d82708fe976bc60e055b05fe557878fb3fb64d39ef'),
+    ('Darwin', 'arm64'): SOURCE,
     ('Linux', 'x86_64'): ('LLVM-23.1.4-Linux-X64.tar.xz', '25d814fda50d5fb0084b42be09605d8b1595d49d5e2e03a3345d7e112ff6f9f3'),
     ('Windows', 'amd64'): ('clang+llvm-23.1.4-x86_64-pc-windows-msvc.tar.xz', '854bffcfc84528e0ee92490ff5c178920abd358a79c3e98f053e41e3e8e4c6d2'),
-    ('Darwin', 'x86_64'): ('llvm-project-23.1.4.src.tar.xz', '819ecf7351f1a66f76b2d701d8942faaf5faeb324cb90c9d5b090de142434bb2'),
+    ('Darwin', 'x86_64'): SOURCE,
 }
+# Hosts that build LLVM from the pinned source, with the one backend each needs.
+SOURCE_BUILDS = {('Darwin', 'x86_64'): 'X86', ('Darwin', 'arm64'): 'AArch64', ('Windows', 'amd64'): 'X86'}
 
 
 def run(args):
@@ -60,21 +65,18 @@ def activate(prefix):
         if not (prefix / 'bin/clang-cl.exe').is_file():
             raise RuntimeError('Windows SDK is missing clang-cl.exe')
     if platform.system() == 'Darwin':
-        runtime = prefix / 'chuchu-runtime-lib'
-        runtime.mkdir(exist_ok=True)
-        for library in (prefix / 'lib').glob('libLLVM*.dylib'):
-            link = runtime / library.name
-            if not link.is_symlink():
-                link.symlink_to(Path('..') / 'lib' / library.name)
+        # The shared library is found through an rpath that build.rs embeds in
+        # cheeku. Never export it through DYLD_LIBRARY_PATH: rustc itself loads
+        # @rpath/libLLVM.dylib, so a global path swaps in an incompatible LLVM.
+        if not (prefix / 'lib/libLLVM.dylib').exists():
+            raise RuntimeError('macOS SDK is missing libLLVM.dylib; llvm-sys would link bitcode archives')
+        subprocess.check_output([config, '--link-shared', '--libnames'], text=True)
     print(f'LLVM_SYS_231_PREFIX={prefix}', flush=True)
     if os.environ.get('GITHUB_ENV'):
         with open(os.environ['GITHUB_ENV'], 'a') as env:
             env.write(f'LLVM_SYS_231_PREFIX={prefix}\n')
             if platform.system() == 'Linux':
                 env.write(f'LD_LIBRARY_PATH={prefix / "lib"}:{os.environ.get("LD_LIBRARY_PATH", "")}\n')
-            if platform.system() == 'Darwin':
-                # Expose LLVM alone, preserving rustc/Node's system libc++.
-                env.write(f'DYLD_LIBRARY_PATH={runtime}:{os.environ.get("DYLD_LIBRARY_PATH", "")}\n')
         with open(os.environ['GITHUB_PATH'], 'a') as paths:
             paths.write(f'{prefix / "bin"}\n')
 
@@ -95,7 +97,7 @@ def main():
         raise RuntimeError(f'No pinned SDK for {key}; build LLVM 23.1.4 for this host')
     name, digest = ASSETS[key]
     download_archive(name, digest, destination)
-    if key == ('Darwin', 'x86_64'):
+    if key in SOURCE_BUILDS and system == 'Darwin':
         prefix = destination / 'install'
     else:
         candidates = list(destination.glob('*/bin/llvm-config*'))
@@ -103,14 +105,14 @@ def main():
         if config is None:
             raise RuntimeError('Archive has no bin/llvm-config; a full development SDK is required')
         prefix = config.parent.parent
-    if key == ('Darwin', 'x86_64') or system == 'Windows':
+    if key in SOURCE_BUILDS:
         if system == 'Windows':
             download_archive(*SOURCE, destination)
         source = destination / f'llvm-project-{VERSION}.src/llvm'
         build = destination / 'llvm-build'
         options = ['cmake', '-S', source, '-B', build, '-G', 'Ninja',
                    '-DCMAKE_BUILD_TYPE=Release', f'-DCMAKE_INSTALL_PREFIX={prefix}',
-                   '-DLLVM_TARGETS_TO_BUILD=X86', '-DLLVM_INCLUDE_TESTS=OFF',
+                   f'-DLLVM_TARGETS_TO_BUILD={SOURCE_BUILDS[key]}', '-DLLVM_INCLUDE_TESTS=OFF',
                    '-DLLVM_INCLUDE_BENCHMARKS=OFF', '-DLLVM_INCLUDE_EXAMPLES=OFF',
                    '-DLLVM_ENABLE_BINDINGS=OFF', '-DLLVM_ENABLE_ZSTD=OFF',
                    '-DLLVM_ENABLE_ZLIB=OFF', '-DLLVM_ENABLE_LIBXML2=OFF']

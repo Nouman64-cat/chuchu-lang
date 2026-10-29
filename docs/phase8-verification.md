@@ -97,7 +97,12 @@ from the completed `assign` migration at `3fe3d90`.
   matching LLVM shared libraries and system runtime dependencies.
 - Linux musl, Windows ARM64/MinGW, 32-bit hosts and cross-OS compilation are not
   initial targets. Presence of unexecuted CI files is not a platform test pass.
-- Intel macOS uses an LLVM source build because this release has no Intel SDK.
+- macOS uses an LLVM source build (X86 on Intel, AArch64 on Apple Silicon): the
+  release has no Intel SDK, and its ARM64 SDK has only bitcode static archives.
+- `inkwell` default features are disabled; only the host LLVM backend feature
+  (`target-x86` / `target-aarch64`) is enabled, matching the single-backend SDKs.
+- SDK cache keys: Linux, macOS Intel and Windows stay pinned to their existing
+  recipe ids (caches stay valid); macOS ARM64 uses a new `source-dylib-<hash>` key.
 - Saved Phase 7 measurements remain historical. New portable benchmark output
   records actual host/tool versions; no cross-hardware speed claim is made.
 

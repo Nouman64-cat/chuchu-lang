@@ -27,17 +27,19 @@ provisioner instead if needed (Python 3.12+):
 ```sh
 python3 .github/scripts/provision-llvm.py --directory "$PWD/target/llvm-sdk"
 export LLVM_SYS_231_PREFIX="$(cat target/llvm-sdk/prefix.txt)"
-export DYLD_LIBRARY_PATH="$LLVM_SYS_231_PREFIX/chuchu-runtime-lib${DYLD_LIBRARY_PATH:+:$DYLD_LIBRARY_PATH}"
 ```
 
-The provisioner creates an LLVM-only loader directory. Do not expose the whole
-SDK `lib` directory through `DYLD_LIBRARY_PATH`: its bundled libc++ can conflict
-with the system runtime used by Rust and other tools.
+Do not set `DYLD_LIBRARY_PATH`: `build.rs` embeds the SDK `lib` directory as an
+rpath in `cheeku`. rustc loads its own `@rpath/libLLVM.dylib`, so a global
+loader path substitutes Chuchu's LLVM into rustc and crashes it (SIGSEGV in
+`llvm_util::init`).
 
-On Intel, install CMake and Ninja (`brew install cmake ninja`); the provisioner
-builds LLVM 23.1.4 from checksum-verified official source with the X86 backend,
-because the release has no macOS Intel SDK asset. This is a substantial source
-build, and is not locally validated on Apple Silicon.
+On Apple Silicon and Intel, install CMake and Ninja (`brew install cmake ninja`);
+the provisioner builds LLVM 23.1.4 from checksum-verified official source as a
+`libLLVM` dylib with only the host backend (AArch64 or X86). The official ARM64
+SDK is not used: it ships no `libLLVM` dylib and its static archives are LTO
+bitcode that Apple's linker rejects ("Unknown attribute kind"). This is a
+substantial source build.
 
 Compile and execute:
 
