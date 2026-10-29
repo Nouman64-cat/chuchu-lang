@@ -40,7 +40,8 @@ const config: Config = {
     colorMode: {defaultMode: 'light', respectPrefersColorScheme: false},
     metadata: [{name: 'theme-color', content: '#6154cc'}],
     navbar: {
-      logo: {alt: 'Chuchu', src: 'img/chuchu-logo-3.png', srcDark: 'img/chuchu-logo-3.png', width: 110, height: 54},
+      title: 'Chuchu',
+      logo: {alt: 'Chuchu', src: 'img/chuchu-logo-3.png', srcDark: 'img/chuchu-logo-3.png', width: 58, height: 35},
       items: [
         {type: 'docSidebar', sidebarId: 'docsSidebar', position: 'left', label: 'Documentation'},
         {to: '/docs/guides/examples', label: 'Examples', position: 'left'},
