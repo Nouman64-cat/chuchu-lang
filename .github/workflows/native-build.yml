@@ -62,6 +62,16 @@ jobs:
           import os, subprocess
           binary = 'target/release/cheeku' + ('.exe' if os.name == 'nt' else '')
           subprocess.run(['python', '.github/scripts/smoke.py', '--compiler', binary], check=True)
+      - name: Portable benchmark harness smoke
+        shell: python
+        run: |
+          import os, subprocess
+          binary = 'target/release/cheeku' + ('.exe' if os.name == 'nt' else '')
+          subprocess.run(['python', 'benchmarks/run.py', '--cheeku', binary,
+                          '--workloads', 'integer_loop,float_loop,array_multiply',
+                          '--levels', 'O2', '--languages', 'chuchu', '--repetitions', '3',
+                          '--compile-repetitions', '1', '--warmups', '0', '--no-throughput',
+                          '--no-simd-probe', '--output', 'target/benchmark-smoke.json'], check=True)
       - name: Package only after native tests pass
         run: python .github/scripts/package-release.py --target ${{ inputs.target }}
       - uses: actions/upload-artifact@v4
