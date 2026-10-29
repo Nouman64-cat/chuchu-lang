@@ -2,3 +2,11 @@
 @media(min-width:1500px){.hero{padding-top:125px;padding-bottom:110px}}@media(max-width:996px){.hero{gap:28px;padding:65px 30px}.hero h1{letter-spacing:-2px}.lead{font-size:15px}.desktopBreak{display:none}.principles{margin:0 30px;gap:20px}.principles>div+div{padding-left:20px}.learnSection{padding:55px 30px}.pathCard{padding:20px}.projectNote{margin:0 30px 55px}.projectNote>a{white-space:normal;min-width:100px}}@media(max-width:700px){.hero{grid-template-columns:1fr;padding:48px 22px;gap:38px}.hero h1{font-size:48px}.codeWindow{transform:none}.principles{grid-template-columns:1fr;margin:0 22px;padding:26px 0;gap:26px}.principles>div,.principles>div+div{padding:0;border:0}.smallIcon{float:left;margin:0 17px 45px 0;min-width:27px}.principles h2{font-size:16px}.learnSection{padding:45px 22px}.sectionHeading{display:block}.sectionHeading>p{margin-top:15px}.sectionHeading>p br{display:none}.pathGrid{grid-template-columns:1fr}.pathNumber{margin-bottom:20px}.projectNote{margin:0 22px 45px;padding:22px;flex-wrap:wrap;gap:16px}.projectNote>div:nth-child(2){flex:1;min-width:180px}.projectNote>a{margin-left:0}.outputStatus{font-size:9px}.version{font-size:9px}}
 @media(prefers-reduced-motion:reduce){.primary,.pathCard{transition:none;transform:none!important}}
 :global([data-theme='dark']) .primary{color:#191820}
+.dot{background:#168a45}
+.primary{box-shadow:0 4px 10px #168a4520}
+.codeWindow{box-shadow:0 20px 65px #1f33260c}
+.traffic i{background:#d9ded8}
+.traffic i:first-child{background:#ef9ab1}
+.traffic i:nth-child(2){background:#f0ca4d}
+.traffic i:last-child{background:#77c98b}
+.noteStar{color:#c39a16}

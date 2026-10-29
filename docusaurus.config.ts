@@ -38,7 +38,7 @@ const config: Config = {
   themeConfig: {
     image: 'img/chuchu-logo-3.png',
     colorMode: {defaultMode: 'light', respectPrefersColorScheme: false},
-    metadata: [{name: 'theme-color', content: '#6154cc'}],
+    metadata: [{name: 'theme-color', content: '#168a45'}],
     navbar: {
       title: 'Chuchu',
       logo: {alt: 'Chuchu', src: 'img/chuchu-logo-3.png', srcDark: 'img/chuchu-logo-3.png', width: 58, height: 35},
