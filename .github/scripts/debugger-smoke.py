@@ -31,6 +31,9 @@ show counter
 show fraction
 show values[1]
 show enabled
+assign greeting "hello"
+reassign greeting greeting + " strings"
+show greeting
 """
 
 
@@ -113,6 +116,9 @@ def main():
         commands += ['continue']
         check('outer-line', 'lldb.frame.GetLineEntry().GetLine() == 16')
         check('outer-scope', 'lldb.frame.FindVariable("counter").GetValueAsSigned() == 2')
+        commands += ['breakpoint set --file ' + quoted(source) + ' --line 22', 'continue']
+        check('string-line', 'lldb.frame.GetLineEntry().GetLine() == 22')
+        check('string-value', '"hello strings" in (lldb.frame.FindVariable("greeting").GetSummary() or "")')
         commands += ['continue']
         check('exit', 'lldb.process.GetExitStatus() == 0')
         script = root / 'commands.lldb'

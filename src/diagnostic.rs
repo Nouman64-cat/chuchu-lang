@@ -118,18 +118,42 @@ fn type_name(ty: Type) -> String {
         Type::Int => "int".into(),
         Type::Float => "float".into(),
         Type::Bool => "bool".into(),
+        Type::String => "string".into(),
         Type::Array { element, len } => format!("{}[{len}]", type_name(element.scalar())),
     }
 }
 
 fn describe(error: &CompileError, source: &str) -> Option<Diagnostic> {
     let (span, message, label, help) = match error {
-        CompileError::Lex(error) => (
-            error.span,
-            format!("Invalid source character {:?}", error.character),
-            "this character is not supported here".into(),
-            Some("Remove this character or replace it with a supported Chuchu token.".into()),
-        ),
+        CompileError::Lex(error) => {
+            use crate::lexer::LexErrorKind;
+            let (message, label, help) = match error.kind {
+                LexErrorKind::UnexpectedCharacter => (
+                    format!("Invalid source character {:?}", error.character),
+                    "this character is not supported here",
+                    "Remove this character or replace it with a supported Chuchu token.",
+                ),
+                LexErrorKind::UnterminatedString => (
+                    "Unterminated string literal".into(),
+                    "missing closing double quote",
+                    r#"Close the string with a double quote. Use \n for a newline inside a string."#,
+                ),
+                LexErrorKind::InvalidEscape => (
+                    format!(
+                        "Invalid string escape \\{}",
+                        error.character.escape_default()
+                    ),
+                    "unsupported escape sequence",
+                    r#"Supported escapes are \n, \r, \t, \\, and \"."#,
+                ),
+                LexErrorKind::NulInString => (
+                    "NUL characters are not supported in strings".into(),
+                    "a string cannot contain a NUL byte",
+                    "Remove the NUL character or use printable text instead.",
+                ),
+            };
+            (error.span, message, label.into(), Some(help.into()))
+        }
         CompileError::Parse(error) => return Some(parse_diagnostic(error, source)),
         CompileError::Codegen(CodegenError::InvalidIntegerLiteral { literal, span }) => (
             *span,
@@ -292,7 +316,9 @@ fn parse_diagnostic(error: &ParseError, source: &str) -> Diagnostic {
                 (
                     format!("Expected expression, found {found}"),
                     "a value is required here".into(),
-                    Some("Use a number, boolean, variable, array, or function call.".into()),
+                    Some(
+                        "Use a number, string, boolean, variable, array, or function call.".into(),
+                    ),
                 )
             }
         }

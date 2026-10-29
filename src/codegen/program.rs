@@ -16,6 +16,7 @@ use super::CodegenError;
 mod arrays;
 mod debug;
 mod runtime;
+mod strings;
 use crate::ast::{BinaryOperator as Op, Expr, ExprKind, Stmt, StmtKind};
 use crate::token::Span;
 use crate::types::{MAX_ARRAY_LEN, NumericType, Type};
@@ -236,6 +237,13 @@ pub(super) fn generate_with_options<'ctx>(
         }
     }
     if !generator.terminated() {
+        generator.cleanup_strings(
+            true,
+            statements
+                .last()
+                .map(|s| s.span)
+                .unwrap_or(Span { start: 0, end: 0 }),
+        )?;
         generator.builder.unset_current_debug_location();
         build(
             generator
@@ -260,6 +268,7 @@ impl<'ctx> Generator<'ctx> {
             Type::Int => self.context.i64_type().into(),
             Type::Float => self.context.f64_type().into(),
             Type::Bool => self.context.bool_type().into(),
+            Type::String => self.context.ptr_type(AddressSpace::default()).into(),
             Type::Array { element, len } => {
                 if len == 0 || len > MAX_ARRAY_LEN {
                     return Err(invalid("Array length outside 1..=256", span));
@@ -439,6 +448,7 @@ impl<'ctx> Generator<'ctx> {
                     ty: Type::Float,
                 })
             }
+            ExprKind::String(literal) => self.string_literal(literal, span),
             ExprKind::Bool(value) => Ok(Value {
                 raw: self
                     .context
@@ -449,7 +459,7 @@ impl<'ctx> Generator<'ctx> {
             }),
             ExprKind::Identifier(name) => {
                 let binding = self.lookup(name, span)?;
-                Ok(Value {
+                let value = Value {
                     raw: build(
                         self.builder.build_load(
                             self.llvm_type(binding.ty, span)?,
@@ -459,7 +469,12 @@ impl<'ctx> Generator<'ctx> {
                         span,
                     )?,
                     ty: binding.ty,
-                })
+                };
+                if value.ty == Type::String {
+                    self.copy_string(value, span)
+                } else {
+                    Ok(value)
+                }
             }
             ExprKind::Negate(inner) => {
                 if let ExprKind::Integer(literal) = &inner.kind
@@ -552,6 +567,9 @@ impl<'ctx> Generator<'ctx> {
         mut right: Value<'ctx>,
         span: Span,
     ) -> Result<Value<'ctx>, CodegenError> {
+        if left.ty == Type::String && right.ty == Type::String {
+            return self.string_binary(op, left, right, span);
+        }
         if matches!(left.ty, Type::Array { .. }) {
             return self.array_binary(op, left, right, span);
         }
@@ -662,6 +680,7 @@ impl<'ctx> Generator<'ctx> {
             values.push(self.expression(argument)?);
         }
         match (name, values.as_slice()) {
+            ("len", [value]) if value.ty == Type::String => self.string_len(*value, span),
             (
                 "len",
                 [
@@ -808,7 +827,17 @@ impl<'ctx> Generator<'ctx> {
             }
         }
         self.scopes.push(HashMap::new());
-        let result = self.statements(body);
+        let result = self.statements(body).and_then(|()| {
+            if !self.terminated() {
+                self.cleanup_strings(
+                    false,
+                    body.last()
+                        .map(|s| s.span)
+                        .unwrap_or(Span { start: 0, end: 0 }),
+                )?;
+            }
+            Ok(())
+        });
         self.scopes.pop();
         if let Some(debug) = &mut self.debug {
             debug.exit_scope();
@@ -838,16 +867,19 @@ impl<'ctx> Generator<'ctx> {
                 let binding = self.lookup(name, span)?;
                 let value = self.expression(value)?;
                 let value = self.cast(value, binding.ty, span)?;
+                self.release_binding(binding, span)?;
                 build(self.builder.build_store(binding.pointer, value.raw), span)?;
                 Ok(())
             }
             StmtKind::Show(expr) => {
                 let value = self.expression(expr)?;
-                self.output(value, span)
+                self.output(value, span)?;
+                self.release_value(value, span)
             }
             StmtKind::Return(expr) => {
                 let value = self.expression(expr)?;
                 let value = self.cast(value, self.result, span)?;
+                self.cleanup_strings(true, span)?;
                 build(self.builder.build_return(Some(&value.raw)), span)?;
                 Ok(())
             }

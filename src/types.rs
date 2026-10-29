@@ -3,6 +3,7 @@ pub enum Type {
     Int,
     Float,
     Bool,
+    String,
     Array { element: NumericType, len: usize },
 }
 

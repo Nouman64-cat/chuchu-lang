@@ -46,11 +46,23 @@ impl fmt::Display for CompileError {
             Self::InputOutputConflict(path) => {
                 write!(f, "Output would overwrite source {}", path.display())
             }
-            Self::Lex(error) => write!(
-                f,
-                "Invalid source character {:?} at {}..{}",
-                error.character, error.span.start, error.span.end
-            ),
+            Self::Lex(error) => {
+                use crate::lexer::LexErrorKind;
+                let message = match error.kind {
+                    LexErrorKind::UnexpectedCharacter => {
+                        format!("Invalid source character {:?}", error.character)
+                    }
+                    LexErrorKind::UnterminatedString => "Unterminated string literal".into(),
+                    LexErrorKind::InvalidEscape => format!(
+                        "Invalid string escape \\{}",
+                        error.character.escape_default()
+                    ),
+                    LexErrorKind::NulInString => {
+                        "NUL characters are not supported in strings".into()
+                    }
+                };
+                write!(f, "{message} at {}..{}", error.span.start, error.span.end)
+            }
             Self::Parse(error) => {
                 let (expected, span) = match error {
                     ParseError::UnexpectedEnd => {

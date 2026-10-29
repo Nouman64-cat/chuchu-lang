@@ -1,0 +1,12 @@
+function greet(name: string) -> string {
+    return "Hello, " + name + "!"
+}
+
+assign name "دنیا 🌍"
+assign message greet(name)
+show message
+show len(name)
+show message == "Hello, دنیا 🌍!"
+reassign message message + " Welcome to Chuchu."
+show message
+show "Escapes: \"quotes\", \\backslash, and\ttab"

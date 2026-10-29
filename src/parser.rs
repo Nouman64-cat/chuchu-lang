@@ -107,9 +107,10 @@ impl Parser {
             TokenKind::Identifier(name) if name == "int" => Type::Int,
             TokenKind::Identifier(name) if name == "float" => Type::Float,
             TokenKind::Identifier(name) if name == "bool" => Type::Bool,
+            TokenKind::Identifier(name) if name == "string" => Type::String,
             _ => {
                 return Err(ParseError::ExpectedToken {
-                    expected: "int, float, or bool type",
+                    expected: "int, float, bool, or string type",
                     span: token.span,
                 });
             }
@@ -293,6 +294,10 @@ impl Parser {
             },
             TokenKind::Float(value) => Expr {
                 kind: ExprKind::Float(value),
+                span: token.span,
+            },
+            TokenKind::String(value) => Expr {
+                kind: ExprKind::String(value),
                 span: token.span,
             },
             TokenKind::True | TokenKind::False => Expr {

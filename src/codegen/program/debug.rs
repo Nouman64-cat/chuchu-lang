@@ -107,6 +107,22 @@ impl<'ctx> DebugState<'ctx> {
         }
         let bits = self.data.get_abi_size(&llvm) * 8;
         let debug = match ty {
+            Type::String => {
+                let character = self
+                    .builder
+                    .create_basic_type("char", 8, 0x06, DIFlags::ZERO)
+                    .map_err(|error| CodegenError::Verification(error.to_string()))?
+                    .as_type();
+                self.builder
+                    .create_pointer_type(
+                        "String",
+                        character,
+                        bits,
+                        self.data.get_abi_alignment(&llvm) * 8,
+                        AddressSpace::default(),
+                    )
+                    .as_type()
+            }
             Type::Array { element, len } => {
                 let BasicTypeEnum::ArrayType(array) = llvm else {
                     unreachable!("array lowering type")

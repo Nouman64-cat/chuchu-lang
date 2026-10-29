@@ -213,6 +213,7 @@ impl<'ctx> Generator<'ctx> {
         let (format, name, raw) = match value.ty {
             Type::Int => ("%lld\n", ".cheeku.format.i64", value.raw),
             Type::Float => ("%.15g\n", ".cheeku.format.float", value.raw),
+            Type::String => ("%s\n", ".cheeku.format.string", value.raw),
             Type::Bool => {
                 let yes = build(
                     self.builder.build_global_string_ptr("true", "bool.true"),

@@ -78,6 +78,11 @@ pub fn reserved_function(name: &str) -> bool {
             | "fmin"
             | "fmax"
             | "fabs"
+            | "malloc"
+            | "free"
+            | "strlen"
+            | "memcpy"
+            | "strcmp"
     )
 }
 
@@ -259,6 +264,7 @@ impl TypeChecker {
                 }
             }
             ExprKind::Bool(_) => Ok(Type::Bool),
+            ExprKind::String(_) => Ok(Type::String),
             ExprKind::Identifier(name) => {
                 self.symbols
                     .lookup(name)
@@ -286,6 +292,13 @@ impl TypeChecker {
             } => {
                 let left = self.infer_expression(left)?;
                 let right = self.infer_expression(right)?;
+                if left == Type::String && right == Type::String {
+                    match operator {
+                        BinaryOperator::Add => return Ok(Type::String),
+                        BinaryOperator::Equal | BinaryOperator::NotEqual => return Ok(Type::Bool),
+                        _ => {}
+                    }
+                }
                 if left.is_numeric() && right.is_numeric() {
                     if operator.is_comparison() {
                         return Ok(Type::Bool);
@@ -376,6 +389,7 @@ impl TypeChecker {
         };
         match (name, types.as_slice()) {
             ("len", [Type::Array { .. }]) => Ok(Type::Int),
+            ("len", [Type::String]) => Ok(Type::Int),
             ("sum", [Type::Array { element, .. }]) => Ok(element.scalar()),
             ("sqrt", [Type::Float]) => Ok(Type::Float),
             ("abs", [ty]) if ty.is_numeric() => Ok(*ty),

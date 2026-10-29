@@ -2,8 +2,17 @@ use crate::token::{Span, Token, TokenKind};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct LexError {
+    pub kind: LexErrorKind,
     pub character: char,
     pub span: Span,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum LexErrorKind {
+    UnexpectedCharacter,
+    UnterminatedString,
+    InvalidEscape,
+    NulInString,
 }
 
 pub fn tokenize(source: &str) -> Result<Vec<Token>, LexError> {
@@ -15,6 +24,97 @@ pub fn tokenize(source: &str) -> Result<Vec<Token>, LexError> {
         let mut end = start + character.len_utf8();
 
         let kind = match character {
+            '"' => {
+                let mut value = String::new();
+                loop {
+                    let Some((position, next)) = characters.next() else {
+                        return Err(LexError {
+                            kind: LexErrorKind::UnterminatedString,
+                            character: '"',
+                            span: Span {
+                                start,
+                                end: source.len(),
+                            },
+                        });
+                    };
+                    end = position + next.len_utf8();
+                    match next {
+                        '"' => break,
+                        '\n' | '\r' => {
+                            return Err(LexError {
+                                kind: LexErrorKind::UnterminatedString,
+                                character: next,
+                                span: Span {
+                                    start,
+                                    end: position,
+                                },
+                            });
+                        }
+                        '\0' => {
+                            return Err(LexError {
+                                kind: LexErrorKind::NulInString,
+                                character: next,
+                                span: Span {
+                                    start: position,
+                                    end,
+                                },
+                            });
+                        }
+                        '\\' => {
+                            let Some((escape_position, escape)) = characters.next() else {
+                                return Err(LexError {
+                                    kind: LexErrorKind::UnterminatedString,
+                                    character: '"',
+                                    span: Span {
+                                        start,
+                                        end: source.len(),
+                                    },
+                                });
+                            };
+                            end = escape_position + escape.len_utf8();
+                            value.push(match escape {
+                                '"' => '"',
+                                '\\' => '\\',
+                                'n' => '\n',
+                                'r' => '\r',
+                                't' => '\t',
+                                '0' | '\0' => {
+                                    return Err(LexError {
+                                        kind: LexErrorKind::NulInString,
+                                        character: escape,
+                                        span: Span {
+                                            start: position,
+                                            end,
+                                        },
+                                    });
+                                }
+                                '\n' | '\r' => {
+                                    return Err(LexError {
+                                        kind: LexErrorKind::UnterminatedString,
+                                        character: escape,
+                                        span: Span {
+                                            start,
+                                            end: position,
+                                        },
+                                    });
+                                }
+                                _ => {
+                                    return Err(LexError {
+                                        kind: LexErrorKind::InvalidEscape,
+                                        character: escape,
+                                        span: Span {
+                                            start: position,
+                                            end,
+                                        },
+                                    });
+                                }
+                            });
+                        }
+                        _ => value.push(next),
+                    }
+                }
+                TokenKind::String(value)
+            }
             'a'..='z' | 'A'..='Z' | '_' => {
                 while let Some(&(position, next_char)) = characters.peek() {
                     if next_char.is_ascii_alphanumeric() || next_char == '_' {
@@ -120,6 +220,7 @@ pub fn tokenize(source: &str) -> Result<Vec<Token>, LexError> {
                     ('>', false) => TokenKind::Greater,
                     _ => {
                         return Err(LexError {
+                            kind: LexErrorKind::UnexpectedCharacter,
                             character,
                             span: Span { start, end },
                         });
@@ -132,6 +233,7 @@ pub fn tokenize(source: &str) -> Result<Vec<Token>, LexError> {
             ' ' | '\t' | '\r' => continue,
             _ => {
                 return Err(LexError {
+                    kind: LexErrorKind::UnexpectedCharacter,
                     character,
                     span: Span { start, end },
                 });
@@ -268,6 +370,7 @@ mod tests {
         assert_eq!(
             error,
             LexError {
+                kind: LexErrorKind::UnexpectedCharacter,
                 character: '@',
                 span: Span { start: 1, end: 2 },
             }

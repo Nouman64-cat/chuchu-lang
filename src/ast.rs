@@ -11,6 +11,7 @@ pub struct Expr {
 pub enum ExprKind {
     Integer(String),
     Float(String),
+    String(String),
     Bool(bool),
     Negate(Box<Expr>),
     Call {

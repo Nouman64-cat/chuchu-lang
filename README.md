@@ -10,6 +10,17 @@ reassign x 6
 show x
 ```
 
+Strings support UTF-8 text, escapes, concatenation, equality and `len`:
+
+```chuchu
+assign name "world 🌍"
+show "Hello, " + name + "!"
+show len(name)
+```
+
+See [strings](STRINGS.md) for type annotations, Unicode length, storage semantics
+and the [runnable example](examples/strings.chuchu).
+
 ## Native build and platform status
 
 New contributors should start with the [setup guide](setup.md).
@@ -50,7 +61,7 @@ only after successful linking, without deleting it first. Windows locked-file
 failures are reported and retain the original output. Optional IR/assembly files
 are still published separately.
 
-`show` prints int/float/bool scalars through the host CRT. Checked overflow,
+`show` prints int/float/bool scalars and UTF-8 strings through the host CRT. Checked overflow,
 division and bounds failures go to stderr with source spans and exit 1. The same
 portable integration suites exercise all OSes; see their actual validation status
 before claiming compatibility.

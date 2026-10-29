@@ -7,6 +7,7 @@ pub enum TokenKind {
     Identifier(String),
     Integer(String),
     Float(String),
+    String(String),
     True,
     False,
     If,
