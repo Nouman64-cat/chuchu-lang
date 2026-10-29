@@ -33,8 +33,57 @@ def version(args):
     try:
         result = command(args)
         return (result.stdout or result.stderr).strip()
-    except (OSError, subprocess.CalledProcessError) as error:
-        return str(error)
+    except (OSError, subprocess.CalledProcessError):
+        return None
+
+
+
+def executable_path(path):
+    """Name new executable artifacts; source paths and explicit CLI outputs are untouched."""
+    return path.with_name(path.name + '.exe') if sys.platform == 'win32' else path
+
+
+def llvm_version():
+    prefix = os.environ.get('LLVM_SYS_231_PREFIX')
+    if prefix:
+        candidate = Path(prefix) / 'bin' / ('llvm-config.exe' if sys.platform == 'win32' else 'llvm-config')
+        if candidate.is_file():
+            return version([candidate, '--version'])
+    for name in ['llvm-config-23', 'llvm-config']:
+        if shutil.which(name):
+            return version([name, '--version'])
+    if sys.platform == 'darwin' and shutil.which('brew'):
+        prefix = version(['brew', '--prefix', 'llvm'])
+        if prefix:
+            return version([Path(prefix) / 'bin/llvm-config', '--version'])
+    return None
+
+
+def machine_metadata():
+    ram = None
+    cpu = platform.processor() or None
+    os_description = platform.platform()
+    if sys.platform == 'darwin':
+        ram = version(['sysctl', '-n', 'hw.memsize'])
+        cpu = version(['sysctl', '-n', 'machdep.cpu.brand_string']) or cpu
+        os_description = version(['sw_vers']) or os_description
+    elif sys.platform.startswith('linux'):
+        try:
+            for line in Path('/proc/meminfo').read_text().splitlines():
+                if line.startswith('MemTotal:'):
+                    ram = str(int(line.split()[1]) * 1024)
+            for line in Path('/proc/cpuinfo').read_text().splitlines():
+                if line.startswith('model name'):
+                    cpu = line.split(':', 1)[1].strip()
+                    break
+        except OSError:
+            pass  # Optional observations, never fabricated.
+    elif sys.platform == 'win32':
+        cpu = os.environ.get('PROCESSOR_IDENTIFIER') or cpu
+    return dict(cpu_count=os.cpu_count(), ram_bytes=ram, platform=platform.platform(),
+                machine=platform.machine(), cpu=cpu, os=os_description,
+                rust=version(['rustc', '--version']), c=version(['clang', '--version']),
+                python=sys.version, llvm=llvm_version())
 
 
 def valid_output(output, workload):
@@ -101,6 +150,7 @@ def inspect_ir(ir_path, assembly_path):
     recursion = has_cycle({name: [x for x in calls[name] if x in reachable] for name in reachable}, 'main')
     vector_ir = re.findall(r'\b(?:fadd|fmul|fsub|fdiv|add|mul)\s+<\d+ x [^>]+>', ir)
     vector_asm = re.findall(r'\b(?:fadd|fmul|fsub|fdiv|fmla)(?:\.\d+[ds]\s+v\d+|\s+v\d+\.\d+[ds])', assembly)
+    vector_asm += re.findall(r'\bv?(?:add|mul|sub|div)(?:pd|ps)\b', assembly)
     return dict(allocas=len(re.findall(r'\balloca\b', ir)), loads=len(re.findall(r'\bload\b', ir)), stores=len(re.findall(r'\bstore\b', ir)),
                 llvm_lines=len(ir.splitlines()), vector_arithmetic_ir=len(vector_ir), vector_arithmetic_assembly=len(vector_asm),
                 reachable_loop_functions=sorted(loop_functions), reachable_recursion=recursion,
@@ -139,7 +189,7 @@ def report(data, path):
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--cheeku',type=Path,default=REPO/'target/release/cheeku')
+    parser.add_argument('--cheeku',type=Path,default=executable_path(REPO/'target/release/cheeku'))
     parser.add_argument('--output',type=Path,default=ROOT/'results/latest.json')
     parser.add_argument('--artifacts',type=Path)
     parser.add_argument('--repetitions',type=int,default=7)
@@ -167,9 +217,9 @@ def main():
     cheeku=args.cheeku.resolve()
     tools={name:shutil.which(name) for name in ['rustc','clang']}
     source_hashes={str(path.relative_to(ROOT)):hashlib.sha256(path.read_bytes()).hexdigest() for directory in ['chuchu','reference'] for path in (ROOT/directory).rglob('*') if path.is_file()}
-    environment=dict(cpu_count=os.cpu_count(), ram_bytes=version(['sysctl','-n','hw.memsize']),platform=platform.platform(),machine=platform.machine(),cpu=version(['sysctl','-n','machdep.cpu.brand_string']),os=version(['sw_vers']),rust=version(['rustc','--version']),c=version(['clang','--version']),python=sys.version,llvm=version([str(Path(version(['brew','--prefix','llvm']))/'bin/llvm-config'),'--version']))
+    environment=machine_metadata()
     data=dict(schema=1,created_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),environment=environment,git_revision=version(['git','rev-parse','HEAD']),compiler_sha256=hashlib.sha256(cheeku.read_bytes()).hexdigest(),source_hashes=source_hashes,
-              config=dict(repetitions=args.repetitions,compile_repetitions=args.compile_repetitions,warmups=args.warmups,cpu='generic',rust_flags='-O -C target-cpu=generic',c_flags='-O2 -ffp-contract=off',timing='wall process time including startup; compilation excluded from execution',memory='one separate macOS /usr/bin/time -l run, bytes'),workloads=[w['name'] for w in manifest],results=[],skipped=[],compiler_throughput=[])
+              config=dict(repetitions=args.repetitions,compile_repetitions=args.compile_repetitions,warmups=args.warmups,cpu='generic',rust_flags='-O -C target-cpu=generic',c_flags='-O2 -ffp-contract=off',timing='wall process time including startup; compilation excluded from execution',memory='one separate macOS /usr/bin/time -l run, bytes' if sys.platform == 'darwin' else None),workloads=[w['name'] for w in manifest],results=[],skipped=[],compiler_throughput=[])
     plans=[]
     for workload in manifest:
         name=workload['name']; print(f'Building {name}',flush=True)
@@ -178,7 +228,7 @@ def main():
         if not args.no_simd_probe and name=='array_multiply' and 'chuchu' in languages and 'O3' in levels:
             variants.append(('chuchu-O3-no-vectorize','chuchu','O3',False))
         for label,language,level,vectorize in variants:
-            exe=artifact/(name+'-'+label); stages=[];compile_samples=[]
+            exe=executable_path(artifact/(name+'-'+label)); stages=[];compile_samples=[]
             if language in ('rust','c') and not tools['rustc' if language=='rust' else 'clang']:
                 data['skipped'].append(dict(workload=name,variant=label,reason='Tool unavailable'));continue
             if language=='chuchu':
@@ -202,7 +252,7 @@ def main():
             if language=='chuchu':
                 ir=artifact/(name+'-'+label+'.ll');asm=artifact/(name+'-'+label+'.s')
                 # Build diagnostics into a separate executable, never the timed binary.
-                inspect_cmd=compile_cmd.copy();index=inspect_cmd.index('-o');inspect_cmd[index+1]=str(exe)+'-inspect'
+                inspect_cmd=compile_cmd.copy();index=inspect_cmd.index('-o');inspect_cmd[index+1]=str(exe.with_name(exe.stem+'-inspect'+exe.suffix))
                 command(inspect_cmd+['--emit-ir',str(ir),'--emit-assembly',str(asm)])
                 row['inspection']=inspect_ir(ir,asm);row['ir_path']=os.path.relpath(ir, REPO);row['assembly_path']=os.path.relpath(asm, REPO)
             data['results'].append(row);plans.append((row,run_cmd,workload))
@@ -216,7 +266,15 @@ def main():
             valid_output(result,workload);row['execution_samples'].append(elapsed)
     for row in data['results']:row['execution']=summary(row.pop('execution_samples'))
     data['startup_controls']={}
-    for label,run_cmd in [('native-empty',['/usr/bin/true']),('python-empty',[sys.executable,'-c','pass'])]:
+    startup_plans = [('python-empty', [sys.executable, '-c', 'pass'])]
+    data['startup_controls']['native-empty'] = None
+    if 'chuchu' in languages:
+        empty_source = artifact / 'startup-empty.chuchu'
+        empty_source.write_text('')
+        empty_exe = executable_path(artifact / 'startup-empty')
+        command([cheeku, empty_source, '-o', empty_exe])
+        startup_plans.insert(0, ('native-empty', [str(empty_exe)]))
+    for label, run_cmd in startup_plans:
         samples=[]
         for _ in range(args.repetitions):
             start=time.perf_counter_ns();command(run_cmd);samples.append((time.perf_counter_ns()-start)/1e9)
@@ -225,7 +283,7 @@ def main():
         for count in [32,256,1024]:
             source=artifact/f'throughput-{count}.chuchu';source.write_text('\n'.join(f'assign value{i} to {i}' for i in range(count))+f'\nshow value{count-1}\n')
             for level in levels:
-                stages=[];samples=[];exe=artifact/f'throughput-{count}-{level}'
+                stages=[];samples=[];exe=executable_path(artifact/f'throughput-{count}-{level}')
                 for _ in range(args.compile_repetitions):
                     start=time.perf_counter_ns();result=command([cheeku,source,'-'+level,'--time-compilation','-o',exe]);samples.append((time.perf_counter_ns()-start)/1e9);stages.append(stage_json(result.stderr))
                 assert command([exe]).stdout==str(count-1)+'\n'

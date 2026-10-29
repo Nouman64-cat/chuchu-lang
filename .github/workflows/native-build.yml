@@ -1,0 +1,71 @@
+name: Native build (shared)
+on:
+  workflow_call:
+    inputs:
+      os:
+        required: true
+        type: string
+      target:
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ${{ inputs.os }}
+    timeout-minutes: 120
+    env:
+      CARGO_TERM_COLOR: always
+      LLVM_SYS_231_STRICT_VERSIONING: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Initialize x64 MSVC and Windows SDK
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Linux SDK dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y clang build-essential libtinfo6 libxml2-dev libzstd-dev zlib1g-dev
+      - name: Intel macOS source build prerequisites
+        if: runner.os == 'macOS' && runner.arch == 'X64'
+        run: brew install cmake ninja
+      - name: Install Rust
+        run: rustup toolchain install 1.99.1 --profile minimal --component rustfmt,clippy
+      - run: rustup default 1.99.1
+      - name: Cache verified LLVM SDK
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/chuchu-llvm
+          key: llvm-23.1.4-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.github/scripts/provision-llvm.py') }}
+      - name: Provision LLVM 23.1.4
+        run: python .github/scripts/provision-llvm.py --directory "${{ runner.temp }}/chuchu-llvm"
+      - name: Verify native Rust host
+        shell: python
+        run: |
+          import subprocess
+          host = subprocess.check_output(['rustc', '-vV'], text=True).split('host: ')[1].splitlines()[0]
+          assert host == '${{ inputs.target }}', host
+      - run: cargo fmt --all -- --check
+      - run: cargo build --locked
+      - run: cargo test --locked
+      - run: cargo clippy --locked --all-targets -- -D warnings
+      - run: cargo build --locked --release
+      - name: Python regression tests
+        run: python -m unittest discover -s benchmarks -p test_runner.py
+      - name: Native release smoke tests
+        shell: python
+        run: |
+          import os, subprocess
+          binary = 'target/release/cheeku' + ('.exe' if os.name == 'nt' else '')
+          subprocess.run(['python', '.github/scripts/smoke.py', '--compiler', binary], check=True)
+      - name: Package only after native tests pass
+        run: python .github/scripts/package-release.py --target ${{ inputs.target }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cheeku-${{ inputs.target }}
+          path: target/distributions/*
+          if-no-files-found: error

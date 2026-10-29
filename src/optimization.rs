@@ -107,6 +107,11 @@ pub fn target_machine(
     module: &Module<'_>,
     options: &BuildOptions,
 ) -> Result<TargetMachine, OptimizationError> {
+    if cfg!(target_os = "windows") && !cfg!(all(target_env = "msvc", target_arch = "x86_64")) {
+        return Err(OptimizationError::Target(
+            "Windows native support requires x86_64-pc-windows-msvc".to_owned(),
+        ));
+    }
     Target::initialize_native(&InitializationConfig::default())
         .map_err(OptimizationError::Target)?;
     let triple = TargetMachine::get_default_triple();
@@ -125,7 +130,11 @@ pub fn target_machine(
             &cpu,
             &features,
             options.optimization.machine_level(),
-            RelocMode::PIC,
+            if cfg!(windows) {
+                RelocMode::Default
+            } else {
+                RelocMode::PIC
+            },
             CodeModel::Default,
         )
         .ok_or_else(|| OptimizationError::Target("Cannot create target machine".to_owned()))?;

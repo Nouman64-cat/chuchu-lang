@@ -54,7 +54,7 @@ fn parse_args(
     }
     let mut invocation = Invocation {
         input: input.into(),
-        output: "main".into(),
+        output: chuchu::native::DEFAULT_EXECUTABLE_NAME.into(),
         options: BuildOptions::default(),
         time: false,
     };
@@ -144,7 +144,10 @@ mod tests {
     fn default_is_o2_and_existing_command_is_valid() {
         let invocation = args(&["input.chuchu"]).unwrap().unwrap();
         assert_eq!(invocation.options.optimization, Optimization::O2);
-        assert_eq!(invocation.output, PathBuf::from("main"));
+        assert_eq!(
+            invocation.output,
+            PathBuf::from(chuchu::native::DEFAULT_EXECUTABLE_NAME)
+        );
     }
     #[test]
     fn output_and_optimization_accept_both_orders() {

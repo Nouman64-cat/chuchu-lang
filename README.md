@@ -12,54 +12,62 @@ show x
 
 The previous `set x to 5` declaration syntax is no longer accepted.
 
-## LLVM setup on macOS
+## Native build and platform status
 
-Cheeku uses LLVM 23.1 through Inkwell, preferring dynamic linking. With LLVM
-installed through Homebrew, configure discovery in the shell before running Cargo:
+One shared Rust/LLVM compiler targets its own host operating system. Rust 1.88+
+and LLVM **23.1.x** are required; CI pins Rust 1.99.1 and the full LLVM 23.1.4 SDK.
+The crate is `chuchu`, and the compiler executable is `cheeku` (`cheeku.exe` on
+Windows). There is no cross-OS `--target` option.
 
-```sh
-export LLVM_SYS_231_PREFIX="$(brew --prefix llvm)"
-cargo test
-```
+- [macOS setup](docs/build-macos.md): Apple Silicon locally validated; Intel CI provided.
+- [Linux x64 GNU setup](docs/build-linux.md): Clang/ELF and libm; see the validation report.
+- [Windows x64 MSVC setup](docs/build-windows.md): clang-cl, full LLVM SDK, VS Build Tools and SDK; native CI validation required.
+- [Platform policy and current evidence](docs/platform-support.md).
+- [Phase 8 verification report](docs/phase8-verification.md).
 
-The Homebrew LLVM installation must provide LLVM 23.1.x. The prefix is resolved
-locally rather than stored as a machine-specific path in the repository.
-
-## Build and run Cheeku
-
-Native linking on macOS requires Xcode or the Xcode command line tools, including
-`xcrun clang`. The Rust library and Cargo package remain named `chuchu`; the compiler
-binary is named `cheeku`.
+On macOS with matching Homebrew LLVM:
 
 ```sh
 export LLVM_SYS_231_PREFIX="$(brew --prefix llvm)"
-cargo build --release
-./target/release/cheeku examples/main.chuchu
-./main
-# Prints: 35 (the current example reassigns x to 15)
+cargo build --locked --release
+./target/release/cheeku examples/main.chuchu -o hello
+./hello
+# 35
 ```
 
-The default executable is `main` in the current working directory. Choose another
-output with `-o`:
+On Windows, after following the SDK/developer-shell guide:
 
-```sh
-./target/release/cheeku examples/main.chuchu -o my_program
-./my_program
+```powershell
+.\target\release\cheeku.exe examples/main.chuchu -o hello.exe
+.\hello.exe
+# 35
 ```
 
-To make the `cheeku` command available on your Cargo binary path, run
-`cargo install --path .` with the same LLVM environment variable set. Then use
-`cheeku examples/main.chuchu`.
+Default output is `main` on Unix and `main.exe` on Windows. `-o` preserves the
+exact filename on every OS; use `.exe` explicitly for normal Windows execution.
+Source/type validation precedes LLVM generation. Compilation does not run the
+program. Temporary artifacts are cleaned up; an existing executable is replaced
+only after successful linking, without deleting it first. Windows locked-file
+failures are reported and retain the original output. Optional IR/assembly files
+are still published separately.
 
-Cheeku validates the source through the lexer, parser, and type checker before
-generating LLVM IR. Locals use scoped entry-block storage for reassignment and
-control flow. `show` uses type-aware C `printf` output for the scalar int, float,
-and bool types.
-LLVM emits a host-native object with its detected target triple and
-data layout; system Clang links it. Compilation never runs the generated program.
-Temporary objects are cleaned up, and the requested output is replaced only after
-linking succeeds.
+`show` prints int/float/bool scalars through the host CRT. Checked overflow,
+division and bounds failures go to stderr with source spans and exit 1. The same
+portable integration suites exercise all OSes; see their actual validation status
+before claiming compatibility.
 
+## CI and distribution
+
+`.github/workflows/cross-platform.yml` builds/tests macOS ARM64, macOS Intel,
+Linux x64 GNU, and Windows x64 MSVC. SDK downloads are pinned and SHA-256 checked;
+Intel macOS builds the same verified LLVM source release. Every job runs native
+programs and packages only after its tests pass. The tag-triggered release workflow
+requires all four jobs and creates a draft, not an unreviewed public release.
+
+Archives require external toolchains/runtimes; see
+[release requirements](docs/release-runtime.md). [Three-developer workflow](docs/phase8-collaboration.md)
+describes ownership and required-check recommendations. No hosted CI pass is
+implied by the presence of these workflow files.
 
 ## Optimization and performance
 
