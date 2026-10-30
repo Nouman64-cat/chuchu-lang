@@ -4,7 +4,38 @@ pub enum Type {
     Float,
     Bool,
     String,
+    Result(ScalarType),
     Array { element: NumericType, len: usize },
+}
+
+/// The first result types carry one scalar. Nested results and array payloads
+/// are deliberately excluded until the language has general aggregate types.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ScalarType {
+    Int,
+    Float,
+    Bool,
+    String,
+}
+
+impl ScalarType {
+    pub fn ty(self) -> Type {
+        match self {
+            Self::Int => Type::Int,
+            Self::Float => Type::Float,
+            Self::Bool => Type::Bool,
+            Self::String => Type::String,
+        }
+    }
+    pub fn from_type(ty: Type) -> Option<Self> {
+        match ty {
+            Type::Int => Some(Self::Int),
+            Type::Float => Some(Self::Float),
+            Type::Bool => Some(Self::Bool),
+            Type::String => Some(Self::String),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -23,6 +54,9 @@ impl NumericType {
 }
 
 impl Type {
+    pub fn owns_string(self) -> bool {
+        matches!(self, Self::String | Self::Result(ScalarType::String))
+    }
     pub fn is_numeric(self) -> bool {
         matches!(self, Self::Int | Self::Float)
     }

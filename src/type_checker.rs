@@ -1,7 +1,7 @@
 use crate::ast::{BinaryOperator, Expr, ExprKind, Stmt, StmtKind};
 use crate::symbol_table::{SymbolError, SymbolTable};
 use crate::token::Span;
-use crate::types::{MAX_ARRAY_LEN, NumericType, Type};
+use crate::types::{MAX_ARRAY_LEN, NumericType, ScalarType, Type};
 use std::collections::HashMap;
 
 #[derive(Debug, PartialEq, Eq)]
@@ -65,7 +65,18 @@ pub struct TypeChecker {
 pub fn reserved_function(name: &str) -> bool {
     matches!(
         name,
-        "abs"
+        "read_line"
+            | "parse_int"
+            | "parse_float"
+            | "to_string"
+            | "is_ok"
+            | "is_eof"
+            | "error_code"
+            | "error_message"
+            | "unwrap"
+            | "ok"
+            | "err"
+            | "abs"
             | "sqrt"
             | "min"
             | "max"
@@ -174,6 +185,13 @@ impl TypeChecker {
             }
             StmtKind::Show(expr) => {
                 let ty = self.infer_expression(expr)?;
+                if matches!(ty, Type::Result(_)) {
+                    return Err(TypeError::InvalidFunction {
+                        name: "show".into(),
+                        message: "unwrap a successful result or inspect error_message before printing",
+                        span: expr.span,
+                    });
+                }
                 if matches!(ty, Type::Array { .. }) {
                     return Err(TypeError::InvalidArray {
                         message: "show requires a scalar, not an array",
@@ -265,6 +283,10 @@ impl TypeChecker {
             }
             ExprKind::Bool(_) => Ok(Type::Bool),
             ExprKind::String(_) => Ok(Type::String),
+            ExprKind::Error { payload, code } => {
+                self.mismatch(Type::Int, code)?;
+                Ok(Type::Result(*payload))
+            }
             ExprKind::Identifier(name) => {
                 self.symbols
                     .lookup(name)
@@ -388,6 +410,22 @@ impl TypeChecker {
             span,
         };
         match (name, types.as_slice()) {
+            ("read_line", []) => Ok(Type::Result(ScalarType::String)),
+            ("parse_int", [Type::String]) => Ok(Type::Result(ScalarType::Int)),
+            ("parse_float", [Type::String]) => Ok(Type::Result(ScalarType::Float)),
+            ("to_string", [ty]) if ScalarType::from_type(*ty).is_some() => Ok(Type::String),
+            ("ok", [ty]) if ScalarType::from_type(*ty).is_some() => Ok(Type::Result(
+                ScalarType::from_type(*ty).expect("checked scalar"),
+            )),
+            ("is_ok" | "is_eof", [Type::Result(_)]) => Ok(Type::Bool),
+            ("error_code", [Type::Result(_)]) => Ok(Type::Int),
+            ("error_message", [Type::Result(_)]) => Ok(Type::String),
+            ("unwrap", [Type::Result(payload)]) => Ok(payload.ty()),
+            (
+                "read_line" | "parse_int" | "parse_float" | "to_string" | "ok" | "is_ok" | "is_eof"
+                | "error_code" | "error_message" | "unwrap",
+                _,
+            ) => Err(invalid()),
             ("len", [Type::Array { .. }]) => Ok(Type::Int),
             ("len", [Type::String]) => Ok(Type::Int),
             ("sum", [Type::Array { element, .. }]) => Ok(element.scalar()),

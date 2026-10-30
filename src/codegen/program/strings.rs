@@ -113,7 +113,10 @@ impl<'ctx> Generator<'ctx> {
     }
 
     pub(super) fn release_value(&self, value: Value<'ctx>, span: Span) -> Result<(), CodegenError> {
-        if value.ty == Type::String {
+        if value.ty == Type::Result(ScalarType::String) {
+            let payload = self.result_payload(value, span)?;
+            self.release_value(payload, span)?;
+        } else if value.ty == Type::String {
             let pointer = self.string_pointer(value, span)?;
             let free = self.external(
                 "free",
@@ -131,10 +134,10 @@ impl<'ctx> Generator<'ctx> {
         binding: Binding<'ctx>,
         span: Span,
     ) -> Result<(), CodegenError> {
-        if binding.ty == Type::String {
+        if binding.ty.owns_string() {
             let raw = build(
                 self.builder.build_load(
-                    self.llvm_type(Type::String, span)?,
+                    self.llvm_type(binding.ty, span)?,
                     binding.pointer,
                     "string.cleanup",
                 ),
@@ -143,7 +146,7 @@ impl<'ctx> Generator<'ctx> {
             self.release_value(
                 Value {
                     raw,
-                    ty: Type::String,
+                    ty: binding.ty,
                 },
                 span,
             )?;

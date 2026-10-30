@@ -21,6 +21,19 @@ show len(name)
 See [strings](STRINGS.md) for type annotations, Unicode length, storage semantics
 and the [runnable example](examples/strings.chuchu).
 
+Read standard input and handle conversion failures as values:
+
+```chuchu
+assign line read_line()
+if is_ok(line) {
+    assign number parse_int(unwrap(line))
+    if is_ok(number) { show "Number: " + to_string(unwrap(number)) } else { show error_message(number) }
+}
+```
+
+See [input, conversions, and results](INPUT.md) for `result<T>`, EOF handling,
+custom errors, and the [interactive temperature converter](examples/temperature.chuchu).
+
 ## Native build and platform status
 
 New contributors should start with the [setup guide](setup.md).

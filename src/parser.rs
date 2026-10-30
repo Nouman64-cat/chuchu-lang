@@ -1,6 +1,6 @@
 use crate::ast::{BinaryOperator, Expr, ExprKind, Parameter, Stmt, StmtKind};
 use crate::token::{Span, Token, TokenKind};
-use crate::types::Type;
+use crate::types::{ScalarType, Type};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum ParseError {
@@ -104,13 +104,24 @@ impl Parser {
     fn annotation(&mut self) -> Result<Type, ParseError> {
         let token = self.token()?;
         let ty = match &token.kind {
+            TokenKind::Identifier(name) if name == "result" => {
+                self.advance();
+                self.require(TokenKind::Less, "'<'")?;
+                let inner = self.annotation()?;
+                let payload = ScalarType::from_type(inner).ok_or(ParseError::ExpectedToken {
+                    expected: "int, float, bool, or string result payload",
+                    span: token.span,
+                })?;
+                self.require(TokenKind::Greater, "'>'")?;
+                return Ok(Type::Result(payload));
+            }
             TokenKind::Identifier(name) if name == "int" => Type::Int,
             TokenKind::Identifier(name) if name == "float" => Type::Float,
             TokenKind::Identifier(name) if name == "bool" => Type::Bool,
             TokenKind::Identifier(name) if name == "string" => Type::String,
             _ => {
                 return Err(ParseError::ExpectedToken {
-                    expected: "int, float, bool, or string type",
+                    expected: "int, float, bool, string, or result<T> type",
                     span: token.span,
                 });
             }
@@ -288,6 +299,28 @@ impl Parser {
         let token = self.token()?;
         self.advance();
         let mut expression = match token.kind {
+            TokenKind::Err => {
+                self.require(TokenKind::Less, "'<'")?;
+                let ty = self.annotation()?;
+                let payload = ScalarType::from_type(ty).ok_or(ParseError::ExpectedToken {
+                    expected: "int, float, bool, or string result payload",
+                    span: token.span,
+                })?;
+                self.require(TokenKind::Greater, "'>'")?;
+                self.require(TokenKind::LeftParen, "'('")?;
+                let code = self.parse_expression()?;
+                let end = self.require(TokenKind::RightParen, "')'")?.span.end;
+                Expr {
+                    kind: ExprKind::Error {
+                        payload,
+                        code: Box::new(code),
+                    },
+                    span: Span {
+                        start: token.span.start,
+                        end,
+                    },
+                }
+            }
             TokenKind::Integer(value) => Expr {
                 kind: ExprKind::Integer(value),
                 span: token.span,

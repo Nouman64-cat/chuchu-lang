@@ -34,6 +34,10 @@ show enabled
 assign greeting "hello"
 reassign greeting greeting + " strings"
 show greeting
+assign parsed parse_int("42")
+assign line ok("result text")
+show unwrap(parsed)
+show unwrap(line)
 """
 
 
@@ -119,6 +123,11 @@ def main():
         commands += ['breakpoint set --file ' + quoted(source) + ' --line 22', 'continue']
         check('string-line', 'lldb.frame.GetLineEntry().GetLine() == 22')
         check('string-value', '"hello strings" in (lldb.frame.FindVariable("greeting").GetSummary() or "")')
+        commands += ['breakpoint set --file ' + quoted(source) + ' --line 25', 'continue']
+        check('result-line', 'lldb.frame.GetLineEntry().GetLine() == 25')
+        check('result-code', 'lldb.frame.FindVariable("parsed").GetChildMemberWithName("code").GetValueAsSigned() == 0')
+        check('result-int', 'lldb.frame.FindVariable("parsed").GetChildMemberWithName("value").GetValueAsSigned() == 42')
+        check('result-string', '"result text" in (lldb.frame.FindVariable("line").GetChildMemberWithName("value").GetSummary() or "")')
         commands += ['continue']
         check('exit', 'lldb.process.GetExitStatus() == 0')
         script = root / 'commands.lldb'

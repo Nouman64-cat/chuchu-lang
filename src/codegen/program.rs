@@ -15,11 +15,12 @@ use super::CodegenError;
 
 mod arrays;
 mod debug;
+mod results;
 mod runtime;
 mod strings;
 use crate::ast::{BinaryOperator as Op, Expr, ExprKind, Stmt, StmtKind};
 use crate::token::Span;
-use crate::types::{MAX_ARRAY_LEN, NumericType, Type};
+use crate::types::{MAX_ARRAY_LEN, NumericType, ScalarType, Type};
 
 fn build<T>(result: Result<T, BuilderError>, span: Span) -> Result<T, CodegenError> {
     result.map_err(|source| CodegenError::Build { source, span })
@@ -269,6 +270,16 @@ impl<'ctx> Generator<'ctx> {
             Type::Float => self.context.f64_type().into(),
             Type::Bool => self.context.bool_type().into(),
             Type::String => self.context.ptr_type(AddressSpace::default()).into(),
+            Type::Result(payload) => self
+                .context
+                .struct_type(
+                    &[
+                        self.context.i32_type().into(),
+                        self.llvm_type(payload.ty(), span)?,
+                    ],
+                    false,
+                )
+                .into(),
             Type::Array { element, len } => {
                 if len == 0 || len > MAX_ARRAY_LEN {
                     return Err(invalid("Array length outside 1..=256", span));
@@ -417,6 +428,10 @@ impl<'ctx> Generator<'ctx> {
     fn expression_inner(&mut self, expr: &Expr) -> Result<Value<'ctx>, CodegenError> {
         let span = expr.span;
         match &expr.kind {
+            ExprKind::Error { payload, code } => {
+                let code = self.expression(code)?.int(span)?;
+                self.error_result(*payload, code, span)
+            }
             ExprKind::Integer(literal) => {
                 let value =
                     literal
@@ -472,6 +487,8 @@ impl<'ctx> Generator<'ctx> {
                 };
                 if value.ty == Type::String {
                     self.copy_string(value, span)
+                } else if value.ty == Type::Result(ScalarType::String) {
+                    self.copy_result(value, span)
                 } else {
                     Ok(value)
                 }
@@ -678,6 +695,21 @@ impl<'ctx> Generator<'ctx> {
         let mut values = Vec::new();
         for argument in arguments {
             values.push(self.expression(argument)?);
+        }
+        if matches!(
+            name,
+            "read_line"
+                | "parse_int"
+                | "parse_float"
+                | "to_string"
+                | "ok"
+                | "is_ok"
+                | "is_eof"
+                | "error_code"
+                | "error_message"
+                | "unwrap"
+        ) {
+            return self.result_builtin(name, &values, span);
         }
         match (name, values.as_slice()) {
             ("len", [value]) if value.ty == Type::String => self.string_len(*value, span),

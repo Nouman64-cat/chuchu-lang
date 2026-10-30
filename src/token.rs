@@ -16,6 +16,7 @@ pub enum TokenKind {
     Function,
     Reassign,
     Return,
+    Err,
 
     Plus,
     Minus,

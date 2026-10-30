@@ -196,23 +196,34 @@ fn run_linker(mut command: Command) -> Result<(), NativeError> {
 }
 
 fn linker_command(object: &Path, output: &Path) -> Command {
+    linker_command_with_runtime(object, output, None)
+}
+
+fn linker_command_with_runtime(object: &Path, output: &Path, runtime: Option<&Path>) -> Command {
     #[cfg(target_os = "windows")]
     {
         let mut command =
             Command::new(configured_linker().unwrap_or_else(|| "clang-cl.exe".into()));
         let mut destination = OsString::from("/Fe");
         destination.push(output);
-        command
-            .args(["/nologo", "/MD"])
-            .arg(object)
-            .arg(destination)
-            .args([
-                "/link",
-                "/MACHINE:X64",
-                "/SUBSYSTEM:CONSOLE",
-                "/DEFAULTLIB:msvcrt.lib",
-                "/DEFAULTLIB:legacy_stdio_definitions.lib",
-            ]);
+        command.args(["/nologo", "/MD"]).arg(object);
+        if let Some(runtime) = runtime {
+            // clang-cl otherwise writes its compiled C object into the current
+            // directory, colliding across concurrent compilations.
+            let mut runtime_object = OsString::from("/Fo");
+            runtime_object.push(runtime.with_extension("obj"));
+            command
+                .args(["/O2", "/std:c11"])
+                .arg(runtime_object)
+                .arg(runtime);
+        }
+        command.arg(destination).args([
+            "/link",
+            "/MACHINE:X64",
+            "/SUBSYSTEM:CONSOLE",
+            "/DEFAULTLIB:msvcrt.lib",
+            "/DEFAULTLIB:legacy_stdio_definitions.lib",
+        ]);
         command
     }
     #[cfg(not(target_os = "windows"))]
@@ -229,6 +240,9 @@ fn linker_command(object: &Path, output: &Path) -> Command {
         // link_object normalizes both paths to absolute paths, so they cannot
         // be mistaken for options. Keep libm after the object for --as-needed.
         command.arg("-o").arg(output).arg(object);
+        if let Some(runtime) = runtime {
+            command.args(["-O2", "-std=c11"]).arg(runtime);
+        }
         #[cfg(target_os = "linux")]
         command.arg("-lm");
         command
@@ -314,7 +328,18 @@ pub fn build_executable_with_options(
     let staged_symbols = symbols
         .as_ref()
         .map(|_| debug_symbol_path(&executable).expect("host sidecar"));
-    let command = linker_command(&object, &executable);
+    let runtime = if crate::runtime::FUNCTIONS
+        .iter()
+        .any(|name| module.get_function(name).is_some())
+    {
+        let path = temporary.0.join("cheeku-runtime.c");
+        fs::write(&path, crate::runtime::c_source())
+            .map_err(|error| filesystem_error(&path, error))?;
+        Some(path)
+    } else {
+        None
+    };
+    let command = linker_command_with_runtime(&object, &executable, runtime.as_deref());
     #[cfg(target_os = "windows")]
     let command = {
         let mut command = command;
@@ -469,5 +494,30 @@ mod tests {
         }
         #[cfg(windows)]
         assert!(args.contains(&std::ffi::OsStr::new("/Feprogram with spaces.exe")));
+    }
+
+    #[test]
+    fn linker_compiles_runtime_source_with_spaces_before_link_options() {
+        let runtime = Path::new("runtime with spaces.c");
+        let command = linker_command_with_runtime(
+            Path::new("program.obj"),
+            Path::new("program.exe"),
+            Some(runtime),
+        );
+        let args: Vec<_> = command.get_args().collect();
+        assert!(args.contains(&runtime.as_os_str()));
+        #[cfg(windows)]
+        {
+            let source = args
+                .iter()
+                .position(|arg| *arg == runtime.as_os_str())
+                .unwrap();
+            let link = args.iter().position(|arg| *arg == "/link").unwrap();
+            assert!(source < link);
+            assert!(args.contains(&std::ffi::OsStr::new("/std:c11")));
+            assert!(args.contains(&std::ffi::OsStr::new("/Foruntime with spaces.obj")));
+        }
+        #[cfg(not(windows))]
+        assert!(args.contains(&std::ffi::OsStr::new("-std=c11")));
     }
 }

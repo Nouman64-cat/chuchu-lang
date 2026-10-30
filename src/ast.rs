@@ -1,5 +1,5 @@
 use crate::token::Span;
-use crate::types::Type;
+use crate::types::{ScalarType, Type};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Expr {
@@ -13,6 +13,10 @@ pub enum ExprKind {
     Float(String),
     String(String),
     Bool(bool),
+    Error {
+        payload: ScalarType,
+        code: Box<Expr>,
+    },
     Negate(Box<Expr>),
     Call {
         name: String,

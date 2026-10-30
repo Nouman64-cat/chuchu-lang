@@ -136,6 +136,7 @@ pub fn tokenize(source: &str) -> Result<Vec<Token>, LexError> {
                     "function" => TokenKind::Function,
                     "reassign" => TokenKind::Reassign,
                     "return" => TokenKind::Return,
+                    "err" => TokenKind::Err,
                     name => TokenKind::Identifier(name.to_owned()),
                 }
             }

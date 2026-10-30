@@ -27,7 +27,8 @@ ordering operators are rejected.
 mark counts separately: `len("é")` is 2, even though it can look like one
 character. No Unicode normalization is performed, so `"é"` and `"é"` differ.
 Empty strings are supported and have length 0. String indexing, slicing,
-interpolation, string arrays and numeric conversions are not implemented.
+interpolation and string arrays are not implemented. Explicit numeric conversions
+are covered in [input and results](INPUT.md).
 
 ## Escapes and errors
 

@@ -119,6 +119,7 @@ fn type_name(ty: Type) -> String {
         Type::Float => "float".into(),
         Type::Bool => "bool".into(),
         Type::String => "string".into(),
+        Type::Result(payload) => format!("result<{}>", type_name(payload.ty())),
         Type::Array { element, len } => format!("{}[{len}]", type_name(element.scalar())),
     }
 }

@@ -107,6 +107,60 @@ impl<'ctx> DebugState<'ctx> {
         }
         let bits = self.data.get_abi_size(&llvm) * 8;
         let debug = match ty {
+            Type::Result(payload) => {
+                let structure = llvm.into_struct_type();
+                let fields = structure.get_field_types();
+                let value_type = self.ty(payload.ty(), fields[1])?;
+                let code_type = self
+                    .builder
+                    .create_basic_type("ErrorCode", 32, 0x05, DIFlags::ZERO)
+                    .map_err(|error| CodegenError::Verification(error.to_string()))?
+                    .as_type();
+                let scope = self.unit.as_debug_info_scope();
+                let mut members = Vec::new();
+                for (index, (name, ty)) in [("code", code_type), ("value", value_type)]
+                    .into_iter()
+                    .enumerate()
+                {
+                    members.push(
+                        self.builder
+                            .create_member_type(
+                                scope,
+                                name,
+                                self.unit.get_file(),
+                                0,
+                                self.data.get_abi_size(&fields[index]) * 8,
+                                self.data.get_abi_alignment(&fields[index]) * 8,
+                                self.data
+                                    .offset_of_element(&structure, index as u32)
+                                    .ok_or(invalid(
+                                        "Invalid result layout",
+                                        Span { start: 0, end: 0 },
+                                    ))?
+                                    * 8,
+                                DIFlags::ZERO,
+                                ty,
+                            )
+                            .as_type(),
+                    );
+                }
+                self.builder
+                    .create_struct_type(
+                        scope,
+                        &format!("result<{:?}>", payload),
+                        self.unit.get_file(),
+                        0,
+                        bits,
+                        self.data.get_abi_alignment(&llvm) * 8,
+                        DIFlags::ZERO,
+                        None,
+                        &members,
+                        0,
+                        None,
+                        "",
+                    )
+                    .as_type()
+            }
             Type::String => {
                 let character = self
                     .builder
