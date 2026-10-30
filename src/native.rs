@@ -209,9 +209,16 @@ fn linker_command_with_runtime(object: &Path, output: &Path, runtime: Option<&Pa
         command.args(["/nologo", "/MD"]).arg(object);
         if let Some(runtime) = runtime {
             // clang-cl otherwise writes its compiled C object into the current
-            // directory, colliding across concurrent compilations.
+            // directory, colliding across concurrent compilations. /Fo must name
+            // a directory (trailing separator) because clang-cl rejects a file
+            // path when compiling multiple sources.
+            let runtime_dir = runtime
+                .parent()
+                .filter(|parent| !parent.as_os_str().is_empty())
+                .unwrap_or_else(|| Path::new("."));
             let mut runtime_object = OsString::from("/Fo");
-            runtime_object.push(runtime.with_extension("obj"));
+            runtime_object.push(runtime_dir);
+            runtime_object.push("/");
             command
                 .args(["/O2", "/std:c11"])
                 .arg(runtime_object)
@@ -515,7 +522,17 @@ mod tests {
             let link = args.iter().position(|arg| *arg == "/link").unwrap();
             assert!(source < link);
             assert!(args.contains(&std::ffi::OsStr::new("/std:c11")));
-            assert!(args.contains(&std::ffi::OsStr::new("/Foruntime with spaces.obj")));
+            assert!(args.contains(&std::ffi::OsStr::new("/Fo./")));
+
+            let nested = Path::new("build dir/runtime with spaces.c");
+            let command = linker_command_with_runtime(
+                Path::new("program.obj"),
+                Path::new("program.exe"),
+                Some(nested),
+            );
+            let args: Vec<_> = command.get_args().collect();
+            assert!(args.contains(&nested.as_os_str()));
+            assert!(args.contains(&std::ffi::OsStr::new("/Fobuild dir/")));
         }
         #[cfg(not(windows))]
         assert!(args.contains(&std::ffi::OsStr::new("-std=c11")));
