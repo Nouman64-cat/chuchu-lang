@@ -224,13 +224,20 @@ fn linker_command_with_runtime(object: &Path, output: &Path, runtime: Option<&Pa
                 .arg(runtime_object)
                 .arg(runtime);
         }
-        command.arg(destination).args([
-            "/link",
-            "/MACHINE:X64",
-            "/SUBSYSTEM:CONSOLE",
-            "/DEFAULTLIB:msvcrt.lib",
-            "/DEFAULTLIB:legacy_stdio_definitions.lib",
-        ]);
+        // The driver derives `-out:` from /Fe and appends .exe when the name has
+        // no extension; a later /OUT: wins, preserving the exact output path.
+        let mut link_output = OsString::from("/OUT:");
+        link_output.push(output);
+        command
+            .arg(destination)
+            .arg("/link")
+            .arg(link_output)
+            .args([
+                "/MACHINE:X64",
+                "/SUBSYSTEM:CONSOLE",
+                "/DEFAULTLIB:msvcrt.lib",
+                "/DEFAULTLIB:legacy_stdio_definitions.lib",
+            ]);
         command
     }
     #[cfg(not(target_os = "windows"))]
@@ -536,5 +543,25 @@ mod tests {
         }
         #[cfg(not(windows))]
         assert!(args.contains(&std::ffi::OsStr::new("-std=c11")));
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn linker_passes_exact_output_path_to_link() {
+        for output in ["program with spaces.exe", "exact-name"] {
+            let command = linker_command_with_runtime(
+                Path::new("program.obj"),
+                Path::new(output),
+                Some(Path::new("runtime.c")),
+            );
+            let args: Vec<_> = command.get_args().collect();
+            let link = args.iter().position(|arg| *arg == "/link").unwrap();
+            let expected = format!("/OUT:{output}");
+            let out = args
+                .iter()
+                .position(|arg| *arg == expected.as_str())
+                .unwrap();
+            assert!(link < out);
+        }
     }
 }
