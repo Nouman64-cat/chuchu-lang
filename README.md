@@ -22,18 +22,51 @@ show len(name)
 See [strings](STRINGS.md) for type annotations, Unicode length, storage semantics
 and the [runnable example](examples/strings.chuchu).
 
-Read standard input and handle conversion failures as values:
+Read a string directly, with an optional prompt:
 
 ```chuchu
-assign line as read_line()
-if is_ok(line) {
-    assign number as parse_int(unwrap(line))
-    if is_ok(number) { show "Number: " + to_string(unwrap(number)) } else { show error_message(number) }
-}
+assign name as input("What is your name? ")
+show "Hello, " + name + "!"
 ```
 
-See [input, conversions, and results](INPUT.md) for `result<T>`, EOF handling,
-custom errors, and the [interactive temperature converter](examples/temperature.chuchu).
+`input()` returns a string. It reports a runtime error on EOF or read failure.
+Use `try_input()` when you want to handle those outcomes yourself as
+`result<string>`. Both forms accept an optional string prompt.
+
+See [input, conversions, and results](INPUT.md), the [simple input example](examples/input.chuchu),
+and the [interactive temperature converter](examples/temperature.chuchu).
+
+## Functions
+
+Use `be` before a function's return type:
+
+```chuchu
+function greet(name: string) be string {
+    assign prefix as "Hello, "
+    return prefix + name + "!"
+}
+show greet("دنیا 🌍")
+```
+
+## Comments
+
+Use `//` for a line comment or `/* ... */` for a block comment. Block comments
+end at the first `*/` and do not nest. Newlines inside comments still separate
+statements. Comment markers inside strings are literal text.
+
+```chuchu
+//NOTE: The initializer determines the variable's type.
+assign count as 10 //TODO: Choose the starting value.
+/* This comment
+   spans multiple lines. */
+show count
+```
+
+The docs highlight comments beginning with `TODO:` (amber), `NOTE:` (blue),
+`CRITICAL:` (red), `FIXME:` (orange), `WARNING:` (gold), `HACK:` (purple), and
+`DONE:` (green). Tags are uppercase, with optional whitespace after the opening
+marker. Annotations affect highlighting only; every comment is ignored by the
+compiler. See [the example](examples/comments.chuchu).
 
 ## Native build and platform status
 

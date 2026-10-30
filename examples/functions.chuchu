@@ -1,4 +1,4 @@
-function factorial(n: int) -> int {
+function factorial(n: int) be int {
     if n <= 1 {
         return 1
     } else {

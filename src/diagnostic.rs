@@ -139,6 +139,11 @@ fn describe(error: &CompileError, source: &str) -> Option<Diagnostic> {
                     "missing closing double quote",
                     r#"Close the string with a double quote. Use \n for a newline inside a string."#,
                 ),
+                LexErrorKind::UnterminatedComment => (
+                    "Unterminated block comment".into(),
+                    "missing closing */",
+                    "Close the block comment with */.",
+                ),
                 LexErrorKind::InvalidEscape => (
                     format!(
                         "Invalid string escape \\{}",
@@ -214,6 +219,13 @@ fn describe(error: &CompileError, source: &str) -> Option<Diagnostic> {
                 "Condition must be bool".into(),
                 "expected true, false, or a comparison".into(),
                 Some("Use a comparison such as 'counter < 5' as the condition.".into()),
+            ),
+            TypeError::InvalidFunction { name, message, span }
+                if name == "show" && message.starts_with("unwrap a successful result") => (
+                *span,
+                "Cannot print a result directly".into(),
+                "this is a result, not its contained value".into(),
+                Some("Check is_ok(value), then use show unwrap(value); on failure use show error_message(value).".into()),
             ),
             TypeError::InvalidFunction {
                 name,

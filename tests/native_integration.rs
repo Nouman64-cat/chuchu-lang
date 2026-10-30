@@ -151,6 +151,18 @@ fn rejects_invalid_sources_without_creating_executables() {
         ("show unknown", "Undefined variable"),
         ("assign x as 1\nassign x as 2", "Duplicate declaration"),
         ("show @", "Invalid source character"),
+        (
+            "function greet(name: string) -> string { return name }",
+            "Expected 'be'",
+        ),
+        (
+            "function greet(name: string) string { return name }",
+            "Expected 'be'",
+        ),
+        (
+            "show 1\n/*NOTE: missing close",
+            "Unterminated block comment",
+        ),
         ("assign x as", "Expected expression"),
         ("assign x 5", "Expected 'as'"),
         ("assign x as 1\nreassign x 5", "Expected 'as'"),

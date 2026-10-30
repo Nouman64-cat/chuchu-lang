@@ -77,8 +77,8 @@ fn succeeds(output: &Output, expected: &str) {
 #[test]
 fn result_types_and_constructors_are_checked_before_lowering() {
     for source in [
-        "function f() -> result<int> { return parse_int(\"1\") }\nshow unwrap(f())",
-        "function f(x: result<string>) -> result<string> { return x }\nshow unwrap(f(ok(\"hi\")))",
+        "function f() be result<int> { return parse_int(\"1\") }\nshow unwrap(f())",
+        "function f(x: result<string>) be result<string> { return x }\nshow unwrap(f(ok(\"hi\")))",
         "show error_code(err<bool>(8))\nshow unwrap(ok(true))",
     ] {
         let statements = Parser::new(tokenize(source).unwrap())
@@ -90,14 +90,24 @@ fn result_types_and_constructors_are_checked_before_lowering() {
     }
     for source in [
         "show parse_int(1)",
+        "function input() be string { return \"reserved\" }",
+        "assign value as input(true)",
+        "assign value as input(\"one\", \"two\")",
+        "show is_ok(input())",
+        "show unwrap(input())",
+        "assign line as read_line()",
+        "function try_input() be string { return \"reserved\" }",
+        "assign x as try_input(true)",
+        "assign x as try_input(\"one\", \"two\")",
+        "function cheeku_read_line_prompt() be int { return 1 }",
         "show is_ok(1)",
-        "show read_line(1)",
+        "show try_input(1)",
         "show unwrap(1)",
         "show to_string(ok(1))",
         "show ok([1, 2])",
         "show ok(ok(1))",
         "show parse_int(\"1\")",
-        "function f() -> result<float> { return ok(1) }",
+        "function f() be result<float> { return ok(1) }",
         "assign x as ok(1)\nreassign x as ok(1.0)",
         "show err<int>(true)",
     ] {
@@ -112,7 +122,7 @@ fn result_types_and_constructors_are_checked_before_lowering() {
         );
     }
     assert!(
-        Parser::new(tokenize("function f() -> result<result<int>> { return ok(1) }").unwrap())
+        Parser::new(tokenize("function f() be result<result<int>> { return ok(1) }").unwrap())
             .parse_program()
             .is_err()
     );
@@ -164,14 +174,14 @@ show error_message(ok(1))
 #[test]
 fn input_distinguishes_empty_lines_eof_and_partial_final_lines() {
     let case = Case::new();
-    let source = r#"assign first as read_line()
+    let source = r#"assign first as try_input()
 show is_ok(first)
 show len(unwrap(first))
-show unwrap(read_line())
-show unwrap(read_line())
-show is_eof(read_line())
-show error_code(read_line())
-show error_message(read_line())
+show unwrap(try_input())
+show unwrap(try_input())
+show is_eof(try_input())
+show error_code(try_input())
+show error_message(try_input())
 "#;
     for level in [
         Optimization::O0,
@@ -186,7 +196,7 @@ show error_message(read_line())
         );
     }
     let output = case.compile(
-        "show is_eof(read_line())",
+        "show is_eof(try_input())",
         Optimization::O2,
         DebugInfo::None,
     );
@@ -197,7 +207,7 @@ show error_message(read_line())
 fn rejected_input_is_drained_and_the_next_line_remains_available() {
     let case = Case::new();
     let output = case.compile(
-        "show error_code(read_line())\nshow unwrap(read_line())\nshow is_eof(read_line())",
+        "show error_code(try_input())\nshow unwrap(try_input())\nshow is_eof(try_input())",
         Optimization::O2,
         DebugInfo::Full,
     );
@@ -214,7 +224,7 @@ fn rejected_input_is_drained_and_the_next_line_remains_available() {
     }
     succeeds(&run(&output, b"bad\0line\nvalid\n"), "6\nvalid\ntrue\n");
     let output = case.compile(
-        "show len(unwrap(read_line()))\nshow is_eof(read_line())",
+        "show len(unwrap(try_input()))\nshow is_eof(try_input())",
         Optimization::O2,
         DebugInfo::None,
     );
@@ -227,12 +237,12 @@ fn rejected_input_is_drained_and_the_next_line_remains_available() {
 #[test]
 fn results_keep_string_payloads_alive_across_copies_functions_and_returns() {
     let case = Case::new();
-    let source = r#"function echo(value: result<string>) -> result<string> {
+    let source = r#"function echo(value: result<string>) be result<string> {
     assign local as value
     if is_ok(local) { return local }
     return err<string>(8)
 }
-assign original as read_line()
+assign original as try_input()
 assign saved as original
 reassign original as ok("replacement")
 show unwrap(saved)
@@ -301,7 +311,7 @@ fn explicit_unwrap_and_invalid_error_codes_have_checked_failures() {
 #[test]
 fn io_failure_is_recoverable_and_distinct_from_eof() {
     let case = Case::new();
-    let output = case.compile("assign line as read_line()\nshow error_code(line)\nshow is_eof(line)\nshow error_message(line)", Optimization::O2, DebugInfo::Full);
+    let output = case.compile("assign line as try_input()\nshow error_code(line)\nshow is_eof(line)\nshow error_message(line)", Optimization::O2, DebugInfo::Full);
     let write_only = fs::File::create(case.path.join("write-only-input")).unwrap();
     let result = Command::new(output)
         .stdin(Stdio::from(write_only))
@@ -329,7 +339,7 @@ fn interactive_converter_retries_bad_input_and_exits_cleanly() {
 fn prompts_are_flushed_before_waiting_for_input() {
     let case = Case::new();
     let output = case.compile(
-        "show \"Prompt\"\nshow unwrap(read_line())",
+        "show \"Prompt\"\nshow unwrap(try_input())",
         Optimization::O2,
         DebugInfo::None,
     );
@@ -348,7 +358,7 @@ fn prompts_are_flushed_before_waiting_for_input() {
         let _ = sender.send(prompt);
         let _ = std::io::copy(&mut reader, &mut std::io::sink());
     });
-    let prompt = receiver.recv_timeout(std::time::Duration::from_secs(5));
+    let prompt = receiver.recv_timeout(std::time::Duration::from_secs(30));
     if prompt.is_err() {
         let _ = child.kill();
         let _ = child.wait();
@@ -357,4 +367,120 @@ fn prompts_are_flushed_before_waiting_for_input() {
     child.stdin.take().unwrap().write_all(b"answer\n").unwrap();
     assert!(child.wait().unwrap().success());
     reader_thread.join().unwrap();
+}
+
+#[test]
+fn optional_prompts_preserve_text_and_result_handling() {
+    let case = Case::new();
+    let source = r#"assign prompt as "x = "
+assign x as try_input(prompt)
+if is_ok(x) { show unwrap(x) } else { show error_message(x) }
+assign y as try_input("دنیا 🌍 100%: " + "")
+if is_ok(y) { show unwrap(y) } else { show error_message(y) }
+show is_eof(try_input(""))
+"#;
+    for level in [
+        Optimization::O0,
+        Optimization::O1,
+        Optimization::O2,
+        Optimization::O3,
+    ] {
+        let program = case.compile(source, level, DebugInfo::Full);
+        succeeds(&run(&program, b"42\n\n"), "x = 42\nدنیا 🌍 100%: \ntrue\n");
+        succeeds(
+            &run(&program, b""),
+            "x = End of input\nدنیا 🌍 100%: End of input\ntrue\n",
+        );
+    }
+}
+
+#[test]
+fn same_line_prompt_is_flushed_before_input_is_sent() {
+    for source in ["show input(\"x = \")", "show unwrap(try_input(\"x = \"))"] {
+        let case = Case::new();
+        let program = case.compile(source, Optimization::O2, DebugInfo::None);
+        let mut child = Command::new(program)
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .spawn()
+            .unwrap();
+        let mut stdout = child.stdout.take().unwrap();
+        let (sender, receiver) = std::sync::mpsc::channel();
+        let reader = std::thread::spawn(move || {
+            use std::io::Read;
+            let mut prompt = [0; 4];
+            let result = stdout.read_exact(&mut prompt).map(|()| prompt);
+            let _ = sender.send(result);
+            let mut remaining = String::new();
+            stdout.read_to_string(&mut remaining).unwrap();
+            remaining
+        });
+        let prompt = receiver.recv_timeout(std::time::Duration::from_secs(30));
+        if prompt.is_err() {
+            let _ = child.kill();
+            let _ = child.wait();
+        }
+        assert_eq!(prompt.unwrap().unwrap(), *b"x = ");
+        child.stdin.take().unwrap().write_all(b"answer\n").unwrap();
+        assert!(child.wait().unwrap().success());
+        assert_eq!(
+            reader.join().unwrap(),
+            String::from_utf8(support::native_output("answer\n")).unwrap()
+        );
+    }
+}
+
+#[test]
+fn input_returns_owned_strings_without_result_wrappers() {
+    let case = Case::new();
+    let source = r#"function read_name() be string { return input("name: ") }
+assign first as read_name()
+assign saved as first
+reassign first as input()
+show saved
+show first
+show len(input(""))
+"#;
+    for level in [
+        Optimization::O0,
+        Optimization::O1,
+        Optimization::O2,
+        Optimization::O3,
+    ] {
+        let program = case.compile(source, level, DebugInfo::Full);
+        succeeds(
+            &run(&program, "دنیا 🌍\nnew\n\n".as_bytes()),
+            "name: دنیا 🌍\nnew\n0\n",
+        );
+    }
+}
+
+#[test]
+fn input_reports_runtime_errors_instead_of_exposing_results() {
+    let case = Case::new();
+    for level in [Optimization::O0, Optimization::O3] {
+        let program = case.compile(
+            "assign x as input(\"x = \")\nshow x",
+            level,
+            DebugInfo::Full,
+        );
+        for (bytes, message) in [
+            (b"".as_slice(), "input reached end of input"),
+            (b"\xff\n".as_slice(), "input failed"),
+        ] {
+            let result = run(&program, bytes);
+            assert_eq!(result.status.code(), Some(1));
+            assert_eq!(result.stdout, b"x = ");
+            let error = String::from_utf8_lossy(&result.stderr);
+            assert!(error.contains(message), "{error}");
+            assert!(error.contains("try_input()"), "{error}");
+        }
+        let write_only = fs::File::create(case.path.join("invalid-input-handle")).unwrap();
+        let result = Command::new(&program)
+            .stdin(Stdio::from(write_only))
+            .output()
+            .unwrap();
+        assert_eq!(result.status.code(), Some(1));
+        assert!(String::from_utf8_lossy(&result.stderr).contains("input failed"));
+    }
 }

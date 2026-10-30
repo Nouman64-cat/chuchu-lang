@@ -11,18 +11,18 @@ import re
 import subprocess
 import tempfile
 
-SOURCE = '''function relay(value: result<string>) -> result<string> {
+SOURCE = '''function relay(value: result<string>) be result<string> {
     assign local as value
     if is_ok(local) { return local }
     return err<string>(8)
 }
-assign first as read_line()
+assign first as try_input()
 show error_code(first)
 if is_ok(first) { show len(unwrap(first)) } else { show "recovered" }
-show unwrap(read_line())
+show unwrap(try_input())
 assign i as 0
 while i < 1000 {
-    assign line as relay(read_line())
+    assign line as relay(try_input())
     assign copy as line
     reassign line as err<string>(8)
     assign parsed as parse_float(unwrap(copy))
@@ -31,7 +31,7 @@ while i < 1000 {
     reassign saved as err<string>(9)
     reassign i as i + 1
 }
-show is_eof(read_line())
+show is_eof(try_input())
 '''
 
 SHIM = r'''

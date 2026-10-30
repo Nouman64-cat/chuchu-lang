@@ -72,7 +72,7 @@ fn generates_empty_program_without_output_runtime() {
 #[test]
 fn storage_is_allocated_only_in_function_entries() {
     let context = Context::create();
-    let statements = Parser::new(tokenize("function f(n: int) -> int {\nassign i as 0\nwhile i < n {\nassign a as [1, 2] * [3, 4]\nreassign i as i + 1\n}\nreturn i\n}\nshow f(2)").unwrap()).parse_program().unwrap();
+    let statements = Parser::new(tokenize("function f(n: int) be int {\nassign i as 0\nwhile i < n {\nassign a as [1, 2] * [3, 4]\nreassign i as i + 1\n}\nreturn i\n}\nshow f(2)").unwrap()).parse_program().unwrap();
     let module = generate_program(&context, &statements).expect("Program should generate");
     for function in module
         .get_functions()
@@ -102,7 +102,7 @@ fn codegen_rejects_invalid_types_without_panicking() {
         "show true + 1",
         "show [1][false]",
         "show missing(1)",
-        "function f() -> int { show 1 }",
+        "function f() be int { show 1 }",
     ] {
         let statements = Parser::new(tokenize(source).unwrap())
             .parse_program()

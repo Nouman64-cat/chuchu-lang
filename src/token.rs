@@ -16,6 +16,8 @@ pub enum TokenKind {
     Else,
     While,
     Function,
+    /// Function return type separator keyword: `be`.
+    Be,
     Reassign,
     Return,
     Err,
@@ -37,7 +39,6 @@ pub enum TokenKind {
     RightBracket,
     Comma,
     Colon,
-    Arrow,
 
     LeftBrace,
     RightBrace,

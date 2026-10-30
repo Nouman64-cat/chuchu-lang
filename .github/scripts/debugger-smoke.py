@@ -12,7 +12,7 @@ import subprocess
 import tempfile
 
 
-SOURCE = """function bump(n: int) -> int {
+SOURCE = """function bump(n: int) be int {
     assign next as n + 1
     return next
 }

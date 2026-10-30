@@ -213,7 +213,7 @@ impl Parser {
                     }
                 }
                 self.require(TokenKind::RightParen, "')'")?;
-                self.require(TokenKind::Arrow, "'->'")?;
+                self.require(TokenKind::Be, "'be'")?;
                 let return_type = self.annotation()?;
                 let (body, end) = self.block()?;
                 (

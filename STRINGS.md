@@ -4,7 +4,7 @@ Strings are immutable UTF-8 text values written with double quotes. Variables
 infer the `string` type; function parameters and return values use `string`.
 
 ```chuchu
-function greet(name: string) -> string {
+function greet(name: string) be string {
     return "Hello, " + name + "!"
 }
 

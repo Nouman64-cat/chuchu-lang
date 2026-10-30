@@ -1,4 +1,4 @@
-function fib(n: int) -> int {
+function fib(n: int) be int {
 if n < 2 { return n } else { return fib(n - 1) + fib(n - 2) }
 }
 show fib(28)

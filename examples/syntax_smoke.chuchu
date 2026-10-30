@@ -1,12 +1,12 @@
-function square(x: int) -> int {
+function square(x: int) be int {
     return x * x
 }
 
-function half(x: float) -> float {
+function half(x: float) be float {
     return x / 2.0
 }
 
-function is_positive(x: int) -> bool {
+function is_positive(x: int) be bool {
     return x > 0
 }
 

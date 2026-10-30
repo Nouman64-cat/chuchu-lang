@@ -111,7 +111,7 @@ fn debug_lowering_reports_invalid_positions_and_drops_builders_safely() {
         .unwrap();
 }
 
-const SOURCE: &str = "function twice(n: int) -> int {\n    return n * 2\n}\nassign x as 3\nassign ratio as 1.5\nassign ready as true\nassign values as [2, 4, 6]\nwhile x < 5 {\n    reassign x as x + 1\n}\nif ready {\n    assign x as twice(x)\n    show x\n}\nshow x\nshow ratio\nshow values[1]\n";
+const SOURCE: &str = "function twice(n: int) be int {\n    return n * 2\n}\nassign x as 3\nassign ratio as 1.5\nassign ready as true\nassign values as [2, 4, 6]\nwhile x < 5 {\n    reassign x as x + 1\n}\nif ready {\n    assign x as twice(x)\n    show x\n}\nshow x\nshow ratio\nshow values[1]\n";
 
 #[test]
 fn metadata_has_real_source_scopes_types_and_storage_at_every_level() {

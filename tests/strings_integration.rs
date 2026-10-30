@@ -98,7 +98,7 @@ fn malformed_strings_report_specific_source_diagnostics() {
 
 #[test]
 fn strings_infer_types_and_support_function_annotations() {
-    let source = r#"function echo(value: string) -> string { return value }
+    let source = r#"function echo(value: string) be string { return value }
 assign greeting as echo("hello")
 reassign greeting as greeting + "!"
 show greeting == "hello!"
@@ -140,8 +140,8 @@ fn rejects_mixed_types_and_unsupported_string_operations() {
         r#"show ["text"]"#,
         r#"assign text as "hello"
 reassign text as 1"#,
-        r#"function echo(s: string) -> string { return 1 }"#,
-        r#"function echo(s: string) -> string { return s }
+        r#"function echo(s: string) be string { return 1 }"#,
+        r#"function echo(s: string) be string { return s }
 show echo(1)"#,
         r#"show "hello"[0]"#,
         r#"if "text" { show 1 }"#,
@@ -163,7 +163,7 @@ fn native_strings_work_at_every_optimization_level_with_and_without_debugging() 
     let directory = Directory::new();
     let input = directory.0.join("strings with spaces.chuchu");
     let output = directory.0.join(support::executable_name("strings"));
-    let source = r#"function greet(name: string) -> string {
+    let source = r#"function greet(name: string) be string {
     assign prefix as "Hello, "
     return prefix + name + "!"
 }
@@ -229,7 +229,7 @@ fn returns_recursion_scopes_and_reassignment_keep_strings_alive() {
     let directory = Directory::new();
     let input = directory.0.join("ownership.chuchu");
     let output = directory.0.join(support::executable_name("ownership"));
-    let source = r#"function recursive(value: string, n: int) -> string {
+    let source = r#"function recursive(value: string, n: int) be string {
     assign local as value + "!"
     if n == 0 { return local }
     while n > 0 {
@@ -239,7 +239,7 @@ fn returns_recursion_scopes_and_reassignment_keep_strings_alive() {
     }
     return "unreachable"
 }
-function consume(value: string) -> int { return len(value) }
+function consume(value: string) be int { return len(value) }
 assign x as "a"
 assign y as x
 reassign x as "b"

@@ -65,7 +65,8 @@ pub struct TypeChecker {
 pub fn reserved_function(name: &str) -> bool {
     matches!(
         name,
-        "read_line"
+        "input"
+            | "try_input"
             | "parse_int"
             | "parse_float"
             | "to_string"
@@ -94,7 +95,7 @@ pub fn reserved_function(name: &str) -> bool {
             | "strlen"
             | "memcpy"
             | "strcmp"
-    )
+    ) || crate::runtime::FUNCTIONS.contains(&name)
 }
 
 impl TypeChecker {
@@ -410,7 +411,8 @@ impl TypeChecker {
             span,
         };
         match (name, types.as_slice()) {
-            ("read_line", []) => Ok(Type::Result(ScalarType::String)),
+            ("input", [] | [Type::String]) => Ok(Type::String),
+            ("try_input", [] | [Type::String]) => Ok(Type::Result(ScalarType::String)),
             ("parse_int", [Type::String]) => Ok(Type::Result(ScalarType::Int)),
             ("parse_float", [Type::String]) => Ok(Type::Result(ScalarType::Float)),
             ("to_string", [ty]) if ScalarType::from_type(*ty).is_some() => Ok(Type::String),
@@ -422,8 +424,8 @@ impl TypeChecker {
             ("error_message", [Type::Result(_)]) => Ok(Type::String),
             ("unwrap", [Type::Result(payload)]) => Ok(payload.ty()),
             (
-                "read_line" | "parse_int" | "parse_float" | "to_string" | "ok" | "is_ok" | "is_eof"
-                | "error_code" | "error_message" | "unwrap",
+                "input" | "try_input" | "parse_int" | "parse_float" | "to_string" | "ok" | "is_ok"
+                | "is_eof" | "error_code" | "error_message" | "unwrap",
                 _,
             ) => Err(invalid()),
             ("len", [Type::Array { .. }]) => Ok(Type::Int),
@@ -508,7 +510,7 @@ mod tests {
     fn function_signature_rejects_wrong_return_type() {
         let mut checker = TypeChecker::new(SymbolTable::new());
         assert!(matches!(
-            checker.check_program(&parse_program("function f() -> bool { return 1 }")),
+            checker.check_program(&parse_program("function f() be bool { return 1 }")),
             Err(TypeError::Mismatch {
                 expected: Type::Bool,
                 actual: Type::Int,

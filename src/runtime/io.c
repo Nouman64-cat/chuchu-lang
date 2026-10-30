@@ -257,3 +257,10 @@ int32_t cheeku_read_line(char **out) {
     *out = buffer;
     return CHEEKU_OK;
 }
+
+int32_t cheeku_read_line_prompt(const char *prompt, char **out) {
+    *out = NULL;
+    if (fputs(prompt, stdout) == EOF) return CHEEKU_IO;
+    /* input flushes the prompt before waiting, without adding a newline. */
+    return cheeku_read_line(out);
+}

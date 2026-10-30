@@ -1,4 +1,4 @@
-function fahrenheit(text: string) -> result<float> {
+function fahrenheit(text: string) be result<float> {
     assign parsed as parse_float(text)
     if is_ok(parsed) {
         assign celsius as unwrap(parsed)
@@ -14,7 +14,7 @@ show "Celsius to Fahrenheit. Enter a number or quit."
 assign running as true
 while running {
     show "Celsius:"
-    assign line as read_line()
+    assign line as try_input()
     if is_eof(line) {
         reassign running as false
     } else {

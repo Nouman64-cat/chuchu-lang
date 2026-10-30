@@ -188,8 +188,57 @@ impl<'ctx> Generator<'ctx> {
         span: Span,
     ) -> Result<Value<'ctx>, CodegenError> {
         match (name, values) {
-            ("read_line", []) => {
-                self.native_result("cheeku_read_line", ScalarType::String, &[], span)
+            (
+                "input" | "try_input",
+                []
+                | [
+                    Value {
+                        ty: Type::String, ..
+                    },
+                ],
+            ) => {
+                let helper = if values.is_empty() {
+                    "cheeku_read_line"
+                } else {
+                    "cheeku_read_line_prompt"
+                };
+                let result = self.native_result(helper, ScalarType::String, values, span)?;
+                if name == "try_input" {
+                    return Ok(result);
+                }
+                let code = self.result_code(result, span)?;
+                let not_eof = build(
+                    self.builder.build_int_compare(
+                        IntPredicate::NE,
+                        code,
+                        self.context
+                            .i32_type()
+                            .const_int(ErrorCode::Eof as u64, false),
+                        "input.not_eof",
+                    ),
+                    span,
+                )?;
+                self.guard(
+                    not_eof,
+                    "input reached end of input; use try_input() to handle EOF",
+                    span,
+                )?;
+                let success = build(
+                    self.builder.build_int_compare(
+                        IntPredicate::EQ,
+                        code,
+                        self.context.i32_type().const_zero(),
+                        "input.ok",
+                    ),
+                    span,
+                )?;
+                self.guard(
+                    success,
+                    "input failed; use try_input() to handle read errors",
+                    span,
+                )?;
+                // Transfer the successful owned string to the caller.
+                self.result_payload(result, span)
             }
             ("parse_int", [value]) if value.ty == Type::String => {
                 self.native_result("cheeku_parse_int", ScalarType::Int, values, span)

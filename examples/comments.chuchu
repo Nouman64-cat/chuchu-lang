@@ -1,0 +1,22 @@
+//NOTE: Comments explain the program without changing its output.
+assign count as 10 //TODO: Choose a starting value for your application.
+
+/* A block comment can span
+   multiple lines. */
+reassign count as count + /* An inline explanation. */ 5
+
+//CRITICAL: Check a result before calling unwrap.
+assign parsed as parse_int("42")
+if is_ok(parsed) {
+    show unwrap(parsed)
+}
+
+//FIXME: Replace this demonstration value when adapting the example.
+//WARNING: Integer division discards the fractional part.
+//HACK: A temporary workaround should explain why it exists.
+//DONE: Both line comments and block comments are demonstrated.
+/*NOTE: A keyword at the start also colors an entire block comment.
+  Block comments end at the first closing marker and do not nest.
+*/
+show count
+show "Comment markers inside strings are text: // and /* ... */"

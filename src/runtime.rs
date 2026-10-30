@@ -15,6 +15,7 @@ pub enum ErrorCode {
 
 pub(crate) const FUNCTIONS: &[&str] = &[
     "cheeku_read_line",
+    "cheeku_read_line_prompt",
     "cheeku_parse_int",
     "cheeku_parse_float",
     "cheeku_to_string_int",

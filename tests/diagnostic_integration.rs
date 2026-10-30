@@ -152,3 +152,14 @@ fn cli_uses_source_diagnostics_and_preserves_the_existing_output() {
     );
     fs::remove_dir_all(directory).unwrap();
 }
+
+#[test]
+fn showing_a_result_explains_how_to_print_its_payload() {
+    let source = "assign x as try_input()\nshow x";
+    let error = compile_source(source, Path::new("unused-diagnostic-output")).unwrap_err();
+    let diagnostic = render(&error, Path::new("input.chuchu"), source);
+    assert!(diagnostic.contains("Cannot print a result directly"));
+    assert!(diagnostic.contains("is_ok(value)"));
+    assert!(diagnostic.contains("show unwrap(value)"));
+    assert!(diagnostic.contains("show error_message(value)"));
+}

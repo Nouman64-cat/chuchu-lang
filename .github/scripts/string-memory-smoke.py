@@ -12,7 +12,7 @@ import subprocess
 import tempfile
 
 
-SOURCE = '''function make(value: string, n: int) -> string {
+SOURCE = '''function make(value: string, n: int) be string {
     assign local as value + "!"
     if n == 0 { return local }
     while n > 0 {
@@ -22,7 +22,7 @@ SOURCE = '''function make(value: string, n: int) -> string {
     }
     return "fallback"
 }
-function consume(value: string) -> int { return len(value) }
+function consume(value: string) be int { return len(value) }
 assign original as "hello"
 assign copy as original
 reassign original as original + original

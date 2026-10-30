@@ -1,4 +1,4 @@
-function square_plus(x: int) -> int { return x * x + 3 }
+function square_plus(x: int) be int { return x * x + 3 }
 assign i as 0
 assign total as 0
 while i < 300000 {

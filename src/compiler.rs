@@ -53,6 +53,7 @@ impl fmt::Display for CompileError {
                         format!("Invalid source character {:?}", error.character)
                     }
                     LexErrorKind::UnterminatedString => "Unterminated string literal".into(),
+                    LexErrorKind::UnterminatedComment => "Unterminated block comment".into(),
                     LexErrorKind::InvalidEscape => format!(
                         "Invalid string escape \\{}",
                         error.character.escape_default()

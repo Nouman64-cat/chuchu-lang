@@ -17,7 +17,7 @@ fn check(source: &str) -> Result<(), TypeError> {
 
 #[test]
 fn lexes_tokens_with_utf8_error_spans() {
-    let source = "- * / ( ) [ ] , : -> = == != < <= > >= true false if else while function reassign return as 1.25 2e-3";
+    let source = "- * / ( ) [ ] , : be = == != < <= > >= true false if else while function reassign return as 1.25 2e-3";
     let tokens = tokenize(source).unwrap();
     assert_eq!(tokens[0].kind, TokenKind::Minus);
     assert!(
@@ -78,7 +78,7 @@ fn parses_precedence_associativity_and_grouping() {
 #[test]
 fn parses_functions_blocks_and_calls() {
     let statements =
-        parse("function f(x: int, y: float) -> bool {\nreturn x < y\n}\nshow f(1, 2.0)");
+        parse("function f(x: int, y: float) be bool {\nreturn x < y\n}\nshow f(1, 2.0)");
     let StmtKind::Function {
         parameters,
         return_type,
@@ -104,7 +104,7 @@ fn rejects_missing_delimiters_and_separators() {
         "show (1 + 2",
         "show [1, 2",
         "show 1 show 2",
-        "function f(x int) -> int { return x }",
+        "function f(x int) be int { return x }",
     ] {
         let result = Parser::new(tokenize(source).unwrap()).parse_program();
         assert!(result.is_err(), "{source}");
@@ -170,21 +170,21 @@ fn validates_scopes_shadowing_and_assignments() {
 fn validates_forward_recursive_and_typed_function_calls() {
     assert_eq!(
         check(
-            "show f(3)\nfunction f(x: int) -> int {\nif x == 0 { return 1 } else { return f(x - 1) }\n}"
+            "show f(3)\nfunction f(x: int) be int {\nif x == 0 { return 1 } else { return f(x - 1) }\n}"
         ),
         Ok(())
     );
     for source in [
-        "function f(x: int) -> int { show x }",
-        "function f(x: int) -> int { return true }",
-        "function f(x: int) -> int { return x }\nshow f(true)",
+        "function f(x: int) be int { show x }",
+        "function f(x: int) be int { return true }",
+        "function f(x: int) be int { return x }\nshow f(true)",
         "show missing(1)",
-        "function f(x: int) -> int { return x }\nshow f(1, 2)",
-        "function f(x: int, x: int) -> int { return x }",
+        "function f(x: int) be int { return x }\nshow f(1, 2)",
+        "function f(x: int, x: int) be int { return x }",
         "return 1",
-        "function f() -> int { return 1 }\nfunction f() -> int { return 2 }",
-        "assign x as 1\nfunction f() -> int { return x }",
-        "function sqrt(x: float) -> float { return x }",
+        "function f() be int { return 1 }\nfunction f() be int { return 2 }",
+        "assign x as 1\nfunction f() be int { return x }",
+        "function sqrt(x: float) be float { return x }",
     ] {
         assert!(check(source).is_err(), "{source}");
     }

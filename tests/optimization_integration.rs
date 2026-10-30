@@ -95,6 +95,10 @@ mod native {
     #[test]
     fn optimization_matrix_preserves_exact_observable_behavior() {
         let cases = [
+            (
+                "//TODO: compiler ignores annotations\nassign/* name */ x as 12 //NOTE: initial value\n/* block\ncomment */reassign x as x / /* divisor */ 3\nshow x\nshow \"// and /* text */\"",
+                Some("4\n// and /* text */\n"),
+            ),
             ("show 10 + 20 * 2\nshow -7 / 2", Some("50\n-3\n")),
             (
                 "assign x as 1\nif true { reassign x as 2 } else { reassign x as 3 }\nshow x",
@@ -105,15 +109,15 @@ mod native {
                 Some("3\n"),
             ),
             (
-                "function f(x: int) -> int { return x * x }\nshow f(f(3))",
+                "function f(x: int) be int { return x * x }\nshow f(f(3))",
                 Some("81\n"),
             ),
             (
-                "function f(n: int) -> int {\nif n <= 1 { return 1 } else { return n * f(n - 1) }\n}\nshow f(6)",
+                "function f(n: int) be int {\nif n <= 1 { return 1 } else { return n * f(n - 1) }\n}\nshow f(6)",
                 Some("720\n"),
             ),
             (
-                "function even(n: int) -> bool {\nif n == 0 { return true } else { return odd(n - 1) }\n}\nfunction odd(n: int) -> bool {\nif n == 0 { return false } else { return even(n - 1) }\n}\nshow even(4)",
+                "function even(n: int) be bool {\nif n == 0 { return true } else { return odd(n - 1) }\n}\nfunction odd(n: int) be bool {\nif n == 0 { return false } else { return even(n - 1) }\n}\nshow even(4)",
                 Some("true\n"),
             ),
             (

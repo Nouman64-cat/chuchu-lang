@@ -698,7 +698,8 @@ impl<'ctx> Generator<'ctx> {
         }
         if matches!(
             name,
-            "read_line"
+            "input"
+                | "try_input"
                 | "parse_int"
                 | "parse_float"
                 | "to_string"

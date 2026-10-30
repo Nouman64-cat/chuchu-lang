@@ -206,3 +206,28 @@ fn declarations_and_reassignments_require_as_before_the_value() {
         );
     }
 }
+
+#[test]
+fn functions_require_be_before_the_return_type() {
+    for separator in ["->", "", "as"] {
+        let source = format!("function greet(name: string) {separator} string {{ return name }}");
+        let tokens = tokenize(&source).unwrap();
+        let span = tokens[7].span;
+        assert_eq!(
+            Parser::new(tokens).parse_program(),
+            Err(chuchu::parser::ParseError::ExpectedToken {
+                expected: "'be'",
+                span
+            }),
+            "{source}"
+        );
+    }
+    for return_type in ["int", "float", "bool", "string", "result<string>"] {
+        let source = format!("function f() be {return_type} {{ return 1 }}");
+        assert!(
+            Parser::new(tokenize(&source).unwrap())
+                .parse_program()
+                .is_ok()
+        );
+    }
+}

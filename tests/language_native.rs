@@ -89,7 +89,7 @@ fn assignment_without_to() {
 #[test]
 fn assignment_without_to_accepts_every_value_kind() {
     succeeds(
-        "function square(n: int) -> int { return n * n }\nassign i as 7\nassign f as 2.5\nassign e as (i + 3) * 2\nassign c as square(4)\nassign a as [10, 20, 30]\nassign g as f * 2\nshow i\nshow f\nshow e\nshow c\nshow a[1] + len(a)\nshow g\nreassign c as square(5)\nreassign f as 0.5\nshow c\nshow f",
+        "function square(n: int) be int { return n * n }\nassign i as 7\nassign f as 2.5\nassign e as (i + 3) * 2\nassign c as square(4)\nassign a as [10, 20, 30]\nassign g as f * 2\nshow i\nshow f\nshow e\nshow c\nshow a[1] + len(a)\nshow g\nreassign c as square(5)\nreassign f as 0.5\nshow c\nshow f",
         "7\n2.5\n20\n16\n23\n5\n25\n0.5\n",
     );
 }
@@ -145,21 +145,21 @@ fn nested_loops_and_block_shadowing() {
 #[test]
 fn forward_function_calls_and_multiple_parameters() {
     succeeds(
-        "show add(square(3), 0.5)\nfunction square(x: int) -> int { return x * x }\nfunction add(x: float, y: float) -> float { return x + y }\nfunction positive(x: int) -> bool { return x > 0 }\nshow positive(2)",
+        "show add(square(3), 0.5)\nfunction square(x: int) be int { return x * x }\nfunction add(x: float, y: float) be float { return x + y }\nfunction positive(x: int) be bool { return x > 0 }\nshow positive(2)",
         "9.5\ntrue\n",
     );
 }
 #[test]
 fn recursive_functions_and_conditional_returns() {
     succeeds(
-        "function factorial(n: int) -> int {\nif n <= 1 { return 1 } else { return n * factorial(n - 1) }\n}\nshow factorial(6)",
+        "function factorial(n: int) be int {\nif n <= 1 { return 1 } else { return n * factorial(n - 1) }\n}\nshow factorial(6)",
         "720\n",
     );
 }
 #[test]
 fn mutual_recursion_and_return_inside_loop() {
     succeeds(
-        "function even(n: int) -> bool {\nif n == 0 { return true } else { return odd(n - 1) }\n}\nfunction odd(n: int) -> bool {\nif n == 0 { return false } else { return even(n - 1) }\n}\nfunction first(n: int) -> int {\nwhile n > 0 { return n }\nreturn 0\n}\nshow even(8)\nshow first(3)",
+        "function even(n: int) be bool {\nif n == 0 { return true } else { return odd(n - 1) }\n}\nfunction odd(n: int) be bool {\nif n == 0 { return false } else { return even(n - 1) }\n}\nfunction first(n: int) be int {\nwhile n > 0 { return n }\nreturn 0\n}\nshow even(8)\nshow first(3)",
         "true\n3\n",
     );
 }
@@ -254,13 +254,13 @@ fn invalid_programs_preserve_existing_executable() {
         "reassign x as 1",
         "assign x as 1\nreassign x as false",
         "if true { assign x as 1 }\nshow x",
-        "function f(x: int) -> int { return x }\nshow f(true)",
-        "function f() -> int { show 1 }",
+        "function f(x: int) be int { return x }\nshow f(true)",
+        "function f() be int { show 1 }",
         "show missing(1)",
         "assign a as [1, 2.0]",
         "show [1][true]",
         "assign a as [1] + [1, 2]",
-        "function f(x: Array) -> int { return 1 }",
+        "function f(x: Array) be int { return 1 }",
         "show 1e9999",
         "show -9223372036854775809",
     ] {

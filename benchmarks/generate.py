@@ -54,7 +54,7 @@ show x''',
      f'i=0\nx=1.0\nwhile i<{n}:\n    x=x*1.0000001+0.0000001\n    i+=1\nprint(format(x,".15g"))', format(x,'.15g'), {'iterations':n}, True)
 
 n=300000
-emit('function_calls', f'''function square_plus(x: int) -> int {{ return x * x + 3 }}
+emit('function_calls', f'''function square_plus(x: int) be int {{ return x * x + 3 }}
 assign i as 0
 assign total as 0
 while i < {n} {{
@@ -70,7 +70,7 @@ show total''',
      extra_python='def square_plus(x):\n    return x*x+3\n')
 
 n=28
-emit('recursion', f'''function fib(n: int) -> int {{
+emit('recursion', f'''function fib(n: int) be int {{
 if n < 2 {{ return n }} else {{ return fib(n - 1) + fib(n - 2) }}
 }}
 show fib({n})''', f'printf("%lld\\n",(long long)fib({n}));', f'println!("{{}}",fib({n}));', f'print(fib({n}))', 317811, {'fibonacci_n':n},

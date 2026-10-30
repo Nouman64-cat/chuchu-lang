@@ -11,6 +11,7 @@ pub struct LexError {
 pub enum LexErrorKind {
     UnexpectedCharacter,
     UnterminatedString,
+    UnterminatedComment,
     InvalidEscape,
     NulInString,
 }
@@ -135,6 +136,7 @@ pub fn tokenize(source: &str) -> Result<Vec<Token>, LexError> {
                     "else" => TokenKind::Else,
                     "while" => TokenKind::While,
                     "function" => TokenKind::Function,
+                    "be" => TokenKind::Be,
                     "reassign" => TokenKind::Reassign,
                     "return" => TokenKind::Return,
                     "err" => TokenKind::Err,
@@ -196,23 +198,62 @@ pub fn tokenize(source: &str) -> Result<Vec<Token>, LexError> {
             }
             '+' => TokenKind::Plus,
             '*' => TokenKind::Star,
-            '/' => TokenKind::Slash,
+            '/' => match characters.peek().map(|&(_, next)| next) {
+                Some('/') => {
+                    characters.next();
+                    while characters
+                        .peek()
+                        .is_some_and(|&(_, next)| next != '\n' && next != '\r')
+                    {
+                        characters.next();
+                    }
+                    continue;
+                }
+                Some('*') => {
+                    characters.next();
+                    loop {
+                        let Some((position, next)) = characters.next() else {
+                            return Err(LexError {
+                                kind: LexErrorKind::UnterminatedComment,
+                                character: '/',
+                                span: Span {
+                                    start,
+                                    end: source.len(),
+                                },
+                            });
+                        };
+                        if next == '*' && characters.peek().is_some_and(|&(_, next)| next == '/') {
+                            characters.next();
+                            break;
+                        }
+                        // Comments act as whitespace, including statement-separating newlines.
+                        if next == '\n' {
+                            tokens.push(Token {
+                                kind: TokenKind::Newline,
+                                span: Span {
+                                    start: position,
+                                    end: position + 1,
+                                },
+                            });
+                        }
+                    }
+                    continue;
+                }
+                _ => TokenKind::Slash,
+            },
             '(' => TokenKind::LeftParen,
             ')' => TokenKind::RightParen,
             '[' => TokenKind::LeftBracket,
             ']' => TokenKind::RightBracket,
             ',' => TokenKind::Comma,
             ':' => TokenKind::Colon,
-            '-' | '=' | '!' | '<' | '>' => {
-                let pair = characters
-                    .peek()
-                    .is_some_and(|&(_, c)| if character == '-' { c == '>' } else { c == '=' });
+            '-' => TokenKind::Minus,
+            '=' | '!' | '<' | '>' => {
+                let pair = characters.peek().is_some_and(|&(_, c)| c == '=');
                 if pair && let Some((position, _)) = characters.next() {
                     end = position + 1;
                 }
                 match (character, pair) {
-                    ('-', true) => TokenKind::Arrow,
-                    ('-', false) => TokenKind::Minus,
                     ('=', true) => TokenKind::Equal,
                     ('=', false) => TokenKind::Assign,
                     ('!', true) => TokenKind::NotEqual,

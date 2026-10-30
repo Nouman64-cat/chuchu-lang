@@ -84,3 +84,15 @@ fn as_is_reserved_with_exact_spans_and_identifier_boundaries() {
         assert_eq!(&source[token.span.start..token.span.end], name);
     }
 }
+
+#[test]
+fn be_is_reserved_with_identifier_boundaries_and_exact_spans() {
+    let source = "be before be_value";
+    let tokens = tokenize(source).unwrap();
+    assert_eq!(tokens[0].kind, TokenKind::Be);
+    assert_eq!(tokens[0].span, chuchu::token::Span { start: 0, end: 2 });
+    assert_eq!(tokens[1].kind, TokenKind::Identifier("before".into()));
+    assert_eq!(tokens[2].kind, TokenKind::Identifier("be_value".into()));
+    assert_eq!(tokenize("->").unwrap()[0].kind, TokenKind::Minus);
+    assert_eq!(tokenize("->").unwrap()[1].kind, TokenKind::Greater);
+}
