@@ -13,27 +13,27 @@ import tempfile
 
 
 SOURCE = '''function make(value: string, n: int) -> string {
-    assign local value + "!"
+    assign local as value + "!"
     if n == 0 { return local }
     while n > 0 {
-        assign nested "scope"
+        assign nested as "scope"
         if n == 1 { return local + nested }
         return make(local, n - 1)
     }
     return "fallback"
 }
 function consume(value: string) -> int { return len(value) }
-assign original "hello"
-assign copy original
-reassign original original + original
+assign original as "hello"
+assign copy as original
+reassign original as original + original
 show copy == "hello"
 show consume(original)
-assign i 0
+assign i as 0
 while i < 2000 {
-    assign temporary make("value", 3)
-    reassign temporary temporary + "!"
-    assign size len(temporary)
-    reassign i i + 1
+    assign temporary as make("value", 3)
+    reassign temporary as temporary + "!"
+    assign size as len(temporary)
+    reassign i as i + 1
 }
 show i
 '''

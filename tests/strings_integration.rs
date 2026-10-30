@@ -99,8 +99,8 @@ fn malformed_strings_report_specific_source_diagnostics() {
 #[test]
 fn strings_infer_types_and_support_function_annotations() {
     let source = r#"function echo(value: string) -> string { return value }
-assign greeting echo("hello")
-reassign greeting greeting + "!"
+assign greeting as echo("hello")
+reassign greeting as greeting + "!"
 show greeting == "hello!"
 show len(greeting)"#;
     let statements = Parser::new(tokenize(source).unwrap())
@@ -138,8 +138,8 @@ fn rejects_mixed_types_and_unsupported_string_operations() {
         r#"show "a" < "b""#,
         r#"show -"text""#,
         r#"show ["text"]"#,
-        r#"assign text "hello"
-reassign text 1"#,
+        r#"assign text as "hello"
+reassign text as 1"#,
         r#"function echo(s: string) -> string { return 1 }"#,
         r#"function echo(s: string) -> string { return s }
 show echo(1)"#,
@@ -164,13 +164,13 @@ fn native_strings_work_at_every_optimization_level_with_and_without_debugging() 
     let input = directory.0.join("strings with spaces.chuchu");
     let output = directory.0.join(support::executable_name("strings"));
     let source = r#"function greet(name: string) -> string {
-    assign prefix "Hello, "
+    assign prefix as "Hello, "
     return prefix + name + "!"
 }
-assign name "دنیا 🌍"
-assign greeting greet(name)
-assign saved greeting
-reassign greeting greeting + " again"
+assign name as "دنیا 🌍"
+assign greeting as greet(name)
+assign saved as greeting
+reassign greeting as greeting + " again"
 show saved
 show greeting
 show len(name)
@@ -186,11 +186,11 @@ show "100% %s %n"
 show "quote: \" slash: \\ tab:\t"
 show "line1\nline2"
 if true {
-    assign name "inner"
+    assign name as "inner"
     show name
 }
 show name
-reassign name name
+reassign name as name
 show name
 "#;
     fs::write(&input, source.replace('\n', "\r\n")).unwrap();
@@ -230,28 +230,28 @@ fn returns_recursion_scopes_and_reassignment_keep_strings_alive() {
     let input = directory.0.join("ownership.chuchu");
     let output = directory.0.join(support::executable_name("ownership"));
     let source = r#"function recursive(value: string, n: int) -> string {
-    assign local value + "!"
+    assign local as value + "!"
     if n == 0 { return local }
     while n > 0 {
-        assign temporary "scope"
+        assign temporary as "scope"
         if n == 1 { return local + temporary }
         return recursive(local, n - 1)
     }
     return "unreachable"
 }
 function consume(value: string) -> int { return len(value) }
-assign x "a"
-assign y x
-reassign x "b"
+assign x as "a"
+assign y as x
+reassign x as "b"
 show y
 show x
 show recursive("start", 3)
 show consume("temporary" + " value")
-assign count 0
+assign count as 0
 while count < 2000 {
-    assign temporary recursive("x", 2)
-    reassign temporary temporary + "!"
-    reassign count count + 1
+    assign temporary as recursive("x", 2)
+    reassign temporary as temporary + "!"
+    reassign count as count + 1
 }
 show count
 "#;

@@ -1,4 +1,4 @@
-assign pi 3.14159
-assign radius 5.0
-assign area pi * radius * radius
+assign pi as 3.14159
+assign radius as 5.0
+assign area as pi * radius * radius
 show area

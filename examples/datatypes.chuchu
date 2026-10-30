@@ -1,0 +1,38 @@
+assign count as 10
+assign ratio as 2.5
+assign ready as true
+assign greeting as "Hello, Chuchu!"
+
+show "int"
+show count
+reassign count as count + 1
+show count
+
+show "float"
+show ratio
+
+show "bool"
+show ready
+
+show "string"
+show greeting
+
+assign numbers as [10, 20, 30]
+assign weights as [1.5, 2.5, 3.5]
+
+show "int array"
+show numbers[0]
+show sum(numbers)
+
+show "float array"
+show weights[0]
+show sum(weights)
+
+assign parsed as parse_int("42")
+
+show "result<int>"
+if is_ok(parsed) {
+    show unwrap(parsed)
+} else {
+    show error_message(parsed)
+}

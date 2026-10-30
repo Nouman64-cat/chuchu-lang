@@ -28,11 +28,11 @@ fn sub(a:i64,b:i64)->i64 { a.checked_sub(b).expect("overflow") }
     manifest.append(dict(name=name, parameters=parameters, expected=str(expected), numeric_output=floating))
 
 n=3000000
-emit('integer_loop', f'''assign i 0
-assign total 0
+emit('integer_loop', f'''assign i as 0
+assign total as 0
 while i < {n} {{
-reassign total total + i
-reassign i i + 1
+reassign total as total + i
+reassign i as i + 1
 }}
 show total''',
      f'int64_t i=0,total=0;while(i<{n}){{total=add(total,i);i=add(i,1);}}printf("%lld\\n",(long long)total);',
@@ -42,11 +42,11 @@ show total''',
 n=1000000
 x=1.0
 for _ in range(n): x=x*1.0000001+0.0000001
-emit('float_loop', f'''assign i 0
-assign x 1.0
+emit('float_loop', f'''assign i as 0
+assign x as 1.0
 while i < {n} {{
-reassign x x * 1.0000001 + 0.0000001
-reassign i i + 1
+reassign x as x * 1.0000001 + 0.0000001
+reassign i as i + 1
 }}
 show x''',
      f'int64_t i=0;double x=1.0;while(i<{n}){{x=x*1.0000001+0.0000001;i=add(i,1);}}printf("%.15g\\n",x);',
@@ -55,11 +55,11 @@ show x''',
 
 n=300000
 emit('function_calls', f'''function square_plus(x: int) -> int {{ return x * x + 3 }}
-assign i 0
-assign total 0
+assign i as 0
+assign total as 0
 while i < {n} {{
-reassign total total + square_plus(i)
-reassign i i + 1
+reassign total as total + square_plus(i)
+reassign i as i + 1
 }}
 show total''',
      f'int64_t i=0,total=0;while(i<{n}){{total=add(total,square_plus(i));i=add(i,1);}}printf("%lld\\n",(long long)total);',
@@ -79,15 +79,15 @@ show fib({n})''', f'printf("%lld\\n",(long long)fib({n}));', f'println!("{{}}",f
      extra_python='def fib(n):\n    if n<2: return n\n    return fib(n-1)+fib(n-2)\n')
 
 n=500
-emit('nested_loops', f'''assign i 0
-assign total 0
+emit('nested_loops', f'''assign i as 0
+assign total as 0
 while i < {n} {{
-assign j 0
+assign j as 0
 while j < {n} {{
-reassign total total + i * j
-reassign j j + 1
+reassign total as total + i * j
+reassign j as j + 1
 }}
-reassign i i + 1
+reassign i as i + 1
 }}
 show total''',
      f'int64_t i=0,total=0;while(i<{n}){{int64_t j=0;while(j<{n}){{total=add(total,mul(i,j));j=add(j,1);}}i=add(i,1);}}printf("%lld\\n",(long long)total);',
@@ -100,8 +100,8 @@ for name,floating in [('array_multiply',True),('array_reduce',False)]:
     ones=['1.0' if floating else '1']*size
     literal='['+','.join(numbers)+']';delta='['+','.join(ones)+']'
     c_type='double' if floating else 'int64_t';rust_type='f64' if floating else 'i64';zero='0.0' if floating else '0'
-    product='assign product a * a\nreassign total total + sum(product)' if floating else 'reassign total total + sum(a)'
-    source=f'assign a {literal}\nassign delta {delta}\nassign i 0\nassign total {zero}\nwhile i < {n} {{\n{product}\nreassign a a + delta\nreassign i i + 1\n}}\nshow total'
+    product='assign product as a * a\nreassign total as total + sum(product)' if floating else 'reassign total as total + sum(a)'
+    source=f'assign a as {literal}\nassign delta as {delta}\nassign i as 0\nassign total as {zero}\nwhile i < {n} {{\n{product}\nreassign a as a + delta\nreassign i as i + 1\n}}\nshow total'
     if floating:
         c_op='double product[64];for(int j=0;j<64;j++)product[j]=a[j]*a[j];double sum=0.0;for(int j=0;j<64;j++)sum+=product[j];total+=sum;'
         r_op='let mut product=[0.0;64];for j in 0..64{product[j]=a[j]*a[j];}let mut sum=0.0;for value in product{sum+=value;}total+=sum;'
@@ -123,16 +123,16 @@ for name,floating in [('array_multiply',True),('array_reduce',False)]:
 size=256;n=30000
 a='['+','.join(f'{i}.0' for i in range(1,size+1))+']';b='['+','.join(f'{i}.0' for i in range(2,size+2))+']'
 expected=(n//2)*3
-emit('array_copies',f'''assign a {a}
-assign b {b}
-assign total 0.0
-assign i 0
+emit('array_copies',f'''assign a as {a}
+assign b as {b}
+assign total as 0.0
+assign i as 0
 while i < {n} {{
-assign temporary a
-reassign a b
-reassign b temporary
-reassign total total + a[0]
-reassign i i + 1
+assign temporary as a
+reassign a as b
+reassign b as temporary
+reassign total as total + a[0]
+reassign i as i + 1
 }}
 show total''',
      f'double a[256]={{{a[1:-1]}}},b[256]={{{b[1:-1]}}};double total=0.0;int64_t i=0;while(i<{n}){{double temporary[256];memcpy(temporary,a,sizeof a);memcpy(a,b,sizeof a);memcpy(b,temporary,sizeof a);total+=a[0];i=add(i,1);}}printf("%.15g\\n",total);',

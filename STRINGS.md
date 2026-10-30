@@ -8,9 +8,9 @@ function greet(name: string) -> string {
     return "Hello, " + name + "!"
 }
 
-assign message greet("world 🌍")
+assign message as greet("world 🌍")
 show message
-reassign message message + " Welcome."
+reassign message as message + " Welcome."
 show message
 show len(message)
 show message == "Hello, world 🌍! Welcome."

@@ -6,7 +6,7 @@ Failures are values: the program chooses whether to retry, report an error, or s
 
 ```chuchu
 show "What is your name?"
-assign line read_line()
+assign line as read_line()
 if is_ok(line) {
     show "Hello, " + unwrap(line) + "!"
 } else {
@@ -43,15 +43,15 @@ There is no `try` propagation operator or general user-defined enum system yet.
 
 ```chuchu
 function positive(text: string) -> result<int> {
-    assign parsed parse_int(text)
+    assign parsed as parse_int(text)
     if is_ok(parsed) {
-        assign value unwrap(parsed)
+        assign value as unwrap(parsed)
         if value > 0 { return ok(value) }
         return err<int>(8)
     }
     return parsed
 }
-assign value positive("42")
+assign value as positive("42")
 if is_ok(value) { show unwrap(value) }
 ```
 
@@ -104,7 +104,7 @@ when parsed; non-finite calculation results format as text but cannot be parsed.
 `show` retains its existing `%.15g` float formatting. No implicit conversion is added.
 
 ```chuchu
-assign parsed parse_int(" 42 ")
+assign parsed as parse_int(" 42 ")
 if is_ok(parsed) {
     show "Count: " + to_string(unwrap(parsed))
 } else {

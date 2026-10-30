@@ -1,7 +1,7 @@
 function fahrenheit(text: string) -> result<float> {
-    assign parsed parse_float(text)
+    assign parsed as parse_float(text)
     if is_ok(parsed) {
-        assign celsius unwrap(parsed)
+        assign celsius as unwrap(parsed)
         if celsius < -273.15 {
             return err<float>(8)
         }
@@ -11,19 +11,19 @@ function fahrenheit(text: string) -> result<float> {
 }
 
 show "Celsius to Fahrenheit. Enter a number or quit."
-assign running true
+assign running as true
 while running {
     show "Celsius:"
-    assign line read_line()
+    assign line as read_line()
     if is_eof(line) {
-        reassign running false
+        reassign running as false
     } else {
         if is_ok(line) {
-            assign text unwrap(line)
+            assign text as unwrap(line)
             if text == "quit" {
-                reassign running false
+                reassign running as false
             } else {
-                assign converted fahrenheit(text)
+                assign converted as fahrenheit(text)
                 if is_ok(converted) {
                     show to_string(unwrap(converted)) + " F"
                 } else {
@@ -36,7 +36,7 @@ while running {
             }
         } else {
             show "Input error: " + error_message(line)
-            reassign running false
+            reassign running as false
         }
     }
 }

@@ -2,6 +2,8 @@
 pub enum TokenKind {
     /// Variable declaration keyword: `assign`.
     Set,
+    /// Assignment separator keyword: `as`.
+    As,
     Show,
 
     Identifier(String),

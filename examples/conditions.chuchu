@@ -1,4 +1,4 @@
-assign score 85
+assign score as 85
 if score >= 80 {
     show 1
 } else {

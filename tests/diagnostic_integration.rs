@@ -18,14 +18,14 @@ fn parse_error(source: &str) -> CompileError {
 
 #[test]
 fn missing_operand_names_the_operator_and_points_to_the_source_line() {
-    let source = "assign counter 0\nwhile counter < 5 {\n    show counter\n    reassign counter counter + \n";
+    let source = "assign counter as 0\nwhile counter < 5 {\n    show counter\n    reassign counter as counter + \n";
     let diagnostic = render(&parse_error(source), Path::new("loops.chuchu"), source);
     assert!(
         diagnostic.starts_with("error: Expected expression after '+'\n"),
         "{diagnostic}"
     );
-    assert!(diagnostic.contains("loops.chuchu:4:32"), "{diagnostic}");
-    assert!(diagnostic.contains("4 |     reassign counter counter + \n"));
+    assert!(diagnostic.contains("loops.chuchu:4:35"), "{diagnostic}");
+    assert!(diagnostic.contains("4 |     reassign counter as counter + \n"));
     assert!(diagnostic.contains("^ missing operand"));
     assert!(diagnostic.contains("help: Add a number, variable, or expression after '+'."));
     assert!(!diagnostic.contains("85..86"));
@@ -89,12 +89,12 @@ fn type_errors_include_the_source_and_actionable_guidance() {
         (
             "show missing",
             "Undefined variable 'missing'",
-            "assign missing <value>",
+            "assign missing as <value>",
         ),
         (
-            "assign x 1\nassign x 2",
+            "assign x as 1\nassign x as 2",
             "Duplicate declaration of 'x'",
-            "reassign x <value>",
+            "reassign x as <value>",
         ),
         (
             "while 1 { show 1 }",

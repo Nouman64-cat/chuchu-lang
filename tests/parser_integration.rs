@@ -5,11 +5,11 @@ use chuchu::token::{Span, TokenKind};
 
 #[test]
 fn assign_replaces_set_declarations_without_changing_reassignment() {
-    let statements = Parser::new(tokenize("assign set 5\nreassign set 6\nshow set").unwrap())
+    let statements = Parser::new(tokenize("assign set as 5\nreassign set as 6\nshow set").unwrap())
         .parse_program()
         .unwrap();
     assert!(matches!(&statements[0].kind, StmtKind::Set { name, .. } if name == "set"));
-    assert_eq!(statements[0].span, Span { start: 0, end: 12 });
+    assert_eq!(statements[0].span, Span { start: 0, end: 15 });
     assert!(matches!(&statements[1].kind, StmtKind::Assign { name, .. } if name == "set"));
     assert_eq!(
         Parser::new(tokenize("set x to 5").unwrap()).parse_program(),
@@ -42,47 +42,47 @@ fn parses_complete_chuchu_program() {
                     name: "x".to_owned(),
                     value: Expr {
                         kind: ExprKind::Integer("10".to_owned()),
-                        span: Span { start: 9, end: 11 },
+                        span: Span { start: 12, end: 14 },
                     },
                 },
-                span: Span { start: 0, end: 11 },
+                span: Span { start: 0, end: 14 },
             },
             Stmt {
                 kind: StmtKind::Set {
                     name: "y".to_owned(),
                     value: Expr {
                         kind: ExprKind::Integer("20".to_owned()),
-                        span: Span { start: 21, end: 23 },
+                        span: Span { start: 27, end: 29 },
                     },
                 },
-                span: Span { start: 12, end: 23 },
+                span: Span { start: 15, end: 29 },
             },
             Stmt {
                 kind: StmtKind::Assign {
                     name: "x".to_owned(),
                     value: Expr {
                         kind: ExprKind::Integer("15".to_owned()),
-                        span: Span { start: 36, end: 38 }
+                        span: Span { start: 45, end: 47 }
                     },
                 },
-                span: Span { start: 25, end: 38 },
+                span: Span { start: 31, end: 47 },
             },
             Stmt {
                 kind: StmtKind::Show(Expr {
                     kind: ExprKind::Binary {
                         left: Box::new(Expr {
                             kind: ExprKind::Identifier("x".to_owned()),
-                            span: Span { start: 45, end: 46 },
+                            span: Span { start: 54, end: 55 },
                         }),
                         operator: BinaryOperator::Add,
                         right: Box::new(Expr {
                             kind: ExprKind::Identifier("y".to_owned()),
-                            span: Span { start: 49, end: 50 },
+                            span: Span { start: 58, end: 59 },
                         }),
                     },
-                    span: Span { start: 45, end: 50 },
+                    span: Span { start: 54, end: 59 },
                 }),
-                span: Span { start: 40, end: 50 },
+                span: Span { start: 49, end: 59 },
             },
         ]
     );
@@ -102,7 +102,7 @@ fn parse_lines(lines: &[&str], separator: &str) -> (String, Vec<Stmt>) {
 
 #[test]
 fn crlf_and_lf_sources_parse_to_the_same_structure() {
-    let lines = ["assign x 10", "reassign x 15", "show x + 1"];
+    let lines = ["assign x as 10", "reassign x as 15", "show x + 1"];
     let (_, lf) = parse_lines(&lines, "\n");
     let (_, crlf) = parse_lines(&lines, "\r\n");
 
@@ -136,17 +136,17 @@ fn crlf_and_lf_sources_parse_to_the_same_structure() {
 
 #[test]
 fn crlf_spans_are_original_input_byte_offsets() {
-    let lines = ["assign x 10", "reassign x 15", "show x + 1"];
+    let lines = ["assign x as 10", "reassign x as 15", "show x + 1"];
     let (source, statements) = parse_lines(&lines, "\r\n");
 
-    // Each CRLF is two bytes, so statements begin at 0, 13 and 28.
+    // Each CRLF is two bytes, so statements begin at 0, 16 and 34.
     let spans: Vec<Span> = statements.iter().map(|statement| statement.span).collect();
     assert_eq!(
         spans,
         vec![
-            Span { start: 0, end: 11 },
-            Span { start: 13, end: 26 },
-            Span { start: 28, end: 38 },
+            Span { start: 0, end: 14 },
+            Span { start: 16, end: 32 },
+            Span { start: 34, end: 44 },
         ]
     );
     for (span, line) in spans.iter().zip(lines) {
@@ -160,20 +160,49 @@ fn crlf_spans_are_original_input_byte_offsets() {
 
 #[test]
 fn crlf_with_blank_lines_keeps_spans_exact() {
-    let source = "assign x 1\r\n\r\nshow x\r\n";
+    let source = "assign x as 1\r\n\r\nshow x\r\n";
     let statements = Parser::new(tokenize(source).unwrap())
         .parse_program()
         .unwrap();
 
-    assert_eq!(statements[0].span, Span { start: 0, end: 10 });
-    assert_eq!(statements[1].span, Span { start: 14, end: 20 });
-    assert_eq!(&source[14..20], "show x");
+    assert_eq!(statements[0].span, Span { start: 0, end: 13 });
+    assert_eq!(statements[1].span, Span { start: 17, end: 23 });
+    assert_eq!(&source[17..23], "show x");
 }
 
 #[test]
 fn crlf_lexical_errors_report_original_byte_offsets() {
-    let error = tokenize("assign x 1\r\nshow @").unwrap_err();
+    let error = tokenize("assign x as 1\r\nshow @").unwrap_err();
 
     assert_eq!(error.character, '@');
-    assert_eq!(error.span, Span { start: 17, end: 18 });
+    assert_eq!(error.span, Span { start: 20, end: 21 });
+}
+
+#[test]
+fn declarations_and_reassignments_require_as_before_the_value() {
+    for keyword in ["assign", "reassign"] {
+        for suffix in ["10", "to 10", "= 10", "", "\nshow 10"] {
+            let source = format!("{keyword} x {suffix}");
+            let tokens = tokenize(&source).unwrap();
+            let span = tokens[2].span;
+            assert_eq!(
+                Parser::new(tokens).parse_program(),
+                Err(chuchu::parser::ParseError::ExpectedToken {
+                    expected: "'as'",
+                    span,
+                }),
+                "{source:?}"
+            );
+        }
+        let source = format!("{keyword} x as");
+        assert_eq!(
+            Parser::new(tokenize(&source).unwrap()).parse_program(),
+            Err(chuchu::parser::ParseError::ExpectedExpression {
+                span: Span {
+                    start: source.len(),
+                    end: source.len()
+                },
+            })
+        );
+    }
 }

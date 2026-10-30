@@ -1,6 +1,6 @@
 # Cheeku benchmarks
 
-Current workloads use `assign` for variable declarations. Saved benchmark results
+Current workloads use `assign name as value` for variable declarations. Saved benchmark results
 and historical profiling sources retain the syntax and source hashes from their
 original runs; regenerate measurements before comparing with the current sources.
 

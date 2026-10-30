@@ -174,7 +174,7 @@ fn describe(error: &CompileError, source: &str) -> Option<Diagnostic> {
                 format!("Undefined variable '{name}'"),
                 "not declared in this scope".into(),
                 Some(format!(
-                    "Declare '{name}' with 'assign {name} <value>' before using it, or check its spelling."
+                    "Declare '{name}' with 'assign {name} as <value>' before using it, or check its spelling."
                 )),
             ),
             TypeError::DuplicateDeclaration { name, span } => (
@@ -182,7 +182,7 @@ fn describe(error: &CompileError, source: &str) -> Option<Diagnostic> {
                 format!("Duplicate declaration of '{name}'"),
                 "already declared in this scope".into(),
                 Some(format!(
-                    "Use 'reassign {name} <value>' to update the existing variable, or choose a different name."
+                    "Use 'reassign {name} as <value>' to update the existing variable, or choose a different name."
                 )),
             ),
             TypeError::InvalidOperands { left, right, span } => (

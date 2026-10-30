@@ -2,18 +2,19 @@
 
 Chuchu is a high-performance, statically typed programming language with automatic type inference, designed for simplicity and fast numerical computation, built in Rust.
 
-Declare variables with `assign` and update them with `reassign`:
+Declare variables with `assign name as value` and update them with
+`reassign name as value`. Both statements require `as`:
 
 ```chuchu
-assign x 5
-reassign x 6
+assign x as 5
+reassign x as 6
 show x
 ```
 
 Strings support UTF-8 text, escapes, concatenation, equality and `len`:
 
 ```chuchu
-assign name "world 🌍"
+assign name as "world 🌍"
 show "Hello, " + name + "!"
 show len(name)
 ```
@@ -24,9 +25,9 @@ and the [runnable example](examples/strings.chuchu).
 Read standard input and handle conversion failures as values:
 
 ```chuchu
-assign line read_line()
+assign line as read_line()
 if is_ok(line) {
-    assign number parse_int(unwrap(line))
+    assign number as parse_int(unwrap(line))
     if is_ok(number) { show "Number: " + to_string(unwrap(number)) } else { show error_message(number) }
 }
 ```

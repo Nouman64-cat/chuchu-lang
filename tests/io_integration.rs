@@ -98,7 +98,7 @@ fn result_types_and_constructors_are_checked_before_lowering() {
         "show ok(ok(1))",
         "show parse_int(\"1\")",
         "function f() -> result<float> { return ok(1) }",
-        "assign x ok(1)\nreassign x ok(1.0)",
+        "assign x as ok(1)\nreassign x as ok(1.0)",
         "show err<int>(true)",
     ] {
         let statements = Parser::new(tokenize(source).unwrap())
@@ -164,7 +164,7 @@ show error_message(ok(1))
 #[test]
 fn input_distinguishes_empty_lines_eof_and_partial_final_lines() {
     let case = Case::new();
-    let source = r#"assign first read_line()
+    let source = r#"assign first as read_line()
 show is_ok(first)
 show len(unwrap(first))
 show unwrap(read_line())
@@ -228,24 +228,24 @@ fn rejected_input_is_drained_and_the_next_line_remains_available() {
 fn results_keep_string_payloads_alive_across_copies_functions_and_returns() {
     let case = Case::new();
     let source = r#"function echo(value: result<string>) -> result<string> {
-    assign local value
+    assign local as value
     if is_ok(local) { return local }
     return err<string>(8)
 }
-assign original read_line()
-assign saved original
-reassign original ok("replacement")
+assign original as read_line()
+assign saved as original
+reassign original as ok("replacement")
 show unwrap(saved)
 show unwrap(original)
 show unwrap(echo(saved))
 show error_code(echo(err<string>(4)))
-assign i 0
+assign i as 0
 while i < 1000 {
-    assign copy echo(saved)
-    assign error err<string>(8)
-    reassign error copy
-    reassign copy err<string>(9)
-    reassign i i + 1
+    assign copy as echo(saved)
+    assign error as err<string>(8)
+    reassign error as copy
+    reassign copy as err<string>(9)
+    reassign i as i + 1
 }
 show unwrap(ok(true))
 show error_code(err<bool>(2147483647))
@@ -301,7 +301,7 @@ fn explicit_unwrap_and_invalid_error_codes_have_checked_failures() {
 #[test]
 fn io_failure_is_recoverable_and_distinct_from_eof() {
     let case = Case::new();
-    let output = case.compile("assign line read_line()\nshow error_code(line)\nshow is_eof(line)\nshow error_message(line)", Optimization::O2, DebugInfo::Full);
+    let output = case.compile("assign line as read_line()\nshow error_code(line)\nshow is_eof(line)\nshow error_message(line)", Optimization::O2, DebugInfo::Full);
     let write_only = fs::File::create(case.path.join("write-only-input")).unwrap();
     let result = Command::new(output)
         .stdin(Stdio::from(write_only))

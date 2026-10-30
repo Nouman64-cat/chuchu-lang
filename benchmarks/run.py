@@ -281,7 +281,7 @@ def main():
         data['startup_controls'][label]=summary(samples)
     if not args.no_throughput and 'chuchu' in languages:
         for count in [32,256,1024]:
-            source=artifact/f'throughput-{count}.chuchu';source.write_text('\n'.join(f'assign value{i} {i}' for i in range(count))+f'\nshow value{count-1}\n')
+            source=artifact/f'throughput-{count}.chuchu';source.write_text('\n'.join(f'assign value{i} as {i}' for i in range(count))+f'\nshow value{count-1}\n')
             for level in levels:
                 stages=[];samples=[];exe=executable_path(artifact/f'throughput-{count}-{level}')
                 for _ in range(args.compile_repetitions):

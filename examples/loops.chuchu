@@ -1,5 +1,5 @@
-assign counter 0
+assign counter as 0
 while counter < 5 {
     show counter
-    reassign counter counter + 1
+    reassign counter as counter + 1
 }

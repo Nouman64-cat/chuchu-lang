@@ -13,29 +13,29 @@ import tempfile
 
 
 SOURCE = """function bump(n: int) -> int {
-    assign next n + 1
+    assign next as n + 1
     return next
 }
-assign counter 0
-assign fraction 1.5
-assign enabled true
-assign values [2, 4, 6]
+assign counter as 0
+assign fraction as 1.5
+assign enabled as true
+assign values as [2, 4, 6]
 while counter < 2 {
-    reassign counter bump(counter)
+    reassign counter as bump(counter)
 }
 if enabled {
-    assign counter 99
+    assign counter as 99
     show counter
 }
 show counter
 show fraction
 show values[1]
 show enabled
-assign greeting "hello"
-reassign greeting greeting + " strings"
+assign greeting as "hello"
+reassign greeting as greeting + " strings"
 show greeting
-assign parsed parse_int("42")
-assign line ok("result text")
+assign parsed as parse_int("42")
+assign line as ok("result text")
 show unwrap(parsed)
 show unwrap(line)
 """

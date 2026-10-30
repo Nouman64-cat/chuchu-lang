@@ -57,7 +57,7 @@ fn debug_builds_preserve_success_and_runtime_failures_at_every_level() {
     for source in [
         SOURCE,
         "show 9223372036854775807 + 1",
-        "assign a [1, 2]\nshow a[2]",
+        "assign a as [1, 2]\nshow a[2]",
         "show 1 / 0",
     ] {
         fs::write(&input, source).unwrap();
@@ -111,7 +111,7 @@ fn debug_lowering_reports_invalid_positions_and_drops_builders_safely() {
         .unwrap();
 }
 
-const SOURCE: &str = "function twice(n: int) -> int {\n    return n * 2\n}\nassign x 3\nassign ratio 1.5\nassign ready true\nassign values [2, 4, 6]\nwhile x < 5 {\n    reassign x x + 1\n}\nif ready {\n    assign x twice(x)\n    show x\n}\nshow x\nshow ratio\nshow values[1]\n";
+const SOURCE: &str = "function twice(n: int) -> int {\n    return n * 2\n}\nassign x as 3\nassign ratio as 1.5\nassign ready as true\nassign values as [2, 4, 6]\nwhile x < 5 {\n    reassign x as x + 1\n}\nif ready {\n    assign x as twice(x)\n    show x\n}\nshow x\nshow ratio\nshow values[1]\n";
 
 #[test]
 fn metadata_has_real_source_scopes_types_and_storage_at_every_level() {

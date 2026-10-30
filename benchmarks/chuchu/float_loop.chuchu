@@ -1,7 +1,7 @@
-assign i 0
-assign x 1.0
+assign i as 0
+assign x as 1.0
 while i < 1000000 {
-reassign x x * 1.0000001 + 0.0000001
-reassign i i + 1
+reassign x as x * 1.0000001 + 0.0000001
+reassign i as i + 1
 }
 show x

@@ -12,24 +12,24 @@ import subprocess
 import tempfile
 
 SOURCE = '''function relay(value: result<string>) -> result<string> {
-    assign local value
+    assign local as value
     if is_ok(local) { return local }
     return err<string>(8)
 }
-assign first read_line()
+assign first as read_line()
 show error_code(first)
 if is_ok(first) { show len(unwrap(first)) } else { show "recovered" }
 show unwrap(read_line())
-assign i 0
+assign i as 0
 while i < 1000 {
-    assign line relay(read_line())
-    assign copy line
-    reassign line err<string>(8)
-    assign parsed parse_float(unwrap(copy))
-    assign text to_string(unwrap(parsed))
-    assign saved ok(text)
-    reassign saved err<string>(9)
-    reassign i i + 1
+    assign line as relay(read_line())
+    assign copy as line
+    reassign line as err<string>(8)
+    assign parsed as parse_float(unwrap(copy))
+    assign text as to_string(unwrap(parsed))
+    assign saved as ok(text)
+    reassign saved as err<string>(9)
+    reassign i as i + 1
 }
 show is_eof(read_line())
 '''

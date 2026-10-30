@@ -17,7 +17,7 @@ fn check(source: &str) -> Result<(), TypeError> {
 
 #[test]
 fn lexes_tokens_with_utf8_error_spans() {
-    let source = "- * / ( ) [ ] , : -> = == != < <= > >= true false if else while function reassign return 1.25 2e-3";
+    let source = "- * / ( ) [ ] , : -> = == != < <= > >= true false if else while function reassign return as 1.25 2e-3";
     let tokens = tokenize(source).unwrap();
     assert_eq!(tokens[0].kind, TokenKind::Minus);
     assert!(
@@ -146,22 +146,24 @@ fn infers_scalar_and_array_types() {
 #[test]
 fn validates_scopes_shadowing_and_assignments() {
     assert_eq!(
-        check("assign x 1\nif true {\nassign x 2\nreassign x 3\n}\nreassign x 4\nshow x"),
+        check(
+            "assign x as 1\nif true {\nassign x as 2\nreassign x as 3\n}\nreassign x as 4\nshow x"
+        ),
         Ok(())
     );
     assert!(matches!(
-        check("if true { assign inside 1 }\nshow inside"),
+        check("if true { assign inside as 1 }\nshow inside"),
         Err(TypeError::UndefinedVariable { .. })
     ));
     assert!(matches!(
-        check("reassign missing 1"),
+        check("reassign missing as 1"),
         Err(TypeError::UndefinedVariable { .. })
     ));
     assert!(matches!(
-        check("assign x 1\nreassign x 2.0"),
+        check("assign x as 1\nreassign x as 2.0"),
         Err(TypeError::Mismatch { .. })
     ));
-    assert_eq!(check("assign x 1.0\nreassign x 2"), Ok(()));
+    assert_eq!(check("assign x as 1.0\nreassign x as 2"), Ok(()));
 }
 
 #[test]
@@ -181,7 +183,7 @@ fn validates_forward_recursive_and_typed_function_calls() {
         "function f(x: int, x: int) -> int { return x }",
         "return 1",
         "function f() -> int { return 1 }\nfunction f() -> int { return 2 }",
-        "assign x 1\nfunction f() -> int { return x }",
+        "assign x as 1\nfunction f() -> int { return x }",
         "function sqrt(x: float) -> float { return x }",
     ] {
         assert!(check(source).is_err(), "{source}");
@@ -195,20 +197,20 @@ fn rejects_invalid_operands_conditions_and_arrays() {
         "if 1 { show 1 }",
         "while 1.0 { show 1 }",
         "show -true",
-        "assign a []",
-        "assign a [1, 2.0]",
-        "assign a [true, false]",
-        "assign a [[1], [2]]",
+        "assign a as []",
+        "assign a as [1, 2.0]",
+        "assign a as [true, false]",
+        "assign a as [[1], [2]]",
         "show [1][0.0]",
         "show 1[0]",
         "show [1]",
-        "assign a [1, 2] + [1]",
-        "assign a [1] * [1.0]",
+        "assign a as [1, 2] + [1]",
+        "assign a as [1] * [1.0]",
         "show sqrt(1)",
     ] {
         assert!(check(source).is_err(), "{source}");
     }
-    let oversized = format!("assign a [{}]", vec!["1"; 257].join(","));
+    let oversized = format!("assign a as [{}]", vec!["1"; 257].join(","));
     assert!(matches!(
         check(&oversized),
         Err(TypeError::InvalidArray { .. })

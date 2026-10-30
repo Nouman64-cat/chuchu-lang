@@ -26,21 +26,21 @@ fn check(source: &str) -> Result<(), TypeError> {
 }
 
 #[test]
-fn type_checks_assignment_without_to() {
+fn type_checks_assignment_with_as() {
     assert_eq!(
-        check("assign x 15\nassign y 2.5\nshow(x + y)\nreassign x 30"),
+        check("assign x as 15\nassign y as 2.5\nshow(x + y)\nreassign x as 30"),
         Ok(())
     );
     assert_eq!(
-        check("assign x 1\nreassign x true"),
+        check("assign x as 1\nreassign x as true"),
         Err(TypeError::Mismatch {
             expected: Type::Int,
             actual: Type::Bool,
-            span: Span { start: 22, end: 26 },
+            span: Span { start: 28, end: 32 },
         })
     );
     assert!(matches!(
-        check("assign x 1\nassign x 2"),
+        check("assign x as 1\nassign x as 2"),
         Err(TypeError::DuplicateDeclaration { .. })
     ));
     assert!(matches!(
